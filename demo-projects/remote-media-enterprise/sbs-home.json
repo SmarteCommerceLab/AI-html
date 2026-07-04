@@ -1,0 +1,42 @@
+[
+  {
+    "name": "remote-demo-hero",
+    "widget": "widget_13",
+    "code": "{\"video\":[{\"src\":\"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4\",\"type\":\"video/mp4\"}],\"autoplay\":true,\"muted\":true,\"loop\":true,\"controls\":false}",
+    "active": "on",
+    "cta": "[{\"text\":\"Scopri il sistema\",\"link\":\"/servizi/\"},{\"text\":\"Richiedi una demo\",\"link\":\"/contatti/\"}]",
+    "youtube": "[]",
+    "images": "[{\"name\":\"desktop\",\"source\":\"https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1920&q=85\"},{\"name\":\"mobile\",\"source\":\"https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=900&q=85\"}]",
+    "texts": "[{\"name\":\"eyebrow\",\"source\":\"AI-HTML REMOTE MEDIA LAB\"},{\"name\":\"title\",\"source\":\"Un progetto completo trasferito tramite JSON.\"},{\"name\":\"subtitle\",\"source\":\"Header, menu, footer, immagini, logo e video usano URL remoti per verificare provisioning e portabilità.\"},{\"name\":\"meta\",\"source\":\"AI-HTML 1.4.0 · Smart Builder Site\"}]"
+  },
+  {
+    "name": "remote-demo-features",
+    "widget": "widget_14",
+    "code": "{}",
+    "active": "on",
+    "cta": "[{\"text\":\"Approfondisci\",\"link\":\"/documentazione/\"},{\"text\":\"Approfondisci\",\"link\":\"/servizi/design/\"},{\"text\":\"Approfondisci\",\"link\":\"/servizi/automation/\"}]",
+    "youtube": "[]",
+    "images": "[{\"name\":\"card_1\",\"source\":\"https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80\"},{\"name\":\"card_2\",\"source\":\"https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=900&q=80\"},{\"name\":\"card_3\",\"source\":\"https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80\"}]",
+    "texts": "[{\"name\":\"title\",\"source\":\"Tre livelli, un solo progetto\"},{\"name\":\"subtitle\",\"source\":\"Il test separa configurazione globale, navigazione e contenuto pagina.\"},{\"name\":\"card_1_title\",\"source\":\"Tema trasferibile\"},{\"name\":\"card_1_text\",\"source\":\"Header, footer, contatti e media descritti da opzioni validate.\"},{\"name\":\"card_2_title\",\"source\":\"Navigazione strutturata\"},{\"name\":\"card_2_text\",\"source\":\"Menu standard e rich importati con gerarchie e location.\"},{\"name\":\"card_3_title\",\"source\":\"Contenuto modulare\"},{\"name\":\"card_3_text\",\"source\":\"Widget SBS con immagini e video remoti.\"}]"
+  },
+  {
+    "name": "remote-demo-stats",
+    "widget": "widget_18",
+    "code": "{}",
+    "active": "on",
+    "cta": "[]",
+    "youtube": "[]",
+    "images": "[]",
+    "texts": "[{\"name\":\"title\",\"source\":\"Copertura del collaudo\"},{\"name\":\"intro\",\"source\":\"La fixture verifica i principali contratti di importazione.\"},{\"name\":\"value_1\",\"source\":\"4\"},{\"name\":\"label_1\",\"source\":\"varianti logo URL\"},{\"name\":\"value_2\",\"source\":\"7\"},{\"name\":\"label_2\",\"source\":\"menu e location\"},{\"name\":\"value_3\",\"source\":\"100%\"},{\"name\":\"label_3\",\"source\":\"media remoti\"},{\"name\":\"value_4\",\"source\":\"1\"},{\"name\":\"label_4\",\"source\":\"flusso documentato\"}]"
+  },
+  {
+    "name": "remote-demo-cta",
+    "widget": "widget_5",
+    "code": "{}",
+    "active": "on",
+    "cta": "[{\"text\":\"Apri la documentazione\",\"link\":\"/documentazione/\"},{\"text\":\"Contattaci\",\"link\":\"/contatti/\"}]",
+    "youtube": "[]",
+    "images": "[{\"name\":\"image\",\"source\":\"https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80\"}]",
+    "texts": "[{\"name\":\"title\",\"source\":\"Esporta, importa, verifica\"},{\"name\":\"body\",\"source\":\"Il progetto può essere riesportato dopo il test per confrontare configurazione attesa e configurazione applicata.\"}]"
+  }
+]

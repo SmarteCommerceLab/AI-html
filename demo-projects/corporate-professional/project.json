@@ -1,0 +1,612 @@
+{
+    "format":  "aihl-project",
+    "version":  1,
+    "name":  "Corporate Professional",
+    "description":  "Sito aziendale professionale con header topbar-nav, mega menu, footer CTA a 4 colonne, 7 pagine e blog.",
+    "options":  {
+                    "sito_descrizione":  "Sito corporate con struttura completa per aziende e agenzie.",
+                    "site_logo_url":  "https://dummyimage.com/600x160/1a365d/ffffff.png\u0026text=CORPORATE+PRO",
+                    "site_logo_transparent_url":  "https://dummyimage.com/600x160/ffffff/1a365d.png\u0026text=CORPORATE+PRO",
+                    "site_logo_light_url":  "https://dummyimage.com/600x160/ffffff/1a365d.png\u0026text=CORPORATE+PRO",
+                    "footer_logo_url":  "https://dummyimage.com/600x160/ffffff/1a365d.png\u0026text=CORPORATE+PRO",
+                    "header_structure":  "topbar-nav",
+                    "header_nav_layout":  "underline",
+                    "header_nav_text_variant":  "uppercase",
+                    "header_nav_font_weight":  "600",
+                    "header_nav_letter_spacing":  0.03,
+                    "header_overlay_mode":  "auto",
+                    "header_overlay_opacity":  0.18,
+                    "header_overlay_blur":  8,
+                    "header_sticky_style":  "solid",
+                    "header_search_style":  "icon-fullscreen",
+                    "header_topbar_scroll_behavior":  "scroll-away",
+                    "header_show_logo":  true,
+                    "header_show_cta":  true,
+                    "header_show_login":  true,
+                    "header_cta_label":  "Richiedi preventivo",
+                    "header_cta_url":  "/contatti/",
+                    "header_login_label":  "Area clienti",
+                    "header_login_url":  "/login/",
+                    "mobile_nav_style":  "bottom-bar",
+                    "mobile_rail_enable":  false,
+                    "footer_variant":  "cta-footer",
+                    "footer_columns_count":  4,
+                    "footer_background_enable":  true,
+                    "footer_background_remote_url":  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format\u0026fit=crop\u0026w=1920\u0026q=85",
+                    "footer_background_opacity":  0.12,
+                    "footer_background_position":  "center center",
+                    "footer_background_size":  "cover",
+                    "footer_background_repeat":  "no-repeat",
+                    "footer_overlay_opacity":  0.88,
+                    "footer_overlay_tone":  "dark",
+                    "footer_cta_title":  "Costruiamo insieme il tuo prossimo progetto",
+                    "footer_cta_subtitle":  "Consulenza strategica, sviluppo e supporto continuo per la tua azienda.",
+                    "footer_cta_btn_label":  "Parla con noi",
+                    "footer_cta_btn_url":  "/contatti/",
+                    "footer_cta_btn2_label":  "I nostri servizi",
+                    "footer_cta_btn2_url":  "/servizi/",
+                    "contatti_telefono":  "+39 02 1234 5678",
+                    "contatti_email":  "info@corporate-demo.com",
+                    "contatti_indirizzo":  "Via Roma 1, 20121 Milano",
+                    "contatti_maps":  "",
+                    "contactform_contacts":  0,
+                    "mailchip_footer":  0
+                },
+    "menus":  {
+                  "format":  "aihl-menu-json",
+                  "version":  1,
+                  "generated_at":  "2026-06-09T00:00:00Z",
+                  "site_url":  "https://example.com/",
+                  "locations":  {
+                                    "topic":  401,
+                                    "naviga":  402,
+                                    "utili":  403,
+                                    "footer_col_1":  404,
+                                    "footer_col_2":  405,
+                                    "footer_col_3":  406
+                                },
+                  "menus":  [
+                                {
+                                    "term_id":  401,
+                                    "name":  "Topbar",
+                                    "slug":  "corp-topbar",
+                                    "description":  "",
+                                    "items":  [
+                                                  {
+                                                      "id":  4001,
+                                                      "parent_id":  0,
+                                                      "menu_order":  1,
+                                                      "title":  "+39 02 1234 5678",
+                                                      "url":  "tel:+390212345678",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+                                                                   "_aihl_menu_icon":  "fa-solid fa-phone"
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4002,
+                                                      "parent_id":  0,
+                                                      "menu_order":  2,
+                                                      "title":  "info@corporate-demo.com",
+                                                      "url":  "mailto:info@corporate-demo.com",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+                                                                   "_aihl_menu_icon":  "fa-solid fa-envelope"
+                                                               }
+                                                  }
+                                              ]
+                                },
+                                {
+                                    "term_id":  402,
+                                    "name":  "Navigazione Principale",
+                                    "slug":  "corp-main",
+                                    "description":  "",
+                                    "items":  [
+                                                  {
+                                                      "id":  4101,
+                                                      "parent_id":  0,
+                                                      "menu_order":  1,
+                                                      "title":  "Home",
+                                                      "url":  "/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4102,
+                                                      "parent_id":  0,
+                                                      "menu_order":  2,
+                                                      "title":  "Chi siamo",
+                                                      "url":  "/chi-siamo/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4103,
+                                                      "parent_id":  0,
+                                                      "menu_order":  3,
+                                                      "title":  "Servizi",
+                                                      "url":  "/servizi/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+                                                                   "_aihl_menu_mode":  "rich",
+                                                                   "_aihl_menu_rich_layout":  "featured",
+                                                                   "_aihl_menu_eyebrow":  "SOLUZIONI",
+                                                                   "_aihl_menu_rich_cta_label":  "Tutti i servizi",
+                                                                   "_aihl_menu_rich_cta_url":  "/servizi/"
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4104,
+                                                      "parent_id":  4103,
+                                                      "menu_order":  4,
+                                                      "title":  "Consulenza",
+                                                      "url":  "/servizi/consulenza/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "Analisi e strategia digitale.",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+                                                                   "_aihl_menu_icon":  "fa-solid fa-lightbulb",
+                                                                   "_aihl_menu_subtitle":  "Strategia e governance"
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4105,
+                                                      "parent_id":  4103,
+                                                      "menu_order":  5,
+                                                      "title":  "Sviluppo",
+                                                      "url":  "/servizi/sviluppo/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "Web app, e-commerce e integrazioni.",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+                                                                   "_aihl_menu_icon":  "fa-solid fa-code",
+                                                                   "_aihl_menu_subtitle":  "Soluzioni su misura"
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4106,
+                                                      "parent_id":  4103,
+                                                      "menu_order":  6,
+                                                      "title":  "Supporto",
+                                                      "url":  "/servizi/supporto/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "Assistenza continua e SLA garantiti.",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+                                                                   "_aihl_menu_icon":  "fa-solid fa-life-ring",
+                                                                   "_aihl_menu_subtitle":  "Manutenzione e SLA"
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4107,
+                                                      "parent_id":  0,
+                                                      "menu_order":  7,
+                                                      "title":  "Portfolio",
+                                                      "url":  "/portfolio/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4108,
+                                                      "parent_id":  0,
+                                                      "menu_order":  8,
+                                                      "title":  "Blog",
+                                                      "url":  "/blog/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4109,
+                                                      "parent_id":  0,
+                                                      "menu_order":  9,
+                                                      "title":  "Contatti",
+                                                      "url":  "/contatti/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+                                                                   "_aihl_menu_item_cta":  "primary"
+                                                               }
+                                                  }
+                                              ]
+                                },
+                                {
+                                    "term_id":  403,
+                                    "name":  "Legal",
+                                    "slug":  "corp-legal",
+                                    "description":  "",
+                                    "items":  [
+                                                  {
+                                                      "id":  4201,
+                                                      "parent_id":  0,
+                                                      "menu_order":  1,
+                                                      "title":  "Privacy Policy",
+                                                      "url":  "/privacy-policy/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4202,
+                                                      "parent_id":  0,
+                                                      "menu_order":  2,
+                                                      "title":  "Cookie Policy",
+                                                      "url":  "/cookie-policy/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  }
+                                              ]
+                                },
+                                {
+                                    "term_id":  404,
+                                    "name":  "Footer Azienda",
+                                    "slug":  "corp-footer-azienda",
+                                    "description":  "",
+                                    "items":  [
+                                                  {
+                                                      "id":  4301,
+                                                      "parent_id":  0,
+                                                      "menu_order":  1,
+                                                      "title":  "Chi siamo",
+                                                      "url":  "/chi-siamo/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4302,
+                                                      "parent_id":  0,
+                                                      "menu_order":  2,
+                                                      "title":  "Team",
+                                                      "url":  "/team/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4303,
+                                                      "parent_id":  0,
+                                                      "menu_order":  3,
+                                                      "title":  "Lavora con noi",
+                                                      "url":  "/careers/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  }
+                                              ]
+                                },
+                                {
+                                    "term_id":  405,
+                                    "name":  "Footer Servizi",
+                                    "slug":  "corp-footer-servizi",
+                                    "description":  "",
+                                    "items":  [
+                                                  {
+                                                      "id":  4401,
+                                                      "parent_id":  0,
+                                                      "menu_order":  1,
+                                                      "title":  "Consulenza",
+                                                      "url":  "/servizi/consulenza/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4402,
+                                                      "parent_id":  0,
+                                                      "menu_order":  2,
+                                                      "title":  "Sviluppo",
+                                                      "url":  "/servizi/sviluppo/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4403,
+                                                      "parent_id":  0,
+                                                      "menu_order":  3,
+                                                      "title":  "Supporto",
+                                                      "url":  "/servizi/supporto/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  }
+                                              ]
+                                },
+                                {
+                                    "term_id":  406,
+                                    "name":  "Footer Risorse",
+                                    "slug":  "corp-footer-risorse",
+                                    "description":  "",
+                                    "items":  [
+                                                  {
+                                                      "id":  4501,
+                                                      "parent_id":  0,
+                                                      "menu_order":  1,
+                                                      "title":  "Blog",
+                                                      "url":  "/blog/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  4502,
+                                                      "parent_id":  0,
+                                                      "menu_order":  2,
+                                                      "title":  "Portfolio",
+                                                      "url":  "/portfolio/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  }
+                                              ]
+                                }
+                            ]
+              },
+    "pages":  [
+                  {
+                      "title":  "Home",
+                      "slug":  "home",
+                      "template":  "page-builder.php",
+                      "status":  "publish",
+                      "content":  ""
+                  },
+                  {
+                      "title":  "Chi siamo",
+                      "slug":  "chi-siamo",
+                      "template":  "page-builder.php",
+                      "status":  "publish",
+                      "content":  ""
+                  },
+                  {
+                      "title":  "Servizi",
+                      "slug":  "servizi",
+                      "template":  "page-builder.php",
+                      "status":  "publish",
+                      "content":  ""
+                  },
+                  {
+                      "title":  "Portfolio",
+                      "slug":  "portfolio",
+                      "template":  "page-builder.php",
+                      "status":  "publish",
+                      "content":  ""
+                  },
+                  {
+                      "title":  "Blog",
+                      "slug":  "blog",
+                      "template":  "default",
+                      "status":  "publish",
+                      "content":  ""
+                  },
+                  {
+                      "title":  "Contatti",
+                      "slug":  "contatti",
+                      "template":  "page-builder.php",
+                      "status":  "publish",
+                      "content":  ""
+                  },
+                  {
+                      "title":  "Privacy Policy",
+                      "slug":  "privacy-policy",
+                      "template":  "default",
+                      "status":  "publish",
+                      "content":  ""
+                  },
+                  {
+                      "title":  "Cookie Policy",
+                      "slug":  "cookie-policy",
+                      "template":  "default",
+                      "status":  "publish",
+                      "content":  ""
+                  }
+              ],
+    "settings":  {
+                     "show_on_front":  "page",
+                     "page_on_front":  "home",
+                     "page_for_posts":  "blog",
+                     "blogname":  "Corporate Professional",
+                     "blogdescription":  "Soluzioni digitali per aziende e professionisti",
+                     "permalink_structure":  "/%postname%/"
+                 }
+}

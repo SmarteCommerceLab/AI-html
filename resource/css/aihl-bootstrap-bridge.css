@@ -1,0 +1,81 @@
+/*
+ * AI-HTML / Smart Bootstrap Manager bridge.
+ * This file only maps SBM and Bootstrap runtime tokens to AI-HTML components.
+ * It must not define component structure, offcanvas positioning, sticky logic,
+ * mobile rail visibility, or responsive menu layout.
+ */
+
+:root {
+    --primary: var(--bs-primary, #0d6efd);
+    --secondary: var(--bs-secondary, #6c757d);
+    --light: var(--bs-light, #f8f9fa);
+    --dark: var(--bs-dark, #212529);
+    --sbin-header-overlay-opacity: var(--sbin-overlay-opacity, var(--aihl-overlay-opacity, .18));
+    --sbin-header-overlay-blur: var(--sbin-overlay-blur, var(--aihl-overlay-blur, 8px));
+}
+
+body {
+    color: var(--bs-body-color, #212529);
+    background-color: var(--bs-body-bg, #ffffff);
+    font-family: var(--bs-body-font-family, inherit);
+    font-size: var(--bs-body-font-size, 1rem);
+    line-height: var(--bs-body-line-height, 1.5);
+}
+
+a {
+    color: var(--bs-link-color, var(--bs-primary, #0d6efd));
+}
+
+a:hover,
+a:focus {
+    color: var(--bs-link-hover-color, var(--bs-primary, #0d6efd));
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--bs-heading-color, inherit);
+    font-family: var(--bs-headings-font-family, var(--bs-body-font-family, inherit));
+    font-weight: var(--sbin-headings-weight, 500);
+    line-height: var(--bs-headings-line-height, 1.2);
+}
+
+.btn {
+    border-color: var(--bs-border-color, #dee2e6);
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+    border-color: var(--bs-border-color, #dee2e6);
+    border-radius: var(--sbin-input-border-radius, var(--bs-border-radius, .375rem));
+}
+
+.card,
+.service-item,
+.team-item,
+.aihl-footer-cta,
+.aihl-menu-rich-content {
+    border-color: var(--bs-border-color, #dee2e6);
+    border-radius: var(--sbin-card-border-radius, var(--bs-border-radius, .375rem));
+}
+
+.navbar .dropdown-menu {
+    border-color: var(--bs-border-color, #dee2e6);
+    border-radius: var(--bs-border-radius-lg, .5rem);
+}
+
+.container,
+.container-fluid,
+.container-xxl {
+    --sbin-space: calc(var(--bs-spacer, 1rem) * 3);
+    --aihl-space: var(--sbin-space);
+}
+
+.py-5 {
+    padding-top: var(--sbin-space, 3rem) !important;
+    padding-bottom: var(--sbin-space, 3rem) !important;
+}

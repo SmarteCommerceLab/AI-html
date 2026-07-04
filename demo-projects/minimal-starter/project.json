@@ -1,0 +1,80 @@
+{
+  "format": "aihl-project",
+  "version": 1,
+  "name": "Minimal Starter",
+  "description": "Setup minimo per partire velocemente. Header standard, footer semplice, 3 pagine base. Ideale come punto di partenza per nuovi progetti.",
+  "options": {
+    "sito_descrizione": "Sito minimo configurato tramite AI-HTML deploy.",
+    "header_structure": "standard",
+    "header_nav_layout": "underline",
+    "header_nav_text_variant": "capitalize",
+    "header_nav_font_weight": "500",
+    "header_nav_letter_spacing": 0.02,
+    "header_sticky_style": "solid",
+    "header_search_style": "icon-dropdown",
+    "header_topbar_scroll_behavior": "scroll-away",
+    "header_show_logo": true,
+    "header_show_cta": false,
+    "header_show_login": false,
+    "mobile_nav_style": "bottom-bar",
+    "mobile_rail_enable": false,
+    "footer_variant": "enterprise",
+    "footer_columns_count": 3,
+    "footer_background_enable": false,
+    "contatti_telefono": "",
+    "contatti_email": "info@example.com",
+    "contatti_indirizzo": "",
+    "contactform_contacts": 0,
+    "mailchip_footer": 0
+  },
+  "menus": {
+    "format": "aihl-menu-json",
+    "version": 1,
+    "generated_at": "2026-06-09T00:00:00Z",
+    "site_url": "https://example.com/",
+    "locations": {
+      "naviga": 301
+    },
+    "menus": [
+      {
+        "term_id": 301,
+        "name": "Menu Principale",
+        "slug": "menu-principale",
+        "description": "",
+        "items": [
+          {"id":3001,"parent_id":0,"menu_order":1,"title":"Home","url":"/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}},
+          {"id":3002,"parent_id":0,"menu_order":2,"title":"Chi siamo","url":"/chi-siamo/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}},
+          {"id":3003,"parent_id":0,"menu_order":3,"title":"Contatti","url":"/contatti/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}}
+        ]
+      }
+    ]
+  },
+  "pages": [
+    {
+      "title": "Home",
+      "slug": "home",
+      "template": "page-builder.php",
+      "status": "publish",
+      "content": ""
+    },
+    {
+      "title": "Chi siamo",
+      "slug": "chi-siamo",
+      "template": "default",
+      "status": "publish",
+      "content": ""
+    },
+    {
+      "title": "Contatti",
+      "slug": "contatti",
+      "template": "default",
+      "status": "publish",
+      "content": ""
+    }
+  ],
+  "settings": {
+    "show_on_front": "page",
+    "page_on_front": "home",
+    "permalink_structure": "/%postname%/"
+  }
+}

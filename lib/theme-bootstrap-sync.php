@@ -1,0 +1,6 @@
+<?php
+if (!defined('ABSPATH')) {
+	exit;
+}
+
+require_once trailingslashit(get_template_directory()) . 'inc/integrations/smart-bootstrap-manager.php';

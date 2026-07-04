@@ -1,0 +1,370 @@
+{
+  "format": "aihl-menu-json",
+  "version": 1,
+  "generated_at": "2026-06-23T17:25:00+02:00",
+  "site_url": "https://demo.smartecommerce.it/",
+  "locations": {
+    "topic": 5101,
+    "utili": 5102,
+    "footer_col_1": 5103,
+    "footer_col_2": 5104,
+    "footer_col_3": 5105
+  },
+  "menus": [
+    {
+      "term_id": 5101,
+      "name": "Studio Legale Di Caprio - Menu Principale",
+      "slug": "studio-legale-di-caprio-menu-principale",
+      "description": "Menu principale AI-HTML per sito legale con dropdown aree di pratica e link editoriali.",
+      "items": [
+        {
+          "id": 1001,
+          "parent_id": 0,
+          "menu_order": 1,
+          "title": "Home",
+          "url": "https://demo.smartecommerce.it/",
+          "attr_title": "Torna alla home dello Studio Legale Di Caprio",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": {
+            "_aihl_menu_mode": "simple",
+            "_aihl_menu_icon": "fa-solid fa-house",
+            "_aihl_menu_color": "#ffffff"
+          }
+        },
+        {
+          "id": 1002,
+          "parent_id": 0,
+          "menu_order": 2,
+          "title": "Chi sono",
+          "url": "https://demo.smartecommerce.it/chi-sono/",
+          "attr_title": "Profilo dell'Avv. Rosa Di Caprio",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": {
+            "_aihl_menu_mode": "simple",
+            "_aihl_menu_icon": "fa-solid fa-scale-balanced",
+            "_aihl_menu_color": "#ffffff"
+          }
+        },
+        {
+          "id": 1003,
+          "parent_id": 0,
+          "menu_order": 3,
+          "title": "Aree di pratica",
+          "url": "https://demo.smartecommerce.it/aree-di-pratica/",
+          "attr_title": "Aree di assistenza in diritto di famiglia",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": {
+            "_aihl_menu_mode": "dropdown",
+            "_aihl_menu_rich_layout": "directory",
+            "_aihl_menu_icon": "fa-solid fa-briefcase",
+            "_aihl_menu_color": "#ff0040",
+            "_aihl_menu_rich_cta_label": "Prenota una consulenza riservata",
+            "_aihl_menu_rich_cta_url": "https://demo.smartecommerce.it/contatti/",
+            "_aihl_menu_rich_footer": "<strong>Studio Legale Di Caprio</strong> · Napoli e Casoria · Consulenza riservata in diritto di famiglia"
+          }
+        },
+        {
+          "id": 1010,
+          "parent_id": 1003,
+          "menu_order": 1,
+          "title": "Separazioni",
+          "url": "https://demo.smartecommerce.it/separazioni/",
+          "attr_title": "Separazione consensuale e giudiziale",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": {
+            "_aihl_menu_icon": "fa-solid fa-file-signature",
+            "_aihl_menu_subtitle": "Consensuali, giudiziali e negoziazione assistita.",
+            "_aihl_menu_eyebrow": "Crisi familiare",
+            "_aihl_menu_color": "#ff0040",
+            "_aihl_menu_highlight": "1"
+          }
+        },
+        {
+          "id": 1011,
+          "parent_id": 1003,
+          "menu_order": 2,
+          "title": "Divorzi",
+          "url": "https://demo.smartecommerce.it/divorzi/",
+          "attr_title": "Divorzio breve e giudiziale",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": {
+            "_aihl_menu_icon": "fa-solid fa-gavel",
+            "_aihl_menu_subtitle": "Ricorso congiunto, tempi, condizioni e tutela patrimoniale.",
+            "_aihl_menu_eyebrow": "Dopo la separazione",
+            "_aihl_menu_color": "#05083f"
+          }
+        },
+        {
+          "id": 1012,
+          "parent_id": 1003,
+          "menu_order": 3,
+          "title": "Affidamento minori",
+          "url": "https://demo.smartecommerce.it/affidamento-minori/",
+          "attr_title": "Affidamento, collocamento e tutela dei figli",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": {
+            "_aihl_menu_icon": "fa-solid fa-children",
+            "_aihl_menu_subtitle": "Soluzioni orientate all'interesse concreto dei figli.",
+            "_aihl_menu_eyebrow": "Figli e genitorialità",
+            "_aihl_menu_color": "#05083f"
+          }
+        },
+        {
+          "id": 1013,
+          "parent_id": 1003,
+          "menu_order": 4,
+          "title": "Questioni patrimoniali",
+          "url": "https://demo.smartecommerce.it/questioni-patrimoniali/",
+          "attr_title": "Casa coniugale, assegni e rapporti economici",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": {
+            "_aihl_menu_icon": "fa-solid fa-landmark",
+            "_aihl_menu_subtitle": "Casa familiare, mantenimento, assegni e patrimonio.",
+            "_aihl_menu_eyebrow": "Tutela economica",
+            "_aihl_menu_color": "#ff0040",
+            "_aihl_menu_badge": "Focus",
+            "_aihl_menu_badge_color": "#ff0040"
+          }
+        },
+        {
+          "id": 1014,
+          "parent_id": 1003,
+          "menu_order": 5,
+          "title": "Violenza familiare",
+          "url": "https://demo.smartecommerce.it/violenza-familiare/",
+          "attr_title": "Protezione e intervento urgente nei casi familiari delicati",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": {
+            "_aihl_menu_icon": "fa-solid fa-shield-heart",
+            "_aihl_menu_subtitle": "Riservatezza, protezione e azione rapida nei casi urgenti.",
+            "_aihl_menu_eyebrow": "Urgenze",
+            "_aihl_menu_color": "#ff0040"
+          }
+        },
+        {
+          "id": 1004,
+          "parent_id": 0,
+          "menu_order": 4,
+          "title": "Magazine",
+          "url": "https://demo.smartecommerce.it/magazine/",
+          "attr_title": "Approfondimenti di diritto di famiglia",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": {
+            "_aihl_menu_mode": "simple",
+            "_aihl_menu_icon": "fa-solid fa-newspaper"
+          }
+        },
+        {
+          "id": 1005,
+          "parent_id": 0,
+          "menu_order": 5,
+          "title": "Guide",
+          "url": "https://demo.smartecommerce.it/guide/",
+          "attr_title": "Guide pratiche per separazione, divorzio e famiglia",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": {
+            "_aihl_menu_mode": "dropdown",
+            "_aihl_menu_rich_layout": "panel",
+            "_aihl_menu_icon": "fa-solid fa-book-open"
+          }
+        },
+        {
+          "id": 1020,
+          "parent_id": 1005,
+          "menu_order": 1,
+          "title": "Separazione consensuale",
+          "url": "https://demo.smartecommerce.it/separazione-consensuale/",
+          "attr_title": "Guida alla separazione consensuale",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": { "_aihl_menu_icon": "fa-solid fa-circle-check", "_aihl_menu_subtitle": "Tempi, documenti e costi." }
+        },
+        {
+          "id": 1021,
+          "parent_id": 1005,
+          "menu_order": 2,
+          "title": "Assegno divorzile",
+          "url": "https://demo.smartecommerce.it/assegno-divorzile/",
+          "attr_title": "Guida all'assegno divorzile",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": { "_aihl_menu_icon": "fa-solid fa-euro-sign", "_aihl_menu_subtitle": "Funzione, criteri e tutela." }
+        },
+        {
+          "id": 1022,
+          "parent_id": 1005,
+          "menu_order": 3,
+          "title": "Casa coniugale",
+          "url": "https://demo.smartecommerce.it/casa-coniugale/",
+          "attr_title": "Guida all'assegnazione della casa coniugale",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": { "_aihl_menu_icon": "fa-solid fa-house-chimney-user", "_aihl_menu_subtitle": "Assegnazione e conseguenze." }
+        },
+        {
+          "id": 1006,
+          "parent_id": 0,
+          "menu_order": 6,
+          "title": "App",
+          "url": "https://demo.smartecommerce.it/app-avvocato-risponde/",
+          "attr_title": "App L'Avvocato Risponde",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": {
+            "_aihl_menu_mode": "simple",
+            "_aihl_menu_icon": "fa-solid fa-mobile-screen-button",
+            "_aihl_menu_badge": "Risposte",
+            "_aihl_menu_badge_color": "#ff0040"
+          }
+        },
+        {
+          "id": 1007,
+          "parent_id": 0,
+          "menu_order": 7,
+          "title": "Contatti",
+          "url": "https://demo.smartecommerce.it/contatti/",
+          "attr_title": "Prenota una consulenza riservata",
+          "target": "",
+          "xfn": "",
+          "description": "",
+          "classes": [],
+          "type": "custom",
+          "object": "custom",
+          "object_id": 0,
+          "meta": {
+            "_aihl_menu_mode": "simple",
+            "_aihl_menu_icon": "fa-solid fa-envelope",
+            "_aihl_menu_item_cta": "btn-outline-primary"
+          }
+        }
+      ]
+    },
+    {
+      "term_id": 5102,
+      "name": "Studio Legale Di Caprio - Menu Footer Utili",
+      "slug": "studio-legale-di-caprio-footer-utili",
+      "description": "Menu utility/footer sintetico.",
+      "items": [
+        { "id": 2001, "parent_id": 0, "menu_order": 1, "title": "Privacy", "url": "https://demo.smartecommerce.it/privacy-policy/", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": {} },
+        { "id": 2002, "parent_id": 0, "menu_order": 2, "title": "Cookie", "url": "https://demo.smartecommerce.it/cookie-policy/", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": {} },
+        { "id": 2003, "parent_id": 0, "menu_order": 3, "title": "Contatti", "url": "https://demo.smartecommerce.it/contatti/", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": {} }
+      ]
+    },
+    {
+      "term_id": 5103,
+      "name": "Footer - Lo Studio",
+      "slug": "footer-lo-studio-di-caprio",
+      "description": "Colonna footer studio.",
+      "items": [
+        { "id": 3001, "parent_id": 0, "menu_order": 1, "title": "Chi sono", "url": "https://demo.smartecommerce.it/chi-sono/", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": {} },
+        { "id": 3002, "parent_id": 0, "menu_order": 2, "title": "Magazine", "url": "https://demo.smartecommerce.it/magazine/", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": {} },
+        { "id": 3003, "parent_id": 0, "menu_order": 3, "title": "App L'Avvocato Risponde", "url": "https://demo.smartecommerce.it/app-avvocato-risponde/", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": {} },
+        { "id": 3004, "parent_id": 0, "menu_order": 4, "title": "Contatti", "url": "https://demo.smartecommerce.it/contatti/", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": {} }
+      ]
+    },
+    {
+      "term_id": 5104,
+      "name": "Footer - Aree di pratica",
+      "slug": "footer-aree-pratica-di-caprio",
+      "description": "Colonna footer aree di pratica.",
+      "items": [
+        { "id": 4001, "parent_id": 0, "menu_order": 1, "title": "Separazioni", "url": "https://demo.smartecommerce.it/separazioni/", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": {} },
+        { "id": 4002, "parent_id": 0, "menu_order": 2, "title": "Divorzi", "url": "https://demo.smartecommerce.it/divorzi/", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": {} },
+        { "id": 4003, "parent_id": 0, "menu_order": 3, "title": "Affidamento minori", "url": "https://demo.smartecommerce.it/affidamento-minori/", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": {} },
+        { "id": 4004, "parent_id": 0, "menu_order": 4, "title": "Questioni patrimoniali", "url": "https://demo.smartecommerce.it/questioni-patrimoniali/", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": {} },
+        { "id": 4005, "parent_id": 0, "menu_order": 5, "title": "Violenza familiare", "url": "https://demo.smartecommerce.it/violenza-familiare/", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": {} }
+      ]
+    },
+    {
+      "term_id": 5105,
+      "name": "Footer - Contatti",
+      "slug": "footer-contatti-di-caprio",
+      "description": "Colonna footer contatti.",
+      "items": [
+        { "id": 5001, "parent_id": 0, "menu_order": 1, "title": "Prenota consulenza", "url": "https://demo.smartecommerce.it/contatti/", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": { "_aihl_menu_icon": "fa-solid fa-calendar-check" } },
+        { "id": 5002, "parent_id": 0, "menu_order": 2, "title": "Chiama lo studio", "url": "tel:+390815405612", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": { "_aihl_menu_icon": "fa-solid fa-phone" } },
+        { "id": 5003, "parent_id": 0, "menu_order": 3, "title": "Scrivi via email", "url": "mailto:avvocatodicaprio@gmail.com", "attr_title": "", "target": "", "xfn": "", "description": "", "classes": [], "type": "custom", "object": "custom", "object_id": 0, "meta": { "_aihl_menu_icon": "fa-solid fa-envelope" } }
+      ]
+    }
+  ]
+}

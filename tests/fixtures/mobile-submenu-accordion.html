@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI-HTML mobile submenu accordion</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../resource/css/ai-html.css">
+  <style>
+    body { margin: 0; background: #182026; }
+    .aihl-header-nav { position: fixed; inset: 0; height: 64px; }
+    #offcanvasNavbar { visibility: visible; transform: none; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg aihl-header-nav" data-overlay-mode="never">
+    <div class="offcanvas offcanvas-end show" id="offcanvasNavbar" role="dialog" aria-label="Menu test">
+      <div class="offcanvas-header border-bottom">
+        <a class="aihl-mobile-menu-brand" href="/">
+          <img class="aihl-mobile-menu-logo" src="https://demo.smartecommerce.it/wp-content/uploads/2026/06/logo-originale-bianco.png" alt="Studio Legale Di Caprio">
+        </a>
+        <button class="btn-close" type="button" aria-label="Chiudi menu"></button>
+      </div>
+      <div class="offcanvas-body aihl-header-nav-body">
+        <ul class="aihl-mobile-menu list-unstyled">
+          <li class="aihl-mobile-menu-item current-menu-item">
+            <div class="aihl-mobile-menu-row"><a class="nav-link" href="/"><span class="aihl-mobile-menu-text">Home</span></a></div>
+          </li>
+          <li class="aihl-mobile-menu-item">
+            <div class="aihl-mobile-menu-row"><a class="nav-link" href="/chi-sono/"><span class="aihl-mobile-menu-text">Chi sono</span></a></div>
+          </li>
+          <li class="aihl-mobile-menu-item has-children">
+            <div class="aihl-mobile-menu-row">
+              <a class="nav-link" href="/aree/"><span class="aihl-mobile-menu-text">Aree di pratica</span></a>
+              <button class="aihl-mobile-submenu-toggle" type="button" aria-expanded="false" aria-controls="aihl-mobile-submenu-100" aria-label="Apri il sottomenu Aree di pratica">
+                <span aria-hidden="true">⌄</span>
+              </button>
+            </div>
+            <ul class="aihl-mobile-submenu list-unstyled" id="aihl-mobile-submenu-100" hidden>
+              <li class="aihl-mobile-menu-item"><div class="aihl-mobile-menu-row"><a class="nav-link" href="/separazioni/"><span class="aihl-mobile-menu-text">Separazioni</span></a></div></li>
+              <li class="aihl-mobile-menu-item"><div class="aihl-mobile-menu-row"><a class="nav-link" href="/divorzi/"><span class="aihl-mobile-menu-text">Divorzi</span></a></div></li>
+              <li class="aihl-mobile-menu-item"><div class="aihl-mobile-menu-row"><a class="nav-link" href="/affidamento/"><span class="aihl-mobile-menu-text">Affidamento minori</span></a></div></li>
+            </ul>
+          </li>
+          <li class="aihl-mobile-menu-item"><div class="aihl-mobile-menu-row"><a class="nav-link" href="/magazine/"><span class="aihl-mobile-menu-text">Magazine</span></a></div></li>
+          <li class="aihl-mobile-menu-item"><div class="aihl-mobile-menu-row"><a class="nav-link" href="/guide/"><span class="aihl-mobile-menu-text">Guide</span></a></div></li>
+          <li class="aihl-mobile-menu-item"><div class="aihl-mobile-menu-row"><a class="nav-link" href="/app/"><span class="aihl-mobile-menu-text">App</span></a></div></li>
+          <li class="aihl-mobile-menu-item"><div class="aihl-mobile-menu-row"><a class="nav-link" href="/contatti/"><span class="aihl-mobile-menu-text">Contatti</span></a></div></li>
+        </ul>
+        <div class="aihl-mobile-search">
+          <form class="search-form" role="search">
+            <input class="form-control" type="search" placeholder="Cerca nel sito" aria-label="Cerca nel sito">
+            <button class="btn btn-primary" type="submit" aria-label="Avvia la ricerca"><span aria-hidden="true">⌕</span></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../resource/js/main.js"></script>
+</body>
+</html>

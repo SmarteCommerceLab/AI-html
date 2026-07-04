@@ -1,0 +1,57 @@
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+
+# Local environment and secrets
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*.old
+*.swp
+*.swo
+~$*
+
+# Archives and backups
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+backup/
+backups/
+_backup/
+_backups/
+
+# Database dumps
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+
+# Dependency/build output
+node_modules/
+vendor/
+dist/
+build/
+coverage/
+
+# WordPress/generated runtime files
+cache/
+logs/
+uploads/
+upgrade/
+wp-content/cache/

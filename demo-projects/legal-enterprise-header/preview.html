@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Preview header enterprise legale</title>
+  <link rel="stylesheet" href="header.css">
+  <style>
+    :root {
+      --bs-primary: #9a7438;
+      --bs-dark: #152132;
+      --bs-dark-rgb: 21, 33, 50;
+      --bs-body-bg: #fff;
+      --bs-body-color: #1d2835;
+      --bs-light: #f8f9fa;
+      --bs-border-color: #dfe3e8;
+      --bs-headings-font-family: Georgia, serif;
+      --bs-body-font-family: Arial, sans-serif;
+      --sbin-primary-contrast: #fff;
+    }
+
+    body {
+      min-height: 150vh;
+      margin: 0;
+      color: var(--bs-body-color);
+      background: #f3f1ed;
+      font-family: var(--bs-body-font-family);
+    }
+
+    main {
+      min-height: 72vh;
+      display: grid;
+      place-items: center;
+      padding: 4rem 1.5rem;
+      background:
+        linear-gradient(90deg, rgba(21, 33, 50, 0.92), rgba(21, 33, 50, 0.55)),
+        url("https://www.avvocatodicaprio.it/wp-content/uploads/2020/05/42677048_2311734552174098_3790331127168761856_n-e1609686348284.jpg") center 34% / cover;
+    }
+
+    .preview-copy {
+      width: min(900px, 100%);
+      color: #fff;
+    }
+
+    .preview-copy p {
+      max-width: 650px;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .preview-copy h1 {
+      max-width: 800px;
+      margin: 0 0 1rem;
+      font-family: Georgia, serif;
+      font-size: clamp(2.5rem, 6vw, 5.5rem);
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="header-preview"></div>
+  <main id="main">
+    <div class="preview-copy">
+      <p>Diritto di famiglia · Tutela personale e patrimoniale</p>
+      <h1>Competenza giuridica, ascolto e strategia.</h1>
+      <p>Preview tecnica del solo header. Il contenuto della pagina sarà gestito da Smart Builder Site.</p>
+    </div>
+  </main>
+  <script>
+    fetch("header.html")
+      .then(function (response) { return response.text(); })
+      .then(function (html) { document.getElementById("header-preview").innerHTML = html; })
+      .then(function () {
+        var script = document.createElement("script");
+        script.src = "header.js";
+        document.body.appendChild(script);
+      });
+  </script>
+</body>
+</html>

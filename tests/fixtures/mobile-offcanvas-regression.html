@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI-HTML mobile offcanvas regression</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+  <style>
+    :root {
+      --bs-body-bg: #fff;
+      --bs-body-color: #212529;
+      --bs-light: #f8f9fa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 150vh;
+      margin: 0;
+      background: #152132;
+      font-family: Arial, sans-serif;
+    }
+
+    .aihl-header-nav {
+      position: fixed;
+      inset: 0 0 auto;
+      height: 64px;
+      color: var(--bs-light);
+      background: rgba(21, 33, 50, 0.68);
+      backdrop-filter: blur(8px);
+    }
+
+    .aihl-header-main-row {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+    }
+
+    .offcanvas {
+      position: fixed;
+      inset: 0 0 0 auto;
+      z-index: 1045;
+      width: min(400px, 100%);
+      display: flex;
+      flex-direction: column;
+      color: var(--bs-body-color);
+      background: var(--bs-body-bg);
+    }
+
+    .offcanvas-header {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .offcanvas-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+
+    .navbar-nav {
+      display: grid;
+      gap: 0.25rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    body.aihl-has-fullscreen-hero .aihl-header-nav .offcanvas .nav-link {
+      color: var(--bs-light);
+    }
+
+    .nav-link {
+      display: block;
+      padding: 0.9rem;
+      text-decoration: none;
+    }
+  </style>
+  <link rel="stylesheet" href="../../resource/css/ai-html.css">
+</head>
+<body class="aihl-has-fullscreen-hero">
+  <nav class="aihl-header-nav aihl-header-overlay">
+    <div class="aihl-header-main-row">
+      <strong>Studio Legale Di Caprio</strong>
+      <button type="button">Menu</button>
+      <div class="offcanvas offcanvas-end show" id="offcanvasNavbar" role="dialog" aria-label="Studio Legale Di Caprio">
+        <div class="offcanvas-header">
+          <strong class="offcanvas-title">Studio Legale Di Caprio</strong>
+          <button type="button" aria-label="Chiudi menu">×</button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="navbar-nav aihl-primary-menu justify-content-end flex-grow-1 py-4">
+            <li><a class="nav-link" href="/">Home</a></li>
+            <li><a class="nav-link" href="/chi-sono/">Chi sono</a></li>
+            <li><a class="nav-link" href="/separazioni/">Aree di pratica</a></li>
+            <li><a class="nav-link" href="/magazine/">Magazine</a></li>
+            <li><a class="nav-link" href="/contatti/">Contatti</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+</body>
+</html>

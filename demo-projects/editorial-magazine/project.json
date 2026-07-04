@@ -1,0 +1,540 @@
+{
+    "format":  "aihl-project",
+    "version":  1,
+    "name":  "Editorial Magazine",
+    "description":  "Layout editoriale per blog, magazine e testate online. Header topbar-nav, navigazione per categorie, footer informativo, blog come homepage.",
+    "options":  {
+                    "sito_descrizione":  "Magazine editoriale configurato per pubblicazione di contenuti e articoli.",
+                    "site_logo_url":  "https://dummyimage.com/600x160/0f172a/f59e0b.png\u0026text=EDITORIAL+MAG",
+                    "site_logo_transparent_url":  "https://dummyimage.com/600x160/ffffff/0f172a.png\u0026text=EDITORIAL+MAG",
+                    "site_logo_light_url":  "https://dummyimage.com/600x160/ffffff/0f172a.png\u0026text=EDITORIAL+MAG",
+                    "footer_logo_url":  "https://dummyimage.com/600x160/ffffff/0f172a.png\u0026text=EDITORIAL+MAG",
+                    "header_structure":  "topbar-nav",
+                    "header_nav_layout":  "underline",
+                    "header_nav_text_variant":  "capitalize",
+                    "header_nav_font_weight":  "500",
+                    "header_nav_letter_spacing":  0.01,
+                    "header_overlay_mode":  "none",
+                    "header_sticky_style":  "solid",
+                    "header_search_style":  "icon-fullscreen",
+                    "header_topbar_scroll_behavior":  "scroll-away",
+                    "header_show_logo":  true,
+                    "header_show_cta":  false,
+                    "header_show_login":  true,
+                    "header_login_label":  "Accedi",
+                    "header_login_url":  "/login/",
+                    "mobile_nav_style":  "bottom-bar",
+                    "mobile_rail_enable":  false,
+                    "footer_variant":  "enterprise",
+                    "footer_columns_count":  4,
+                    "footer_background_enable":  false,
+                    "footer_overlay_tone":  "dark",
+                    "contatti_telefono":  "",
+                    "contatti_email":  "redazione@editorial-demo.com",
+                    "contatti_indirizzo":  "Roma, Italia",
+                    "contatti_maps":  "",
+                    "contactform_contacts":  0,
+                    "mailchip_footer":  1
+                },
+    "menus":  {
+                  "format":  "aihl-menu-json",
+                  "version":  1,
+                  "generated_at":  "2026-06-09T00:00:00Z",
+                  "site_url":  "https://example.com/",
+                  "locations":  {
+                                    "topic":  501,
+                                    "naviga":  502,
+                                    "utili":  503,
+                                    "footer_col_1":  504,
+                                    "footer_col_2":  505,
+                                    "footer_col_3":  506
+                                },
+                  "menus":  [
+                                {
+                                    "term_id":  501,
+                                    "name":  "Topbar Editoriale",
+                                    "slug":  "edit-topbar",
+                                    "description":  "",
+                                    "items":  [
+                                                  {
+                                                      "id":  5001,
+                                                      "parent_id":  0,
+                                                      "menu_order":  1,
+                                                      "title":  "Newsletter",
+                                                      "url":  "/newsletter/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+                                                                   "_aihl_menu_icon":  "fa-solid fa-envelope"
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  5002,
+                                                      "parent_id":  0,
+                                                      "menu_order":  2,
+                                                      "title":  "Chi siamo",
+                                                      "url":  "/chi-siamo/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  5003,
+                                                      "parent_id":  0,
+                                                      "menu_order":  3,
+                                                      "title":  "Contatti",
+                                                      "url":  "/contatti/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  }
+                                              ]
+                                },
+                                {
+                                    "term_id":  502,
+                                    "name":  "Navigazione Categorie",
+                                    "slug":  "edit-main",
+                                    "description":  "",
+                                    "items":  [
+                                                  {
+                                                      "id":  5101,
+                                                      "parent_id":  0,
+                                                      "menu_order":  1,
+                                                      "title":  "Home",
+                                                      "url":  "/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  5102,
+                                                      "parent_id":  0,
+                                                      "menu_order":  2,
+                                                      "title":  "Tecnologia",
+                                                      "url":  "/categoria/tecnologia/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  5103,
+                                                      "parent_id":  0,
+                                                      "menu_order":  3,
+                                                      "title":  "Business",
+                                                      "url":  "/categoria/business/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  5104,
+                                                      "parent_id":  0,
+                                                      "menu_order":  4,
+                                                      "title":  "Design",
+                                                      "url":  "/categoria/design/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  5105,
+                                                      "parent_id":  0,
+                                                      "menu_order":  5,
+                                                      "title":  "Cultura",
+                                                      "url":  "/categoria/cultura/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  5106,
+                                                      "parent_id":  0,
+                                                      "menu_order":  6,
+                                                      "title":  "Opinioni",
+                                                      "url":  "/categoria/opinioni/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  }
+                                              ]
+                                },
+                                {
+                                    "term_id":  503,
+                                    "name":  "Legal Editoriale",
+                                    "slug":  "edit-legal",
+                                    "description":  "",
+                                    "items":  [
+                                                  {
+                                                      "id":  5201,
+                                                      "parent_id":  0,
+                                                      "menu_order":  1,
+                                                      "title":  "Privacy Policy",
+                                                      "url":  "/privacy-policy/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  5202,
+                                                      "parent_id":  0,
+                                                      "menu_order":  2,
+                                                      "title":  "Cookie Policy",
+                                                      "url":  "/cookie-policy/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  }
+                                              ]
+                                },
+                                {
+                                    "term_id":  504,
+                                    "name":  "Footer Redazione",
+                                    "slug":  "edit-footer-redazione",
+                                    "description":  "",
+                                    "items":  [
+                                                  {
+                                                      "id":  5301,
+                                                      "parent_id":  0,
+                                                      "menu_order":  1,
+                                                      "title":  "Chi siamo",
+                                                      "url":  "/chi-siamo/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  5302,
+                                                      "parent_id":  0,
+                                                      "menu_order":  2,
+                                                      "title":  "Redazione",
+                                                      "url":  "/redazione/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  5303,
+                                                      "parent_id":  0,
+                                                      "menu_order":  3,
+                                                      "title":  "Contatti",
+                                                      "url":  "/contatti/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  }
+                                              ]
+                                },
+                                {
+                                    "term_id":  505,
+                                    "name":  "Footer Sezioni",
+                                    "slug":  "edit-footer-sezioni",
+                                    "description":  "",
+                                    "items":  [
+                                                  {
+                                                      "id":  5401,
+                                                      "parent_id":  0,
+                                                      "menu_order":  1,
+                                                      "title":  "Tecnologia",
+                                                      "url":  "/categoria/tecnologia/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  5402,
+                                                      "parent_id":  0,
+                                                      "menu_order":  2,
+                                                      "title":  "Business",
+                                                      "url":  "/categoria/business/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  5403,
+                                                      "parent_id":  0,
+                                                      "menu_order":  3,
+                                                      "title":  "Design",
+                                                      "url":  "/categoria/design/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  }
+                                              ]
+                                },
+                                {
+                                    "term_id":  506,
+                                    "name":  "Footer Servizi",
+                                    "slug":  "edit-footer-servizi",
+                                    "description":  "",
+                                    "items":  [
+                                                  {
+                                                      "id":  5501,
+                                                      "parent_id":  0,
+                                                      "menu_order":  1,
+                                                      "title":  "Newsletter",
+                                                      "url":  "/newsletter/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  },
+                                                  {
+                                                      "id":  5502,
+                                                      "parent_id":  0,
+                                                      "menu_order":  2,
+                                                      "title":  "RSS Feed",
+                                                      "url":  "/feed/",
+                                                      "attr_title":  "",
+                                                      "target":  "",
+                                                      "xfn":  "",
+                                                      "description":  "",
+                                                      "classes":  [
+
+                                                                  ],
+                                                      "type":  "custom",
+                                                      "object":  "custom",
+                                                      "object_id":  0,
+                                                      "meta":  {
+
+                                                               }
+                                                  }
+                                              ]
+                                }
+                            ]
+              },
+    "pages":  [
+                  {
+                      "title":  "Home",
+                      "slug":  "home",
+                      "template":  "page-builder.php",
+                      "status":  "publish",
+                      "content":  ""
+                  },
+                  {
+                      "title":  "Chi siamo",
+                      "slug":  "chi-siamo",
+                      "template":  "default",
+                      "status":  "publish",
+                      "content":  ""
+                  },
+                  {
+                      "title":  "Redazione",
+                      "slug":  "redazione",
+                      "template":  "default",
+                      "status":  "publish",
+                      "content":  ""
+                  },
+                  {
+                      "title":  "Contatti",
+                      "slug":  "contatti",
+                      "template":  "page-builder.php",
+                      "status":  "publish",
+                      "content":  ""
+                  },
+                  {
+                      "title":  "Newsletter",
+                      "slug":  "newsletter",
+                      "template":  "page-builder.php",
+                      "status":  "publish",
+                      "content":  ""
+                  },
+                  {
+                      "title":  "Privacy Policy",
+                      "slug":  "privacy-policy",
+                      "template":  "default",
+                      "status":  "publish",
+                      "content":  ""
+                  },
+                  {
+                      "title":  "Cookie Policy",
+                      "slug":  "cookie-policy",
+                      "template":  "default",
+                      "status":  "publish",
+                      "content":  ""
+                  }
+              ],
+    "settings":  {
+                     "show_on_front":  "posts",
+                     "blogname":  "Editorial Magazine",
+                     "blogdescription":  "Notizie, approfondimenti e opinioni dal mondo digitale",
+                     "permalink_structure":  "/%postname%/"
+                 }
+}

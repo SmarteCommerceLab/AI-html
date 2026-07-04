@@ -1,0 +1,84 @@
+{
+  "format": "aihl-menu-json",
+  "version": 1,
+  "generated_at": "2026-06-09T00:00:00Z",
+  "site_url": "https://example.com/",
+  "locations": {
+    "topic": 201,
+    "naviga": 202,
+    "utili": 203,
+    "footer_col_1": 204,
+    "footer_col_2": 205,
+    "footer_col_3": 206
+  },
+  "menus": [
+    {
+      "term_id": 201,
+      "name": "Demo Main",
+      "slug": "demo-main",
+      "description": "Navigazione principale demo remote media",
+      "items": [
+        {"id":2001,"parent_id":0,"menu_order":1,"title":"Home","url":"/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}},
+        {"id":2002,"parent_id":0,"menu_order":2,"title":"Servizi","url":"/servizi/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{"_aihl_menu_mode":"rich","_aihl_menu_rich_layout":"featured","_aihl_menu_eyebrow":"SOLUZIONI","_aihl_menu_rich_cta_label":"Tutti i servizi","_aihl_menu_rich_cta_url":"/servizi/","_aihl_menu_rich_footer":"Architettura, design e automazione in un unico ecosistema."}},
+        {"id":2003,"parent_id":2002,"menu_order":3,"title":"Digital Strategy","url":"/servizi/strategy/","attr_title":"","target":"","xfn":"","description":"Roadmap, contenuti e misurazione.","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{"_aihl_menu_icon":"fa-solid fa-compass","_aihl_menu_subtitle":"Roadmap e governance digitale","_aihl_menu_image":"https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=80"}},
+        {"id":2004,"parent_id":2002,"menu_order":4,"title":"Experience Design","url":"/servizi/design/","attr_title":"","target":"","xfn":"","description":"Interfacce leggibili e accessibili.","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{"_aihl_menu_icon":"fa-solid fa-pen-ruler","_aihl_menu_subtitle":"UI, UX e design system","_aihl_menu_image":"https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=900&q=80"}},
+        {"id":2005,"parent_id":2002,"menu_order":5,"title":"Automation","url":"/servizi/automation/","attr_title":"","target":"","xfn":"","description":"Processi integrati e configurazioni JSON.","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{"_aihl_menu_icon":"fa-solid fa-gears","_aihl_menu_subtitle":"Workflow e integrazioni","_aihl_menu_image":"https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80"}},
+        {"id":2006,"parent_id":0,"menu_order":6,"title":"Progetti","url":"/progetti/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}},
+        {"id":2007,"parent_id":0,"menu_order":7,"title":"Insight","url":"/blog/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}},
+        {"id":2008,"parent_id":0,"menu_order":8,"title":"Contatti","url":"/contatti/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{"_aihl_menu_item_cta":"primary"}}
+      ]
+    },
+    {
+      "term_id": 202,
+      "name": "Demo Topbar",
+      "slug": "demo-topbar",
+      "description": "",
+      "items": [
+        {"id":2101,"parent_id":0,"menu_order":1,"title":"+39 02 0000 0000","url":"tel:+390200000000","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{"_aihl_menu_icon":"fa-solid fa-phone"}},
+        {"id":2102,"parent_id":0,"menu_order":2,"title":"demo@example.com","url":"mailto:demo@example.com","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{"_aihl_menu_icon":"fa-solid fa-envelope"}},
+        {"id":2103,"parent_id":0,"menu_order":3,"title":"Documentazione","url":"/documentazione/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}}
+      ]
+    },
+    {
+      "term_id": 203,
+      "name": "Demo Legal",
+      "slug": "demo-legal",
+      "description": "",
+      "items": [
+        {"id":2201,"parent_id":0,"menu_order":1,"title":"Privacy","url":"/privacy-policy/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}},
+        {"id":2202,"parent_id":0,"menu_order":2,"title":"Cookie","url":"/cookie-policy/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}}
+      ]
+    },
+    {
+      "term_id": 204,
+      "name": "Azienda",
+      "slug": "footer-azienda",
+      "description": "",
+      "items": [
+        {"id":2301,"parent_id":0,"menu_order":1,"title":"Chi siamo","url":"/chi-siamo/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}},
+        {"id":2302,"parent_id":0,"menu_order":2,"title":"Metodo","url":"/metodo/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}}
+      ]
+    },
+    {
+      "term_id": 205,
+      "name": "Servizi",
+      "slug": "footer-servizi",
+      "description": "",
+      "items": [
+        {"id":2401,"parent_id":0,"menu_order":1,"title":"Strategy","url":"/servizi/strategy/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}},
+        {"id":2402,"parent_id":0,"menu_order":2,"title":"Design","url":"/servizi/design/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}},
+        {"id":2403,"parent_id":0,"menu_order":3,"title":"Automation","url":"/servizi/automation/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}}
+      ]
+    },
+    {
+      "term_id": 206,
+      "name": "Risorse",
+      "slug": "footer-risorse",
+      "description": "",
+      "items": [
+        {"id":2501,"parent_id":0,"menu_order":1,"title":"Blog","url":"/blog/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}},
+        {"id":2502,"parent_id":0,"menu_order":2,"title":"Documentazione","url":"/documentazione/","attr_title":"","target":"","xfn":"","description":"","classes":[],"type":"custom","object":"custom","object_id":0,"meta":{}}
+      ]
+    }
+  ]
+}
