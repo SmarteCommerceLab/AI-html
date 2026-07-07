@@ -73,6 +73,22 @@ function aihl_ai_register_rest_routes() {
 		'callback'            => 'aihl_ai_rest_options_schema',
 	));
 
+	register_rest_route('aihtml/v1', '/ai/openapi', array(
+		'methods'             => WP_REST_Server::READABLE,
+		'permission_callback' => 'aihl_ai_can_read',
+		'callback'            => function () {
+			return rest_ensure_response(aihl_ai_openapi_payload());
+		},
+	));
+
+	register_rest_route('aihtml/v1', '/openapi', array(
+		'methods'             => WP_REST_Server::READABLE,
+		'permission_callback' => 'aihl_ai_can_read',
+		'callback'            => function () {
+			return rest_ensure_response(aihl_ai_openapi_payload());
+		},
+	));
+
 	register_rest_route('aihtml/v1', '/ai/integration-manifest', array(
 		'methods'             => WP_REST_Server::READABLE,
 		'permission_callback' => 'aihl_ai_can_read',
@@ -255,6 +271,7 @@ function aihl_ai_rest_context() {
 			'options' => rest_url('aihtml/v1/ai/options'),
 			'menus'   => rest_url('aihtml/v1/ai/menus'),
 			'pages'   => rest_url('aihtml/v1/ai/pages'),
+			'openapi' => rest_url('aihtml/v1/ai/openapi'),
 			'integration_manifest' => rest_url('aihtml/v1/ai/integration-manifest'),
 			'addons' => rest_url('aihtml/v1/ai/addons'),
 		),
@@ -364,6 +381,254 @@ function aihl_ai_sanitize_option_value($value, array $def) {
 /* ============================================================================
  * Menu JSON — delega alle funzioni del tema (menu-json.php)
  * ============================================================================ */
+
+function aihl_ai_openapi_field_schema(array $field): array {
+	$type = (string) ($field['type'] ?? 'text');
+	$schema = array('type' => 'string');
+
+	switch ($type) {
+		case 'bool':
+			$schema = array('type' => 'boolean');
+			break;
+		case 'int':
+			$schema = array('type' => 'integer');
+			break;
+		case 'float':
+			$schema = array('type' => 'number');
+			break;
+		case 'url':
+			$schema = array('type' => 'string', 'format' => 'uri');
+			break;
+		case 'email':
+			$schema = array('type' => 'string', 'format' => 'email');
+			break;
+		case 'maps_html':
+			$schema = array('type' => 'string', 'format' => 'html');
+			break;
+		case 'enum':
+			$schema = array('type' => 'string', 'enum' => array_values((array) ($field['values'] ?? array())));
+			break;
+	}
+
+	if (isset($field['min'])) {
+		$schema['minimum'] = $field['min'];
+	}
+	if (isset($field['max'])) {
+		$schema['maximum'] = $field['max'];
+	}
+	if (!empty($field['group'])) {
+		$schema['x-aihl-group'] = (string) $field['group'];
+	}
+
+	return $schema;
+}
+
+function aihl_ai_openapi_options_schema(): array {
+	$properties = array();
+	foreach (aihl_ai_options_whitelist() as $key => $field) {
+		$properties[$key] = aihl_ai_openapi_field_schema((array) $field);
+	}
+
+	return array(
+		'type' => 'object',
+		'additionalProperties' => false,
+		'properties' => $properties,
+	);
+}
+
+function aihl_ai_openapi_generic_object_schema(): array {
+	return array('type' => 'object', 'additionalProperties' => true);
+}
+
+function aihl_ai_openapi_schema_ref(string $name): array {
+	return array('$ref' => '#/components/schemas/' . $name);
+}
+
+function aihl_ai_openapi_path_from_route(string $route): string {
+	return (string) preg_replace('/\(\?P<([a-zA-Z0-9_]+)>[^)]+\)/', '{$1}', $route);
+}
+
+function aihl_ai_openapi_methods_from_endpoint($methods): array {
+	if (is_string($methods)) {
+		$methods = array($methods);
+	}
+
+	$normalized = array();
+	foreach ((array) $methods as $method => $enabled) {
+		if (is_string($method) && is_bool($enabled)) {
+			if ($enabled) {
+				$normalized[] = strtoupper($method);
+			}
+			continue;
+		}
+		if (is_string($enabled)) {
+			$normalized[] = strtoupper($enabled);
+		}
+	}
+
+	return array_values(array_intersect(array_unique($normalized), array('GET', 'POST', 'PUT', 'PATCH', 'DELETE')));
+}
+
+function aihl_ai_openapi_route_metadata(): array {
+	return array(
+		'/aihtml/v1/ai/context' => array('summary' => 'Theme AI context', 'tag' => 'AI', 'read_schema' => 'AIContext'),
+		'/aihtml/v1/ai/options' => array('summary' => 'Theme AI options', 'tag' => 'Options', 'read_schema' => 'AIHLOptionsPayload', 'write_schema' => 'AIHLOptionsEnvelope'),
+		'/aihtml/v1/ai/menus' => array('summary' => 'Theme menu JSON', 'tag' => 'Menus', 'read_schema' => 'MenuPayload', 'write_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/pages' => array('summary' => 'Theme pages', 'tag' => 'Pages', 'read_schema' => 'PagesPayload', 'write_schema' => 'PageCreateRequest'),
+		'/aihtml/v1/ai/options/schema' => array('summary' => 'Theme options schema', 'tag' => 'Options', 'read_schema' => 'AIHLOptionsSchema'),
+		'/aihtml/v1/ai/openapi' => array('summary' => 'OpenAPI document', 'tag' => 'Documentation', 'read_schema' => 'OpenAPI'),
+		'/aihtml/v1/openapi' => array('summary' => 'OpenAPI document alias', 'tag' => 'Documentation', 'read_schema' => 'OpenAPI'),
+		'/aihtml/v1/ai/integration-manifest' => array('summary' => 'Theme integration manifest', 'tag' => 'Integration', 'read_schema' => 'IntegrationManifest'),
+		'/aihtml/v1/ai/addons' => array('summary' => 'Theme addon integrations', 'tag' => 'Integration', 'read_schema' => 'AddonsPayload'),
+		'/aihtml/v1/ai/deploy' => array('summary' => 'Deploy AI-HTML project', 'tag' => 'Deploy', 'read_schema' => 'DeployResult', 'write_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/deploy/projects' => array('summary' => 'List deploy projects', 'tag' => 'Deploy', 'read_schema' => 'DeployProjects'),
+		'/aihtml/v1/ai/reset/registry' => array('summary' => 'Smart Reset registry', 'tag' => 'Reset', 'read_schema' => 'ResetRegistry'),
+		'/aihtml/v1/ai/reset/execute' => array('summary' => 'Execute Smart Reset', 'tag' => 'Reset', 'read_schema' => 'ResetResult', 'write_schema' => 'ResetRequest'),
+		'/aihtml/v1/ai/author-profile' => array('summary' => 'Author profile preferences', 'tag' => 'Authors', 'read_schema' => 'GenericObject', 'write_schema' => 'GenericObject'),
+	);
+}
+
+function aihl_ai_openapi_payload(): array {
+	$server = rest_get_server();
+	$routes = $server ? $server->get_routes() : array();
+	$metadata = aihl_ai_openapi_route_metadata();
+	$paths = array();
+
+	foreach ($routes as $route => $handlers) {
+		if (strpos((string) $route, '/aihtml/v1/') !== 0) {
+			continue;
+		}
+		$path = aihl_ai_openapi_path_from_route((string) $route);
+		if (!isset($paths[$path])) {
+			$paths[$path] = array();
+		}
+
+		foreach ((array) $handlers as $handler) {
+			if (empty($handler['methods'])) {
+				continue;
+			}
+			foreach (aihl_ai_openapi_methods_from_endpoint($handler['methods']) as $method) {
+				$method_key = strtolower($method);
+				$route_meta = $metadata[$route] ?? array();
+				$is_write = in_array($method, array('POST', 'PUT', 'PATCH', 'DELETE'), true);
+				$response_schema = isset($route_meta['read_schema']) ? (string) $route_meta['read_schema'] : 'GenericObject';
+				$request_schema = isset($route_meta['write_schema']) ? (string) $route_meta['write_schema'] : 'GenericObject';
+				$operation_id = 'aihl_' . strtolower($method) . '_' . preg_replace('/[^a-z0-9]+/', '_', trim(strtolower($path), '/'));
+
+				$operation = array(
+					'tags' => array((string) ($route_meta['tag'] ?? 'AI-HTML')),
+					'summary' => (string) ($route_meta['summary'] ?? trim($method . ' ' . $path)),
+					'operationId' => trim($operation_id, '_'),
+					'responses' => array(
+						'200' => array(
+							'description' => 'Successful response',
+							'content' => array(
+								'application/json' => array('schema' => aihl_ai_openapi_schema_ref($response_schema)),
+							),
+						),
+						'401' => array('description' => 'Authentication required'),
+						'403' => array('description' => 'Insufficient permissions'),
+					),
+					'security' => array(array('wpNonce' => array()), array('smartAiKey' => array()), array('applicationPassword' => array())),
+				);
+
+				if ($is_write) {
+					$operation['requestBody'] = array(
+						'required' => in_array($method, array('POST', 'PUT', 'PATCH'), true),
+						'content' => array(
+							'application/json' => array('schema' => aihl_ai_openapi_schema_ref($request_schema)),
+						),
+					);
+				}
+
+				$paths[$path][$method_key] = $operation;
+			}
+		}
+	}
+
+	ksort($paths);
+
+	return array(
+		'openapi' => '3.1.0',
+		'info' => array(
+			'title' => AIHL_THEME_NAME . ' REST API',
+			'description' => 'OpenAPI generated at runtime from WordPress REST routes and the AI-HTML theme option whitelist.',
+			'version' => AIHL_VERSION,
+		),
+		'servers' => array(array('url' => untrailingslashit(rest_url()))),
+		'tags' => array(
+			array('name' => 'AI'),
+			array('name' => 'Options'),
+			array('name' => 'Menus'),
+			array('name' => 'Pages'),
+			array('name' => 'Deploy'),
+			array('name' => 'Reset'),
+			array('name' => 'Authors'),
+			array('name' => 'Integration'),
+			array('name' => 'Documentation'),
+		),
+		'paths' => $paths,
+		'components' => array(
+			'securitySchemes' => array(
+				'wpNonce' => array('type' => 'apiKey', 'in' => 'header', 'name' => 'X-WP-Nonce'),
+				'smartAiKey' => array('type' => 'apiKey', 'in' => 'header', 'name' => defined('SMART_AI_KEY_HEADER') ? SMART_AI_KEY_HEADER : 'X-Smart-AI-Key'),
+				'applicationPassword' => array('type' => 'http', 'scheme' => 'basic'),
+			),
+			'schemas' => array(
+				'GenericObject' => aihl_ai_openapi_generic_object_schema(),
+				'OpenAPI' => aihl_ai_openapi_generic_object_schema(),
+				'AIContext' => aihl_ai_openapi_generic_object_schema(),
+				'MenuPayload' => aihl_ai_openapi_generic_object_schema(),
+				'PagesPayload' => aihl_ai_openapi_generic_object_schema(),
+				'DeployResult' => aihl_ai_openapi_generic_object_schema(),
+				'DeployProjects' => aihl_ai_openapi_generic_object_schema(),
+				'ResetRegistry' => aihl_ai_openapi_generic_object_schema(),
+				'ResetResult' => aihl_ai_openapi_generic_object_schema(),
+				'IntegrationManifest' => aihl_ai_openapi_generic_object_schema(),
+				'AddonsPayload' => aihl_ai_openapi_generic_object_schema(),
+				'AIHLOptionsSchema' => array(
+					'type' => 'object',
+					'properties' => array(
+						'theme' => array('type' => 'string'),
+						'option_key' => array('type' => 'string'),
+						'fields' => aihl_ai_openapi_options_schema(),
+					),
+				),
+				'AIHLOptionsEnvelope' => array(
+					'type' => 'object',
+					'required' => array('options'),
+					'properties' => array('options' => aihl_ai_openapi_options_schema()),
+				),
+				'AIHLOptionsPayload' => array(
+					'type' => 'object',
+					'properties' => array(
+						'theme' => array('type' => 'string'),
+						'options' => aihl_ai_openapi_options_schema(),
+					),
+				),
+				'PageCreateRequest' => array(
+					'type' => 'object',
+					'required' => array('title'),
+					'properties' => array(
+						'title' => array('type' => 'string'),
+						'content' => array('type' => 'string'),
+						'status' => array('type' => 'string', 'enum' => array('publish', 'draft')),
+						'template' => array('type' => 'string'),
+					),
+				),
+				'ResetRequest' => array(
+					'type' => 'object',
+					'properties' => array(
+						'components' => array('type' => 'array', 'items' => array('type' => 'string')),
+						'dry_run' => array('type' => 'boolean'),
+					),
+				),
+			),
+		),
+		'x-aihl-generated' => gmdate('c'),
+		'x-aihl-schema-source' => 'aihl_ai_options_whitelist',
+	);
+}
 
 function aihl_ai_rest_get_menus(WP_REST_Request $request) {
 	if (!function_exists('aihl_build_menu_json_payload')) {

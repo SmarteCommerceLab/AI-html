@@ -1,0 +1,147 @@
+name: Build WordPress Theme Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      REPOSITORY_FTP_HOST: repository.smartecommerce.it
+      REPOSITORY_FTP_UPDATES_PATH: /httpdocs/updates/themes
+      REPOSITORY_FTP_DOWNLOADS_PATH: /httpdocs/downloads/themes
+      REPOSITORY_FTP_USER: ${{ secrets.REPOSITORY_FTP_USER }}
+      REPOSITORY_FTP_PASSWORD: ${{ secrets.REPOSITORY_FTP_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate theme version
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          HEADER_VERSION="$(grep -E '^Version:' style.css | head -n1 | sed -E 's/Version:[[:space:]]*//')"
+          CONSTANT_VERSION="$(grep -E "define\\('AIHL_VERSION'" functions.php | head -n1 | sed -E "s/.*'([^']+)'.*/\\1/")"
+          STABLE_TAG="$(grep -E '^Stable tag:' readme.txt | head -n1 | sed -E 's/Stable tag:[[:space:]]*//')"
+
+          if [ "$HEADER_VERSION" != "$VERSION" ] || [ "$CONSTANT_VERSION" != "$VERSION" ] || [ "$STABLE_TAG" != "$VERSION" ]; then
+            echo "Tag version is ${VERSION}, header is ${HEADER_VERSION}, constant is ${CONSTANT_VERSION}, stable tag is ${STABLE_TAG}."
+            exit 1
+          fi
+
+      - name: Package theme
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          THEME_DIR="AI-html"
+          PACKAGE="${THEME_DIR}-${VERSION}.zip"
+
+          rm -rf dist
+          mkdir -p "dist/${THEME_DIR}"
+
+          rsync -a ./ "dist/${THEME_DIR}/" \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'dist/' \
+            --exclude '.gitignore' \
+            --exclude '.gitattributes' \
+            --exclude '*.zip' \
+            --exclude '*.sha256.txt'
+
+          cd dist
+          zip -r "../${PACKAGE}" "${THEME_DIR}"
+          cd ..
+          sha256sum "${PACKAGE}" > "${PACKAGE}.sha256.txt"
+
+      - name: Publish GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          THEME_DIR="AI-html"
+          PACKAGE="${THEME_DIR}-${VERSION}.zip"
+
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" \
+              "${PACKAGE}" \
+              "${PACKAGE}.sha256.txt" \
+              --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" \
+              "${PACKAGE}" \
+              "${PACKAGE}.sha256.txt" \
+              --title "${THEME_DIR} ${VERSION}" \
+              --notes "Release ${VERSION}"
+          fi
+
+      - name: Build update manifest
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          SLUG="ai-html"
+          THEME_DIR="AI-html"
+          DOWNLOAD_URL="https://repository.smartecommerce.it/downloads/themes/${THEME_DIR}-${VERSION}.zip"
+
+          cat > "${SLUG}.json" <<JSON
+          {
+            "type": "theme",
+            "package_type": "theme",
+            "name": "AI-HTML",
+            "slug": "${SLUG}",
+            "version": "${VERSION}",
+            "new_version": "${VERSION}",
+            "download_url": "${DOWNLOAD_URL}",
+            "package": "${DOWNLOAD_URL}",
+            "homepage": "https://smartecommerce.it/",
+            "url": "https://smartecommerce.it/",
+            "requires": "6.5",
+            "tested": "7.0",
+            "requires_php": "7.4",
+            "author": "Smart eCommerce srls",
+            "description": "Tema enterprise AI-ready per siti corporate, magazine e piattaforme WordPress governate da design system, JSON e REST API.",
+            "changelog": "Release ${VERSION}",
+            "documentation_url": "https://smartecommerce.it/docs/ai-html",
+            "support_url": "https://smartecommerce.it/supporto",
+            "security_url": "https://smartecommerce.it/security",
+            "privacy_url": "https://smartecommerce.it/privacy",
+            "repository_url": "https://github.com/SmarteCommerceLab/AI-html"
+          }
+          JSON
+
+      - name: Deploy package and manifest to repository server
+        if: ${{ env.REPOSITORY_FTP_USER != '' && env.REPOSITORY_FTP_PASSWORD != '' }}
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          SLUG="ai-html"
+          THEME_DIR="AI-html"
+          PACKAGE="${THEME_DIR}-${VERSION}.zip"
+
+          curl --fail --ftp-create-dirs \
+            --user "${REPOSITORY_FTP_USER}:${REPOSITORY_FTP_PASSWORD}" \
+            --upload-file "${PACKAGE}" \
+            "ftp://${REPOSITORY_FTP_HOST}${REPOSITORY_FTP_DOWNLOADS_PATH}/${PACKAGE}"
+
+          curl --fail --ftp-create-dirs \
+            --user "${REPOSITORY_FTP_USER}:${REPOSITORY_FTP_PASSWORD}" \
+            --upload-file "${PACKAGE}.sha256.txt" \
+            "ftp://${REPOSITORY_FTP_HOST}${REPOSITORY_FTP_DOWNLOADS_PATH}/${PACKAGE}.sha256.txt"
+
+          curl --fail --ftp-create-dirs \
+            --user "${REPOSITORY_FTP_USER}:${REPOSITORY_FTP_PASSWORD}" \
+            --upload-file "${SLUG}.json" \
+            "ftp://${REPOSITORY_FTP_HOST}${REPOSITORY_FTP_UPDATES_PATH}/${SLUG}.json"

@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.8.2
+Stable tag: 1.8.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,12 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.8.7 =
+* Generazione OpenAPI automatica per le API REST AI-HTML.
+* Endpoint `/ai/openapi` e `/openapi` per JSON compatibile Swagger.
+* Pagina admin Swagger sotto AI-HTML.
+* Updater pubblico Smart Repository e workflow release per ZIP tema.
 
 = 1.8.2 =
 * Nuova presentazione enterprise nella schermata Temi.

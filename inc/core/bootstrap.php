@@ -9,6 +9,7 @@ aihl_require_files(array(
 	'inc/option.php',
 	'inc/activation.php',
 	'inc/output-cleanup.php',
+	'inc/class-aihl-public-theme-updater.php',
 	'inc/resource.php',
 	'inc/required-plugins.php',
 	'inc/admin/admin-hub.php',
@@ -43,4 +44,11 @@ aihl_require_files(array(
 	'inc/integrations/ai-auth-core.php',
 	'inc/integrations/ai-api.php',
 	'inc/theme/options-json.php',
+));
+
+AIHL_Public_Theme_Updater::register(array(
+	'theme_slug' => get_template(),
+	'product_slug' => AIHL_PRODUCT_SLUG,
+	'version' => AIHL_VERSION,
+	'endpoint' => AIHL_UPDATE_ENDPOINT,
 ));

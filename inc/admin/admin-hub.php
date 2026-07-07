@@ -190,6 +190,15 @@ if (!function_exists('aihl_admin_get_subpages')) {
 				'icon'        => 'fa-solid fa-key',
 				'description' => __('Gestione chiavi API per agenti AI (Claude, GPT, custom).', AIHL_TEXT_DOMAIN),
 			),
+			array(
+				'slug'        => 'aihl-api-docs',
+				'page_title'  => __('Swagger/OpenAPI', AIHL_TEXT_DOMAIN),
+				'menu_title'  => __('Swagger', AIHL_TEXT_DOMAIN),
+				'capability'  => 'manage_options',
+				'callback'    => 'aihl_admin_wrap_api_docs',
+				'icon'        => 'fa-solid fa-book-open',
+				'description' => __('Consulta la specifica OpenAPI generata automaticamente dalle route REST del tema.', AIHL_TEXT_DOMAIN),
+			),
 		);
 	}
 }
@@ -453,6 +462,90 @@ function aihl_admin_wrap_api_keys() {
    7. CSS Admin
    ────────────────────────────────────────────── */
 
+function aihl_admin_wrap_api_docs() {
+	aihl_admin_page_template(
+		__('Swagger/OpenAPI', AIHL_TEXT_DOMAIN),
+		__('Documentazione OpenAPI generata dal tema per agenti AI, consumer e strumenti di integrazione.', AIHL_TEXT_DOMAIN),
+		'aihl_render_api_docs_content'
+	);
+}
+
+function aihl_render_api_docs_content() {
+	if (!current_user_can('manage_options')) {
+		wp_die(esc_html__('Non hai i permessi per accedere a questa pagina.', AIHL_TEXT_DOMAIN));
+	}
+
+	$openapi = function_exists('aihl_ai_openapi_payload') ? aihl_ai_openapi_payload() : array();
+	$openapi_json = wp_json_encode($openapi, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+	$openapi_url = rest_url('aihtml/v1/ai/openapi');
+	$schema = isset($openapi['components']['schemas']['AIHLOptionsPayload']['properties']['options']['properties']) && is_array($openapi['components']['schemas']['AIHLOptionsPayload']['properties']['options']['properties'])
+		? $openapi['components']['schemas']['AIHLOptionsPayload']['properties']['options']['properties']
+		: array();
+	$paths = isset($openapi['paths']) && is_array($openapi['paths']) ? $openapi['paths'] : array();
+	?>
+	<div class="aihl-api-docs-grid">
+		<section class="aihl-json-panel aihl-api-docs-summary">
+			<h2><?php echo esc_html__('Specifica generata', AIHL_TEXT_DOMAIN); ?></h2>
+			<div class="smart-dash-stats">
+				<div class="smart-dash-stat-card">
+					<div class="smart-dash-stat-icon"><i class="fa-solid fa-code-branch" aria-hidden="true"></i></div>
+					<div class="smart-dash-stat-text">
+						<span class="smart-dash-stat-label"><?php echo esc_html__('Versione', AIHL_TEXT_DOMAIN); ?></span>
+						<span class="smart-dash-stat-value"><?php echo esc_html(AIHL_VERSION); ?></span>
+					</div>
+				</div>
+				<div class="smart-dash-stat-card">
+					<div class="smart-dash-stat-icon"><i class="fa-solid fa-route" aria-hidden="true"></i></div>
+					<div class="smart-dash-stat-text">
+						<span class="smart-dash-stat-label"><?php echo esc_html__('Path REST', AIHL_TEXT_DOMAIN); ?></span>
+						<span class="smart-dash-stat-value"><?php echo esc_html((string) count($paths)); ?></span>
+					</div>
+				</div>
+				<div class="smart-dash-stat-card">
+					<div class="smart-dash-stat-icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></div>
+					<div class="smart-dash-stat-text">
+						<span class="smart-dash-stat-label"><?php echo esc_html__('Campi opzione', AIHL_TEXT_DOMAIN); ?></span>
+						<span class="smart-dash-stat-value"><?php echo esc_html((string) count($schema)); ?></span>
+					</div>
+				</div>
+			</div>
+			<p>
+				<a class="button button-primary" href="<?php echo esc_url($openapi_url); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html__('Apri OpenAPI JSON', AIHL_TEXT_DOMAIN); ?></a>
+				<a class="button" href="https://editor.swagger.io/" target="_blank" rel="noopener noreferrer"><?php echo esc_html__('Apri Swagger Editor', AIHL_TEXT_DOMAIN); ?></a>
+			</p>
+			<p class="description"><?php echo esc_html__('La specifica viene generata runtime dalle route REST registrate da WordPress e dalla whitelist opzioni AI-HTML. Non viene salvata come file statico.', AIHL_TEXT_DOMAIN); ?></p>
+		</section>
+
+		<section class="aihl-json-panel">
+			<h2><?php echo esc_html__('Endpoint rilevati', AIHL_TEXT_DOMAIN); ?></h2>
+			<table class="widefat striped">
+				<thead>
+					<tr>
+						<th><?php echo esc_html__('Metodo', AIHL_TEXT_DOMAIN); ?></th>
+						<th><?php echo esc_html__('Path', AIHL_TEXT_DOMAIN); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ($paths as $path => $operations) : ?>
+						<?php foreach ($operations as $method => $operation) : ?>
+							<tr>
+								<td><code><?php echo esc_html(strtoupper((string) $method)); ?></code></td>
+								<td><code><?php echo esc_html((string) $path); ?></code></td>
+							</tr>
+						<?php endforeach; ?>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</section>
+
+		<section class="aihl-json-panel aihl-json-panel-wide">
+			<h2><?php echo esc_html__('OpenAPI JSON', AIHL_TEXT_DOMAIN); ?></h2>
+			<textarea class="aihl-json-editor aihl-openapi-editor" readonly spellcheck="false"><?php echo esc_textarea((string) $openapi_json); ?></textarea>
+		</section>
+	</div>
+	<?php
+}
+
 add_action('admin_enqueue_scripts', function ($hook) {
 	if (strpos($hook, 'aihl-') === false) {
 		return;
@@ -525,12 +618,20 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .smart-dash-card-body{display:flex;flex-direction:column;gap:2px}
 .smart-dash-card-body strong{font-size:14px}
 .smart-dash-card-body span{font-size:12px;color:#646970;line-height:1.4}
+.aihl-api-docs-grid{display:grid;grid-template-columns:minmax(0,.75fr) minmax(360px,.25fr);gap:18px}
+.aihl-api-docs-summary{grid-column:1/-1}
+.aihl-json-panel{background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:18px}
+.aihl-json-panel-wide{grid-column:1/-1}
+.aihl-json-panel h2{margin-top:0}
+.aihl-json-editor{width:100%;min-height:520px;font-family:Consolas,Monaco,monospace;font-size:12px;line-height:1.55;color:#101517;background:#f8fafc;border:1px solid #c3c4c7;border-radius:6px;padding:14px;tab-size:2}
+.aihl-openapi-editor{min-height:680px}
 
 @media(max-width:782px){
 .smart-admin-body{padding:16px}
 .smart-admin-tabs{padding:0 8px}
 .smart-admin-tab{padding:10px 12px;font-size:12px}
 }
+@media(max-width:1100px){.aihl-api-docs-grid{grid-template-columns:1fr}.aihl-json-editor{min-height:360px}}
 CSS;
 
 	wp_add_inline_style('wp-admin', $css);

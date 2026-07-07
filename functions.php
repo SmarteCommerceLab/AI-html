@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-define('AIHL_VERSION', '1.8.6');
+define('AIHL_VERSION', '1.8.7');
 
 /**
  * Move the visually oversized legacy author banner to the enterprise preset.
@@ -30,6 +30,8 @@ define('AIHL_TEXT_DOMAIN', 'ai_html');
 define('AIHL_THEME_NAME', 'AI-HTML');
 define('AIHL_THEME_BASE', 'ai_html');
 define('AIHL_OPTION_BASE', 'ai_html_option');
+define('AIHL_PRODUCT_SLUG', 'ai-html');
+define('AIHL_UPDATE_ENDPOINT', 'https://repository.smartecommerce.it/updates/themes/ai-html.json');
 
 define('AIHL_DIR_PATH', get_template_directory());
 define('AIHL_DIR_URL', get_template_directory_uri());

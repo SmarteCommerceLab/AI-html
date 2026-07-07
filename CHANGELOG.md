@@ -5,6 +5,15 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.8.7] - 2026-07-07
+
+### Aggiunto
+- Updater pubblico Smart Repository per rilevare gli aggiornamenti tema da `updates/themes/ai-html.json`.
+- Workflow release GitHub per generare ZIP tema, checksum e manifest pubblico.
+- Generatore OpenAPI automatico per le route REST `aihtml/v1`.
+- Endpoint Swagger-compatible `/wp-json/aihtml/v1/ai/openapi` e alias `/wp-json/aihtml/v1/openapi`.
+- Pagina admin `Swagger` sotto il menu AI-HTML con riepilogo endpoint e JSON OpenAPI.
+
 ## [1.8.6] - 2026-07-02
 
 ### Aggiunto
