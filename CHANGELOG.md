@@ -5,6 +5,16 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.8.8] - 2026-07-08
+
+### Aggiunto
+- Consumo del contract runtime Smart Bootstrap Manager tramite `smart_bootstrap_manager_consumer_contract('ai-html')`.
+- Classi body derivate dal contract SBM per consumer, theme mode e stato motion GSAP/static.
+- Documentazione tema aggiornata con endpoint `/ai/consumer-contract?consumer=ai-html`.
+
+### Migliorato
+- Bridge SBM/AI-HTML allineato al modello Bootstrap-first e motion governato da SBM.
+
 ## [1.8.7] - 2026-07-07
 
 ### Aggiunto

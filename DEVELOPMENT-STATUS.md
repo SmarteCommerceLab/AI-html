@@ -1,7 +1,7 @@
 # AI-HTML Theme â€” Stato di sviluppo
 
-Versione: 1.7.1  
-Ultimo aggiornamento: 30 giugno 2026
+Versione: 1.8.8
+Ultimo aggiornamento: 8 luglio 2026
 
 I loghi configurati via Customizer/API mantengono proporzioni native con limiti responsive; le varianti principale, overlay, chiara e footer restano governate dal contratto del tema.
 
@@ -16,6 +16,13 @@ Documentazione canonica cross-prodotto: `../docs/smart-stack/`.
 Header e footer dichiarano ora una sorgente esplicita `native` o `canvas`. La modalita
 Canvas richiede uno slot contestualmente attivo; in sua assenza il tema usa il fallback
 nativo per evitare strutture mancanti.
+
+## Aggiornamento 2026-07-08 - Contract consumer SBM
+
+- AI-HTML consuma `smart_bootstrap_manager_consumer_contract('ai-html')` quando SBM e attivo.
+- Il bridge aggiunge classi body consumer/theme mode e stato motion `aihl-sbm-motion-gsap` o `aihl-sbm-motion-static`.
+- Il tema continua a consumare variabili `--bs-*` e `--sbin-*` senza duplicare Bootstrap o assumere proprieta su GSAP.
+- Documentazione aggiornata in `THEME-INTEGRATION-CONTRACT.md`.
 
 ---
 

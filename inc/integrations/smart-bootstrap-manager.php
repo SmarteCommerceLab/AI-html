@@ -17,12 +17,88 @@ if (!function_exists('aihl_is_bootstrap_manager_active')) {
 	}
 }
 
+if (!function_exists('aihl_sbm_consumer_contract')) {
+	function aihl_sbm_consumer_contract() {
+		if (!aihl_is_bootstrap_manager_active()) {
+			return array();
+		}
+
+		if (function_exists('smart_bootstrap_manager_consumer_contract')) {
+			$contract = smart_bootstrap_manager_consumer_contract('ai-html');
+			return is_array($contract) ? $contract : array();
+		}
+
+		return array(
+			'contract_version' => 'fallback',
+			'provider' => 'smart-bootstrap-manager',
+			'consumer' => 'ai-html',
+			'bootstrap' => array(
+				'theme_mode' => 'light',
+				'resolved_theme_mode' => 'light',
+				'css_handle' => 'smart-bootstrap',
+				'js_handle' => 'smart-bootstrap',
+				'body_classes' => array('sbin-consumer', 'sbin-consumer-ai-html', 'sbin-theme-light'),
+			),
+			'motion' => array(
+				'engine' => 'gsap',
+				'available' => false,
+				'policy' => 'settings-authorized-markup-requested-reduced-motion-safe',
+			),
+			'usage_rules' => array(
+				'bootstrap_first_markup' => true,
+				'do_not_enqueue_bootstrap_twice' => true,
+				'consume_css_variables_do_not_duplicate_tokens' => true,
+			),
+		);
+	}
+}
+
+if (!function_exists('aihl_sbm_contract_value')) {
+	function aihl_sbm_contract_value($path, $default = '') {
+		$contract = aihl_sbm_consumer_contract();
+		$value = $contract;
+		foreach ((array) $path as $segment) {
+			if (!is_array($value) || !array_key_exists($segment, $value)) {
+				return $default;
+			}
+			$value = $value[$segment];
+		}
+		return $value;
+	}
+}
+
+add_filter('body_class', function($classes) {
+	if (!aihl_is_bootstrap_manager_active()) {
+		return $classes;
+	}
+
+	$contract_classes = aihl_sbm_contract_value(array('bootstrap', 'body_classes'), array());
+	foreach ((array) $contract_classes as $class) {
+		$class = sanitize_html_class((string) $class);
+		if ('' !== $class) {
+			$classes[] = $class;
+		}
+	}
+
+	$motion_available = aihl_sbm_contract_value(array('motion', 'available'), false);
+	$classes[] = $motion_available ? 'aihl-sbm-motion-gsap' : 'aihl-sbm-motion-static';
+	$classes[] = 'aihl-sbm-contract';
+
+	return array_values(array_unique($classes));
+}, 20);
+
 if (!function_exists('aihl_build_bootstrap_bridge_css')) {
 	function aihl_build_bootstrap_bridge_css() {
+		$contract_version = sanitize_key((string) aihl_sbm_contract_value(array('contract_version'), 'fallback'));
+		$theme_mode = sanitize_key((string) aihl_sbm_contract_value(array('bootstrap', 'theme_mode'), 'light'));
+		$resolved_theme_mode = sanitize_key((string) aihl_sbm_contract_value(array('bootstrap', 'resolved_theme_mode'), 'light'));
+		$motion_available = aihl_sbm_contract_value(array('motion', 'available'), false) ? '1' : '0';
+
 		$css = ':root{';
 		$css .= '--primary:var(--bs-primary,#0d6efd);--secondary:var(--bs-secondary,#6c757d);--light:var(--bs-light,#f8f9fa);--dark:var(--bs-dark,#212529);';
 		$css .= '--aihl-brand-color:var(--bs-primary,#0d6efd);';
 		$css .= '--aihl-accent-color:var(--bs-primary,#0d6efd);';
+		$css .= '--aihl-sbm-contract-version:' . $contract_version . ';--aihl-sbm-theme-mode:' . $theme_mode . ';--aihl-sbm-resolved-theme-mode:' . $resolved_theme_mode . ';--aihl-sbm-motion-available:' . $motion_available . ';';
 		$css .= '--aihl-ui-link-color:var(--bs-link-color,var(--bs-primary,#0d6efd));';
 		$css .= '--aihl-ui-link-hover-color:var(--bs-link-hover-color,var(--bs-primary,#0d6efd));';
 		$css .= '--aihl-primary-contrast:var(--sbin-primary-contrast,#fff);';

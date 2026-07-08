@@ -14,6 +14,30 @@ Endpoint:
 - `GET /wp-json/aihtml/v1/ai/addons`
 - `GET /wp-json/aihtml/v1/ai/introspection`
 
+## Contratto Smart Bootstrap Manager
+
+Quando Smart Bootstrap Manager e attivo, AI-HTML consuma il contract runtime SBM tramite:
+
+```php
+smart_bootstrap_manager_consumer_contract('ai-html')
+```
+
+Endpoint equivalente per agenti e strumenti autorizzati:
+
+```text
+GET /wp-json/smart-bootstrap-manager/v1/ai/consumer-contract?consumer=ai-html
+```
+
+AI-HTML deve usare il contract per:
+
+- leggere theme mode Bootstrap `light`, `dark` o `auto`;
+- aggiungere le classi body consumer dichiarate da SBM;
+- consumare variabili `--bs-*` e `--sbin-*`;
+- evitare il caricamento duplicato di Bootstrap;
+- trattare GSAP come motion runtime governato da SBM, non come dipendenza propria del tema.
+
+Le classi body attese sono `sbin-consumer`, `sbin-consumer-ai-html`, `sbin-theme-{mode}` e una classe AI-HTML di stato motion tra `aihl-sbm-motion-gsap` e `aihl-sbm-motion-static`.
+
 ## Componenti runtime
 
 ```html

@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-define('AIHL_VERSION', '1.8.7');
+define('AIHL_VERSION', '1.8.8');
 
 /**
  * Move the visually oversized legacy author banner to the enterprise preset.
@@ -24,7 +24,7 @@ function aihl_upgrade_author_box_preset(): void {
 	update_option($migration_key, 1, false);
 }
 add_action('after_setup_theme', 'aihl_upgrade_author_box_preset', 30);
-define('AIHL_UNICODE', '202607022215');
+define('AIHL_UNICODE', '202607081130');
 
 define('AIHL_TEXT_DOMAIN', 'ai_html');
 define('AIHL_THEME_NAME', 'AI-HTML');
