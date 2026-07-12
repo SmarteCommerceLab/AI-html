@@ -65,6 +65,14 @@ function aihl_ai_register_rest_routes() {
 			'callback'            => 'aihl_ai_rest_create_page',
 		),
 	));
+	register_rest_route('aihtml/v1', '/ai/pages/(?P<id>\d+)', array(
+		'methods'             => WP_REST_Server::DELETABLE,
+		'permission_callback' => 'aihl_ai_can_write',
+		'callback'            => 'aihl_ai_rest_trash_page',
+		'args'                => array(
+			'id' => array('type' => 'integer', 'minimum' => 1, 'required' => true),
+		),
+	));
 
 	/* ── Schema opzioni: descrive all'AI quali campi puo modificare ── */
 	register_rest_route('aihtml/v1', '/ai/options/schema', array(
@@ -475,6 +483,7 @@ function aihl_ai_openapi_route_metadata(): array {
 		'/aihtml/v1/ai/options' => array('summary' => 'Theme AI options', 'tag' => 'Options', 'read_schema' => 'AIHLOptionsPayload', 'write_schema' => 'AIHLOptionsEnvelope'),
 		'/aihtml/v1/ai/menus' => array('summary' => 'Theme menu JSON', 'tag' => 'Menus', 'read_schema' => 'MenuPayload', 'write_schema' => 'GenericObject'),
 		'/aihtml/v1/ai/pages' => array('summary' => 'Theme pages', 'tag' => 'Pages', 'read_schema' => 'PagesPayload', 'write_schema' => 'PageCreateRequest'),
+		'/aihtml/v1/ai/pages/{id}' => array('summary' => 'Trash a non-published AI page', 'tag' => 'Pages', 'write_schema' => 'PageTrashRequest'),
 		'/aihtml/v1/ai/options/schema' => array('summary' => 'Theme options schema', 'tag' => 'Options', 'read_schema' => 'AIHLOptionsSchema'),
 		'/aihtml/v1/ai/openapi' => array('summary' => 'OpenAPI document', 'tag' => 'Documentation', 'read_schema' => 'OpenAPI'),
 		'/aihtml/v1/openapi' => array('summary' => 'OpenAPI document alias', 'tag' => 'Documentation', 'read_schema' => 'OpenAPI'),
@@ -731,5 +740,25 @@ function aihl_ai_rest_create_page(WP_REST_Request $request) {
 		'edit_builder' => ('smart-site-home.php' === $template || 'smart-site-builder.php' === $template || 'smart-site-blog.php' === $template)
 			? rest_url('sbs/v1/ai/pages/' . $page_id . '/builder')
 			: null,
+	));
+}
+
+function aihl_ai_rest_trash_page(WP_REST_Request $request) {
+	$page_id = absint($request->get_param('id'));
+	$page = get_post($page_id);
+	if (!$page || 'page' !== $page->post_type) {
+		return new WP_Error('page_not_found', 'Pagina non trovata.', array('status' => 404));
+	}
+	if (!in_array($page->post_status, array('draft', 'pending', 'private'), true)) {
+		return new WP_Error('published_page_protected', 'Le pagine pubblicate non possono essere cestinate dalla AI.', array('status' => 409));
+	}
+	$trashed = wp_trash_post($page_id);
+	if (!$trashed) {
+		return new WP_Error('trash_failed', 'Impossibile spostare la pagina nel cestino.', array('status' => 500));
+	}
+	return rest_ensure_response(array(
+		'trashed' => true,
+		'page_id' => $page_id,
+		'previous_status' => $page->post_status,
 	));
 }
