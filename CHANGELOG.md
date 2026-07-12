@@ -5,6 +5,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.8.9] - 2026-07-12
+
+### Aggiunto
+- Endpoint governato `DELETE /wp-json/aihtml/v1/ai/pages/{id}` per il rollback delle pagine AI non pubblicate.
+- Protezione esplicita delle pagine pubblicate e contratto OpenAPI del cestino pagina.
+
 ## [1.8.8] - 2026-07-08
 
 ### Aggiunto
