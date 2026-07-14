@@ -94,7 +94,11 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           SLUG="ai-html"
           THEME_DIR="AI-html"
+          PACKAGE="${THEME_DIR}-${VERSION}.zip"
           DOWNLOAD_URL="https://repository.smartecommerce.it/downloads/themes/${THEME_DIR}-${VERSION}.zip"
+          SHA256="$(sha256sum "${PACKAGE}" | awk '{print $1}')"
+          LAST_UPDATED="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          CHANGELOG="Release ${VERSION} - controllo manuale Smart Repository disponibile anche nella schermata Temi standard."
 
           cat > "${SLUG}.json" <<JSON
           {
@@ -113,12 +117,23 @@ jobs:
             "requires_php": "7.4",
             "author": "Smart eCommerce srls",
             "description": "Tema enterprise AI-ready per siti corporate, magazine e piattaforme WordPress governate da design system, JSON e REST API.",
-            "changelog": "Release ${VERSION}",
-            "documentation_url": "https://smartecommerce.it/docs/ai-html",
+            "changelog": "${CHANGELOG}",
+            "sha256": "${SHA256}",
+            "checksum_sha256": "${SHA256}",
+            "last_updated": "${LAST_UPDATED}",
+            "documentation_url": "https://repository.smartecommerce.it/swagger/ai-html/",
             "support_url": "https://smartecommerce.it/supporto",
             "security_url": "https://smartecommerce.it/security",
             "privacy_url": "https://smartecommerce.it/privacy",
-            "repository_url": "https://github.com/SmarteCommerceLab/AI-html"
+            "repository_url": "https://github.com/SmarteCommerceLab/AI-html",
+            "openapi_yaml": "https://repository.smartecommerce.it/api-docs/themes/ai-html/openapi.yaml",
+            "openapi_json": "https://repository.smartecommerce.it/api-docs/themes/ai-html/openapi.json",
+            "sections": {
+              "description": "Tema enterprise AI-ready per siti corporate, magazine e piattaforme WordPress governate da design system, JSON e REST API.",
+              "changelog": "${CHANGELOG}"
+            },
+            "banners": [],
+            "icons": []
           }
           JSON
 
