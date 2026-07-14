@@ -16,6 +16,12 @@ if (!in_array($aihl_blog_layout, array('grid', 'list', 'magazine'), true)) {
 $aihl_blog_sidebar = (bool) aihtml_option_value('blog_sidebar', false);
 ?>
 <main id="main" class="container site-main overflow-hidden py-4">
+	<header class="mb-4">
+		<h1 class="display-5 fw-bold mb-2"><?php echo esc_html(get_bloginfo('name')); ?></h1>
+		<?php if (get_bloginfo('description')) : ?>
+			<p class="lead text-muted mb-0"><?php echo esc_html(get_bloginfo('description')); ?></p>
+		<?php endif; ?>
+	</header>
 
 	<?php if ($aihl_blog_layout === 'magazine' && have_posts()) : ?>
 		<?php /* Magazine: primo post grande, poi griglia */

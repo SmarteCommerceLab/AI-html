@@ -5,6 +5,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.9.1] - 2026-07-14
+
+### Corretto
+- Titolo `h1` e descrizione semantica nell'indice articoli per installazioni senza pagina statica pubblicata.
+- Nomi accessibili per tutti i campi e pulsanti di ricerca del tema.
+- A capo sicuro delle etichette nel menu mobile per evitare overflow su viewport stretti.
+
 ## [1.9.0] - 2026-07-14
 
 ### Aggiunto

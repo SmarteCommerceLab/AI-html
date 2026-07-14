@@ -169,8 +169,8 @@
         <?php if ($aihl_header_search_style !== 'none') : ?>
         <div class="aihl-sidebar-search px-3 mb-3">
             <form class="d-flex border rounded-pill overflow-hidden" role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
-                <input type="search" class="form-control form-control-sm border-0" placeholder="<?php esc_attr_e('Cerca...', AIHL_TEXT_DOMAIN); ?>" name="s" value="<?php echo esc_attr(get_search_query()); ?>">
-                <button class="btn btn-sm btn-primary rounded-0" type="submit"><i class="fa-solid fa-search"></i></button>
+                <input type="search" class="form-control form-control-sm border-0" placeholder="<?php esc_attr_e('Cerca...', AIHL_TEXT_DOMAIN); ?>" aria-label="<?php esc_attr_e('Cerca nel sito', AIHL_TEXT_DOMAIN); ?>" name="s" value="<?php echo esc_attr(get_search_query()); ?>">
+                <button class="btn btn-sm btn-primary rounded-0" type="submit" aria-label="<?php esc_attr_e('Avvia la ricerca', AIHL_TEXT_DOMAIN); ?>"><i class="fa-solid fa-search" aria-hidden="true"></i></button>
             </form>
         </div>
         <?php endif; ?>
@@ -282,7 +282,7 @@
                         </button>
                         <?php elseif ($aihl_header_search_style === 'inline') : ?>
                         <form class="aihl-search-inline d-flex" role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
-                            <input type="search" class="form-control form-control-sm" placeholder="<?php esc_attr_e('Cerca nel sito...', AIHL_TEXT_DOMAIN); ?>" name="s" value="<?php echo esc_attr(get_search_query()); ?>">
+                            <input type="search" class="form-control form-control-sm" placeholder="<?php esc_attr_e('Cerca nel sito...', AIHL_TEXT_DOMAIN); ?>" aria-label="<?php esc_attr_e('Cerca nel sito', AIHL_TEXT_DOMAIN); ?>" name="s" value="<?php echo esc_attr(get_search_query()); ?>">
                             <button class="btn btn-sm btn-primary ms-1" type="submit"><i class="fa-solid fa-search"></i></button>
                         </form>
                         <?php endif; ?>
@@ -444,8 +444,8 @@
                     <div class="d-none d-lg-flex align-items-center aihl-header-search-wrap aihl-search-style-<?php echo esc_attr($aihl_header_search_style); ?>">
                         <?php if ($aihl_header_search_style === 'inline') : ?>
                             <form class="aihl-search-inline d-flex" role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
-                                <input type="search" class="form-control form-control-sm" placeholder="<?php esc_attr_e('Cerca...', AIHL_TEXT_DOMAIN); ?>" name="s" value="<?php echo esc_attr(get_search_query()); ?>">
-                                <button class="btn btn-sm btn-primary ms-1" type="submit"><i class="fa-solid fa-search"></i></button>
+                                <input type="search" class="form-control form-control-sm" placeholder="<?php esc_attr_e('Cerca...', AIHL_TEXT_DOMAIN); ?>" aria-label="<?php esc_attr_e('Cerca nel sito', AIHL_TEXT_DOMAIN); ?>" name="s" value="<?php echo esc_attr(get_search_query()); ?>">
+                                <button class="btn btn-sm btn-primary ms-1" type="submit" aria-label="<?php esc_attr_e('Avvia la ricerca', AIHL_TEXT_DOMAIN); ?>"><i class="fa-solid fa-search" aria-hidden="true"></i></button>
                             </form>
                         <?php else : ?>
                             <button type="button" class="btn btn-link aihl-search-toggle p-1" aria-label="<?php esc_attr_e('Cerca', AIHL_TEXT_DOMAIN); ?>" data-search-style="<?php echo esc_attr($aihl_header_search_style); ?>">
@@ -478,7 +478,7 @@
         <div class="container">
             <form class="aihl-search-dropdown-form d-flex align-items-center gap-2 py-3" role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
                 <i class="fa-solid fa-search text-muted"></i>
-                <input type="search" class="form-control form-control-lg border-0 shadow-none" placeholder="<?php esc_attr_e('Cerca nel sito...', AIHL_TEXT_DOMAIN); ?>" name="s" value="<?php echo esc_attr(get_search_query()); ?>" autofocus>
+                <input type="search" class="form-control form-control-lg border-0 shadow-none" placeholder="<?php esc_attr_e('Cerca nel sito...', AIHL_TEXT_DOMAIN); ?>" aria-label="<?php esc_attr_e('Cerca nel sito', AIHL_TEXT_DOMAIN); ?>" name="s" value="<?php echo esc_attr(get_search_query()); ?>" autofocus>
                 <button type="button" class="btn-close aihl-search-close" aria-label="<?php esc_attr_e('Chiudi ricerca', AIHL_TEXT_DOMAIN); ?>"></button>
             </form>
         </div>
@@ -492,7 +492,7 @@
             <button type="button" class="btn-close btn-close-white aihl-search-close position-absolute top-0 end-0 m-4" aria-label="<?php esc_attr_e('Chiudi ricerca', AIHL_TEXT_DOMAIN); ?>"></button>
             <form class="aihl-search-fullscreen-form text-center" role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
                 <label class="h6 text-uppercase text-white-50 mb-3 d-block"><?php esc_html_e('Cerca nel sito', AIHL_TEXT_DOMAIN); ?></label>
-                <input type="search" class="aihl-search-fullscreen-input" placeholder="<?php esc_attr_e('Digita e premi Invio...', AIHL_TEXT_DOMAIN); ?>" name="s" value="<?php echo esc_attr(get_search_query()); ?>" autofocus>
+                <input type="search" class="aihl-search-fullscreen-input" placeholder="<?php esc_attr_e('Digita e premi Invio...', AIHL_TEXT_DOMAIN); ?>" aria-label="<?php esc_attr_e('Cerca nel sito', AIHL_TEXT_DOMAIN); ?>" name="s" value="<?php echo esc_attr(get_search_query()); ?>" autofocus>
             </form>
         </div>
     </div>

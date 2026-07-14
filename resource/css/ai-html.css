@@ -1012,6 +1012,7 @@ body.aihl-has-fullscreen-hero .aihl-header-nav:not(.aihl-overlay-mode-never) .ai
 
     html body .aihl-header-nav #offcanvasNavbar .aihl-mobile-menu-text {
         display: block !important;
+        min-width: 0;
         color: inherit !important;
         font: inherit !important;
         letter-spacing: inherit !important;
@@ -1020,6 +1021,7 @@ body.aihl-has-fullscreen-hero .aihl-header-nav:not(.aihl-overlay-mode-never) .ai
         visibility: visible !important;
         text-indent: 0 !important;
         text-transform: inherit !important;
+        overflow-wrap: anywhere;
     }
 
     .aihl-mobile-menu-item.current-menu-item > .aihl-mobile-menu-row,
