@@ -81,6 +81,33 @@ function aihl_ai_register_rest_routes() {
 			'id' => array('type' => 'integer', 'minimum' => 1, 'required' => true),
 		),
 	));
+	register_rest_route('aihtml/v1', '/ai/pages/(?P<id>\d+)/status', array(
+		'methods'             => WP_REST_Server::CREATABLE,
+		'permission_callback' => 'aihl_ai_can_publish',
+		'callback'            => 'aihl_ai_rest_update_page_status',
+		'args'                => array(
+			'id' => array('type' => 'integer', 'minimum' => 1, 'required' => true),
+		),
+	));
+
+	register_rest_route('aihtml/v1', '/ai/site/front-page', array(
+		array(
+			'methods'             => WP_REST_Server::READABLE,
+			'permission_callback' => 'aihl_ai_can_read',
+			'callback'            => 'aihl_ai_rest_get_front_page',
+		),
+		array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'permission_callback' => 'aihl_ai_can_publish',
+			'callback'            => 'aihl_ai_rest_update_front_page',
+		),
+	));
+
+	register_rest_route('aihtml/v1', '/ai/auth/capabilities', array(
+		'methods'             => WP_REST_Server::READABLE,
+		'permission_callback' => 'aihl_ai_can_read',
+		'callback'            => 'aihl_ai_rest_auth_capabilities',
+	));
 
 	/* ── Schema opzioni: descrive all'AI quali campi puo modificare ── */
 	register_rest_route('aihtml/v1', '/ai/options/schema', array(
@@ -139,6 +166,21 @@ function aihl_ai_can_write(WP_REST_Request $request): bool {
 		return smart_ai_can_write($request);
 	}
 	return current_user_can('edit_theme_options');
+}
+
+function aihl_ai_can_publish(WP_REST_Request $request): bool {
+	if (function_exists('smart_ai_can_publish')) {
+		return smart_ai_can_publish($request);
+	}
+	return current_user_can('publish_pages');
+}
+
+function aihl_ai_rest_auth_capabilities(WP_REST_Request $request) {
+	return rest_ensure_response(array(
+		'read'    => aihl_ai_can_read($request),
+		'write'   => aihl_ai_can_write($request),
+		'publish' => aihl_ai_can_publish($request),
+	));
 }
 
 /* ============================================================================
@@ -493,6 +535,9 @@ function aihl_ai_openapi_route_metadata(): array {
 		'/aihtml/v1/ai/pages' => array('summary' => 'Theme pages', 'tag' => 'Pages', 'read_schema' => 'PagesPayload', 'write_schema' => 'PageCreateRequest'),
 		'/aihtml/v1/ai/pages/{id}' => array('summary' => 'Trash a non-published AI page', 'tag' => 'Pages', 'write_schema' => 'PageTrashRequest'),
 		'/aihtml/v1/ai/pages/{id}/restore' => array('summary' => 'Restore a trashed AI page as a non-published draft', 'tag' => 'Pages', 'write_schema' => 'PageRestoreRequest'),
+		'/aihtml/v1/ai/pages/{id}/status' => array('summary' => 'Change page publication status', 'tag' => 'Pages', 'write_schema' => 'PageStatusRequest'),
+		'/aihtml/v1/ai/site/front-page' => array('summary' => 'Read or assign the WordPress front page', 'tag' => 'Site', 'read_schema' => 'FrontPagePayload', 'write_schema' => 'FrontPageRequest'),
+		'/aihtml/v1/ai/auth/capabilities' => array('summary' => 'Capabilities granted to the current Smart AI key', 'tag' => 'AI', 'read_schema' => 'AuthCapabilities'),
 		'/aihtml/v1/ai/options/schema' => array('summary' => 'Theme options schema', 'tag' => 'Options', 'read_schema' => 'AIHLOptionsSchema'),
 		'/aihtml/v1/ai/openapi' => array('summary' => 'OpenAPI document', 'tag' => 'Documentation', 'read_schema' => 'OpenAPI'),
 		'/aihtml/v1/openapi' => array('summary' => 'OpenAPI document alias', 'tag' => 'Documentation', 'read_schema' => 'OpenAPI'),
@@ -579,6 +624,7 @@ function aihl_ai_openapi_payload(): array {
 			array('name' => 'Options'),
 			array('name' => 'Menus'),
 			array('name' => 'Pages'),
+			array('name' => 'Site'),
 			array('name' => 'Deploy'),
 			array('name' => 'Reset'),
 			array('name' => 'Authors'),
@@ -598,6 +644,14 @@ function aihl_ai_openapi_payload(): array {
 				'AIContext' => aihl_ai_openapi_generic_object_schema(),
 				'MenuPayload' => aihl_ai_openapi_generic_object_schema(),
 				'PagesPayload' => aihl_ai_openapi_generic_object_schema(),
+				'AuthCapabilities' => array(
+					'type' => 'object',
+					'properties' => array(
+						'read' => array('type' => 'boolean'),
+						'write' => array('type' => 'boolean'),
+						'publish' => array('type' => 'boolean'),
+					),
+				),
 				'DeployResult' => aihl_ai_openapi_generic_object_schema(),
 				'DeployProjects' => aihl_ai_openapi_generic_object_schema(),
 				'ResetRegistry' => aihl_ai_openapi_generic_object_schema(),
@@ -630,10 +684,26 @@ function aihl_ai_openapi_payload(): array {
 					'properties' => array(
 						'title' => array('type' => 'string'),
 						'content' => array('type' => 'string'),
-						'status' => array('type' => 'string', 'enum' => array('publish', 'draft')),
+						'status' => array('type' => 'string', 'enum' => array('draft')),
 						'template' => array('type' => 'string'),
 					),
 				),
+				'PageStatusRequest' => array(
+					'type' => 'object',
+					'required' => array('status'),
+					'properties' => array(
+						'status' => array('type' => 'string', 'enum' => array('draft', 'pending', 'private', 'publish')),
+					),
+				),
+				'FrontPageRequest' => array(
+					'type' => 'object',
+					'required' => array('show_on_front'),
+					'properties' => array(
+						'show_on_front' => array('type' => 'string', 'enum' => array('posts', 'page')),
+						'page_on_front' => array('type' => 'integer', 'minimum' => 0),
+					),
+				),
+				'FrontPagePayload' => aihl_ai_openapi_generic_object_schema(),
 				'ResetRequest' => array(
 					'type' => 'object',
 					'properties' => array(
@@ -687,7 +757,7 @@ function aihl_ai_rest_import_menus(WP_REST_Request $request) {
 
 function aihl_ai_rest_list_pages() {
 	$pages = array();
-	foreach (get_pages(array('post_status' => array('publish', 'draft'))) as $p) {
+	foreach (get_pages(array('post_status' => array('publish', 'draft', 'pending', 'private'))) as $p) {
 		$pages[] = array(
 			'id'       => (int) $p->ID,
 			'title'    => $p->post_title,
@@ -722,7 +792,10 @@ function aihl_ai_rest_create_page(WP_REST_Request $request) {
 		return new WP_Error('invalid_template', 'Template non valido.', array('status' => 400));
 	}
 
-	$status = isset($body['status']) && in_array($body['status'], array('publish', 'draft'), true) ? $body['status'] : 'draft';
+	if (isset($body['status']) && 'draft' !== $body['status']) {
+		return new WP_Error('create_status_not_allowed', 'Le nuove pagine AI devono essere create come bozze.', array('status' => 422));
+	}
+	$status = 'draft';
 
 	$page_id = wp_insert_post(array(
 		'post_type'    => 'page',
@@ -804,5 +877,78 @@ function aihl_ai_rest_restore_page(WP_REST_Request $request) {
 		'page_id'  => $page_id,
 		'status'   => $status,
 		'slug'     => (string) get_post_field('post_name', $page_id),
+	));
+}
+
+function aihl_ai_rest_update_page_status(WP_REST_Request $request) {
+	$page_id = absint($request->get_param('id'));
+	$page = get_post($page_id);
+	if (!$page || 'page' !== $page->post_type) {
+		return new WP_Error('page_not_found', 'Pagina non trovata.', array('status' => 404));
+	}
+	if ('trash' === $page->post_status) {
+		return new WP_Error('page_trashed', 'Ripristinare la pagina prima di cambiarne lo stato.', array('status' => 409));
+	}
+
+	$body = $request->get_json_params();
+	$status = isset($body['status']) ? sanitize_key((string) $body['status']) : '';
+	if (!in_array($status, array('draft', 'pending', 'private', 'publish'), true)) {
+		return new WP_Error('invalid_page_status', 'Stato pagina non valido.', array('status' => 422));
+	}
+
+	$previous_status = $page->post_status;
+	$result = wp_update_post(array('ID' => $page_id, 'post_status' => $status), true);
+	if (is_wp_error($result)) {
+		return new WP_Error('status_update_failed', $result->get_error_message(), array('status' => 500));
+	}
+
+	return rest_ensure_response(array(
+		'updated'         => true,
+		'page_id'         => $page_id,
+		'previous_status' => $previous_status,
+		'status'          => (string) get_post_status($page_id),
+		'url'             => get_permalink($page_id),
+	));
+}
+
+function aihl_ai_rest_get_front_page() {
+	return rest_ensure_response(array(
+		'show_on_front' => (string) get_option('show_on_front', 'posts'),
+		'page_on_front' => (int) get_option('page_on_front', 0),
+	));
+}
+
+function aihl_ai_rest_update_front_page(WP_REST_Request $request) {
+	$body = $request->get_json_params();
+	$show_on_front = isset($body['show_on_front']) ? sanitize_key((string) $body['show_on_front']) : '';
+	if (!in_array($show_on_front, array('posts', 'page'), true)) {
+		return new WP_Error('invalid_show_on_front', 'show_on_front deve essere posts o page.', array('status' => 422));
+	}
+
+	$page_on_front = isset($body['page_on_front']) ? absint($body['page_on_front']) : 0;
+	if ('page' === $show_on_front) {
+		$page = get_post($page_on_front);
+		if (!$page || 'page' !== $page->post_type) {
+			return new WP_Error('front_page_not_found', 'La pagina iniziale indicata non esiste.', array('status' => 404));
+		}
+		if ('publish' !== $page->post_status) {
+			return new WP_Error('front_page_not_published', 'La pagina iniziale deve essere pubblicata.', array('status' => 409));
+		}
+	}
+
+	$previous = array(
+		'show_on_front' => (string) get_option('show_on_front', 'posts'),
+		'page_on_front' => (int) get_option('page_on_front', 0),
+	);
+	update_option('show_on_front', $show_on_front);
+	update_option('page_on_front', 'page' === $show_on_front ? $page_on_front : 0);
+
+	return rest_ensure_response(array(
+		'updated'  => true,
+		'previous' => $previous,
+		'current'  => array(
+			'show_on_front' => (string) get_option('show_on_front', 'posts'),
+			'page_on_front' => (int) get_option('page_on_front', 0),
+		),
 	));
 }

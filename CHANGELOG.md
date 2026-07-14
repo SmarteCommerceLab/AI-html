@@ -5,6 +5,16 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.10.0] - 2026-07-14
+
+### Aggiunto
+- Operazioni REST con scope `publish` per stato pagina e assegnazione della homepage WordPress.
+- Discovery delle capability della Smart AI Key per pianificare la pubblicazione in sicurezza.
+
+### Modificato
+- La creazione di pagine via AI produce esclusivamente bozze; la pubblicazione richiede lo scope dedicato.
+- Stato pagina e homepage espongono il pre-stato necessario al rollback transazionale del gateway.
+
 ## [1.9.2] - 2026-07-14
 
 ### Corretto
