@@ -12,6 +12,8 @@ $required = array(
 	"page_not_trashed",
 	"restore_status_not_allowed",
 	'wp_untrash_post($page_id)',
+	'array_key_exists(\'slug\', $body)',
+	'$restore_update[\'post_name\'] = $slug',
 	"/aihtml/v1/ai/pages/{id}/restore",
 );
 foreach ($required as $needle) {

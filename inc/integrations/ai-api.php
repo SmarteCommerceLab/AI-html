@@ -783,6 +783,8 @@ function aihl_ai_rest_restore_page(WP_REST_Request $request) {
 	}
 	$body = $request->get_json_params();
 	$status = isset($body['status']) ? sanitize_key((string) $body['status']) : 'draft';
+	$has_slug = is_array($body) && array_key_exists('slug', $body);
+	$slug = $has_slug ? sanitize_title((string) $body['slug']) : '';
 	if (!in_array($status, array('draft', 'pending', 'private'), true)) {
 		return new WP_Error('restore_status_not_allowed', 'Il ripristino AI non puo pubblicare una pagina.', array('status' => 422));
 	}
@@ -790,12 +792,17 @@ function aihl_ai_rest_restore_page(WP_REST_Request $request) {
 	if (!$restored) {
 		return new WP_Error('restore_failed', 'Impossibile ripristinare la pagina dal cestino.', array('status' => 500));
 	}
-	if ('draft' !== $status) {
-		wp_update_post(array('ID' => $page_id, 'post_status' => $status));
+	if ('draft' !== $status || $has_slug) {
+		$restore_update = array('ID' => $page_id, 'post_status' => $status);
+		if ($has_slug) {
+			$restore_update['post_name'] = $slug;
+		}
+		wp_update_post($restore_update);
 	}
 	return rest_ensure_response(array(
 		'restored' => true,
 		'page_id'  => $page_id,
 		'status'   => $status,
+		'slug'     => (string) get_post_field('post_name', $page_id),
 	));
 }

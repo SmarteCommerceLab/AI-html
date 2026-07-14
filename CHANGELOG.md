@@ -5,6 +5,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.9.2] - 2026-07-14
+
+### Corretto
+- Il ripristino governato conserva anche lo slug precedente, compreso lo slug vuoto delle bozze AI, evitando residui `__trashed-*` dopo un rollback.
+
 ## [1.9.1] - 2026-07-14
 
 ### Corretto
