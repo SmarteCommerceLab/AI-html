@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.10.1
+Stable tag: 1.10.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,9 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.10.2 =
+* Mostra il controllo manuale Smart Repository anche nella schermata Temi dei siti WordPress non Multisite.
 
 = 1.8.8 =
 * Consumo del contract runtime Smart Bootstrap Manager tramite `smart_bootstrap_manager_consumer_contract('ai-html')`.

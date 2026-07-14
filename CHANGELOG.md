@@ -5,6 +5,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.10.2] - 2026-07-14
+
+### Corretto
+- Il comando `Controlla aggiornamenti` e ora visibile anche nella schermata Temi standard dei siti non Multisite, con nonce e verifica capability server-side.
+
 ## [1.10.1] - 2026-07-14
 
 ### Aggiunto

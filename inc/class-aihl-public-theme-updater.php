@@ -43,7 +43,7 @@ class AIHL_Public_Theme_Updater {
 		if (!current_user_can('update_themes')) {
 			return $links;
 		}
-		$url = wp_nonce_url(admin_url('admin-post.php?action=aihl_check_updates'), 'aihl_check_updates');
+		$url = $this->manual_update_url();
 		$links['aihl_check_updates'] = '<a href="' . esc_url($url) . '">' . esc_html__('Controlla aggiornamenti', AIHL_TEXT_DOMAIN) . '</a>';
 		return $links;
 	}
@@ -61,11 +61,26 @@ class AIHL_Public_Theme_Updater {
 	}
 
 	public function render_manual_update_notice() {
-		$checked = isset($_GET['smart_update_checked']) ? sanitize_key(wp_unslash($_GET['smart_update_checked'])) : '';
-		if ($checked !== $this->product_slug || !current_user_can('update_themes')) {
+		global $pagenow;
+		if ('themes.php' !== $pagenow || !current_user_can('update_themes')) {
 			return;
 		}
-		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Controllo aggiornamenti tema completato tramite Smart Repository.', AIHL_TEXT_DOMAIN) . '</p></div>';
+
+		$checked = isset($_GET['smart_update_checked']) ? sanitize_key(wp_unslash($_GET['smart_update_checked'])) : '';
+		if ($checked === $this->product_slug) {
+			$message = esc_html__('Controllo aggiornamenti tema completato tramite Smart Repository.', AIHL_TEXT_DOMAIN);
+			$notice_class = 'notice notice-success is-dismissible';
+		} else {
+			$message = esc_html__('Verifica subito la disponibilita di una nuova versione sullo Smart Repository.', AIHL_TEXT_DOMAIN);
+			$notice_class = 'notice notice-info';
+		}
+
+		echo '<div class="' . esc_attr($notice_class) . '"><p><strong>' . esc_html(AIHL_THEME_NAME) . ':</strong> ' . $message . ' ';
+		echo '<a class="button button-secondary" href="' . esc_url($this->manual_update_url()) . '">' . esc_html__('Controlla aggiornamenti', AIHL_TEXT_DOMAIN) . '</a></p></div>';
+	}
+
+	private function manual_update_url() {
+		return wp_nonce_url(self_admin_url('admin-post.php?action=aihl_check_updates'), 'aihl_check_updates');
 	}
 
 	public function filter_updates($transient) {
