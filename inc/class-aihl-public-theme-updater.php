@@ -34,6 +34,38 @@ class AIHL_Public_Theme_Updater {
 		add_filter('site_transient_update_themes', array($this, 'filter_updates'));
 		add_filter('themes_api', array($this, 'filter_theme_info'), 10, 3);
 		add_filter('upgrader_source_selection', array($this, 'fix_install_directory'), 10, 4);
+		add_filter('theme_action_links_' . $this->theme_slug, array($this, 'add_action_links'));
+		add_action('admin_post_aihl_check_updates', array($this, 'handle_manual_update_check'));
+		add_action('admin_notices', array($this, 'render_manual_update_notice'));
+	}
+
+	public function add_action_links($links) {
+		if (!current_user_can('update_themes')) {
+			return $links;
+		}
+		$url = wp_nonce_url(admin_url('admin-post.php?action=aihl_check_updates'), 'aihl_check_updates');
+		$links['aihl_check_updates'] = '<a href="' . esc_url($url) . '">' . esc_html__('Controlla aggiornamenti', AIHL_TEXT_DOMAIN) . '</a>';
+		return $links;
+	}
+
+	public function handle_manual_update_check() {
+		if (!current_user_can('update_themes')) {
+			wp_die(esc_html__('Non hai i permessi per controllare gli aggiornamenti del tema.', AIHL_TEXT_DOMAIN));
+		}
+		check_admin_referer('aihl_check_updates');
+		delete_site_transient($this->cache_key());
+		delete_site_transient('update_themes');
+		wp_update_themes();
+		wp_safe_redirect(add_query_arg('smart_update_checked', $this->product_slug, self_admin_url('themes.php')));
+		exit;
+	}
+
+	public function render_manual_update_notice() {
+		$checked = isset($_GET['smart_update_checked']) ? sanitize_key(wp_unslash($_GET['smart_update_checked'])) : '';
+		if ($checked !== $this->product_slug || !current_user_can('update_themes')) {
+			return;
+		}
+		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Controllo aggiornamenti tema completato tramite Smart Repository.', AIHL_TEXT_DOMAIN) . '</p></div>';
 	}
 
 	public function filter_updates($transient) {
@@ -134,7 +166,7 @@ class AIHL_Public_Theme_Updater {
 	}
 
 	private function get_release() {
-		$cache_key = 'aihl_public_update_' . md5($this->endpoint);
+		$cache_key = $this->cache_key();
 		$cached = get_site_transient($cache_key);
 		if (is_array($cached) && $this->is_update_available($cached)) {
 			return $cached;
@@ -172,6 +204,10 @@ class AIHL_Public_Theme_Updater {
 
 		set_site_transient($cache_key, $release, self::CACHE_SUCCESS_SECONDS);
 		return $release;
+	}
+
+	private function cache_key() {
+		return 'aihl_public_update_' . md5($this->endpoint);
 	}
 
 	private function sanitize_release(array $data) {

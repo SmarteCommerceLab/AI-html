@@ -5,6 +5,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.10.1] - 2026-07-14
+
+### Aggiunto
+- Link `Controlla aggiornamenti` nelle azioni del tema, con invalidazione cache e verifica immediata del manifest Smart Repository.
+
 ## [1.10.0] - 2026-07-14
 
 ### Aggiunto
