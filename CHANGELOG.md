@@ -5,6 +5,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.9.0] - 2026-07-14
+
+### Aggiunto
+- Endpoint governato `POST /wp-json/aihtml/v1/ai/pages/{id}/restore` per ripristinare dal cestino le pagine AI senza pubblicarle.
+- Contratto OpenAPI e test statico per rollback pagina completamente reversibile tramite Smart AI Key.
+
 ## [1.8.9] - 2026-07-12
 
 ### Aggiunto

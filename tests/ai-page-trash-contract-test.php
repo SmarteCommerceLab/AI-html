@@ -7,6 +7,12 @@ $required = array(
 	"published_page_protected",
 	'wp_trash_post($page_id)',
 	"/aihtml/v1/ai/pages/{id}",
+	"/ai/pages/(?P<id>\\d+)/restore",
+	"aihl_ai_rest_restore_page",
+	"page_not_trashed",
+	"restore_status_not_allowed",
+	'wp_untrash_post($page_id)',
+	"/aihtml/v1/ai/pages/{id}/restore",
 );
 foreach ($required as $needle) {
 	if (false === strpos($source, $needle)) {

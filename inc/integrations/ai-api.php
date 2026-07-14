@@ -73,6 +73,14 @@ function aihl_ai_register_rest_routes() {
 			'id' => array('type' => 'integer', 'minimum' => 1, 'required' => true),
 		),
 	));
+	register_rest_route('aihtml/v1', '/ai/pages/(?P<id>\d+)/restore', array(
+		'methods'             => WP_REST_Server::CREATABLE,
+		'permission_callback' => 'aihl_ai_can_write',
+		'callback'            => 'aihl_ai_rest_restore_page',
+		'args'                => array(
+			'id' => array('type' => 'integer', 'minimum' => 1, 'required' => true),
+		),
+	));
 
 	/* ── Schema opzioni: descrive all'AI quali campi puo modificare ── */
 	register_rest_route('aihtml/v1', '/ai/options/schema', array(
@@ -484,6 +492,7 @@ function aihl_ai_openapi_route_metadata(): array {
 		'/aihtml/v1/ai/menus' => array('summary' => 'Theme menu JSON', 'tag' => 'Menus', 'read_schema' => 'MenuPayload', 'write_schema' => 'GenericObject'),
 		'/aihtml/v1/ai/pages' => array('summary' => 'Theme pages', 'tag' => 'Pages', 'read_schema' => 'PagesPayload', 'write_schema' => 'PageCreateRequest'),
 		'/aihtml/v1/ai/pages/{id}' => array('summary' => 'Trash a non-published AI page', 'tag' => 'Pages', 'write_schema' => 'PageTrashRequest'),
+		'/aihtml/v1/ai/pages/{id}/restore' => array('summary' => 'Restore a trashed AI page as a non-published draft', 'tag' => 'Pages', 'write_schema' => 'PageRestoreRequest'),
 		'/aihtml/v1/ai/options/schema' => array('summary' => 'Theme options schema', 'tag' => 'Options', 'read_schema' => 'AIHLOptionsSchema'),
 		'/aihtml/v1/ai/openapi' => array('summary' => 'OpenAPI document', 'tag' => 'Documentation', 'read_schema' => 'OpenAPI'),
 		'/aihtml/v1/openapi' => array('summary' => 'OpenAPI document alias', 'tag' => 'Documentation', 'read_schema' => 'OpenAPI'),
@@ -760,5 +769,33 @@ function aihl_ai_rest_trash_page(WP_REST_Request $request) {
 		'trashed' => true,
 		'page_id' => $page_id,
 		'previous_status' => $page->post_status,
+	));
+}
+
+function aihl_ai_rest_restore_page(WP_REST_Request $request) {
+	$page_id = absint($request->get_param('id'));
+	$page = get_post($page_id);
+	if (!$page || 'page' !== $page->post_type) {
+		return new WP_Error('page_not_found', 'Pagina non trovata.', array('status' => 404));
+	}
+	if ('trash' !== $page->post_status) {
+		return new WP_Error('page_not_trashed', 'Solo le pagine nel cestino possono essere ripristinate.', array('status' => 409));
+	}
+	$body = $request->get_json_params();
+	$status = isset($body['status']) ? sanitize_key((string) $body['status']) : 'draft';
+	if (!in_array($status, array('draft', 'pending', 'private'), true)) {
+		return new WP_Error('restore_status_not_allowed', 'Il ripristino AI non puo pubblicare una pagina.', array('status' => 422));
+	}
+	$restored = wp_untrash_post($page_id);
+	if (!$restored) {
+		return new WP_Error('restore_failed', 'Impossibile ripristinare la pagina dal cestino.', array('status' => 500));
+	}
+	if ('draft' !== $status) {
+		wp_update_post(array('ID' => $page_id, 'post_status' => $status));
+	}
+	return rest_ensure_response(array(
+		'restored' => true,
+		'page_id'  => $page_id,
+		'status'   => $status,
 	));
 }
