@@ -796,13 +796,18 @@ function aihl_ai_rest_create_page(WP_REST_Request $request) {
 		return new WP_Error('create_status_not_allowed', 'Le nuove pagine AI devono essere create come bozze.', array('status' => 422));
 	}
 	$status = 'draft';
+	$slug = isset($body['slug']) ? sanitize_title((string) $body['slug']) : '';
 
-	$page_id = wp_insert_post(array(
+	$page_data = array(
 		'post_type'    => 'page',
 		'post_title'   => $title,
 		'post_status'  => $status,
 		'post_content' => isset($body['content']) ? wp_kses_post((string) $body['content']) : '',
-	));
+	);
+	if ('' !== $slug) {
+		$page_data['post_name'] = $slug;
+	}
+	$page_id = wp_insert_post($page_data);
 
 	if (is_wp_error($page_id) || !$page_id) {
 		return new WP_Error('create_failed', 'Creazione pagina fallita.', array('status' => 500));
@@ -816,6 +821,7 @@ function aihl_ai_rest_create_page(WP_REST_Request $request) {
 		'created'  => true,
 		'page_id'  => (int) $page_id,
 		'title'    => $title,
+		'slug'     => (string) get_post_field('post_name', $page_id),
 		'template' => $template ?: 'default',
 		'status'   => $status,
 		'url'      => get_permalink($page_id),

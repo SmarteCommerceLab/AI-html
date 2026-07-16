@@ -5,6 +5,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.10.3] - 2026-07-16
+
+### Corretto
+- L'endpoint REST di creazione pagina applica lo `slug` richiesto al campo WordPress `post_name` e restituisce lo slug effettivo, rendendo deterministiche le ricostruzioni multi-pagina in bozza.
+
 ## [1.10.2] - 2026-07-14
 
 ### Corretto
