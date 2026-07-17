@@ -215,6 +215,12 @@ if (!function_exists('aihl_admin_page_template')) {
 
 		$current_slug = isset($_GET['page']) ? sanitize_key((string) $_GET['page']) : '';
 		$subpages = aihl_admin_get_subpages();
+		$all_pages = array_merge(array(array(
+			'slug' => 'aihl-dashboard',
+			'menu_title' => __('Dashboard', AIHL_TEXT_DOMAIN),
+			'description' => __('Stato del tema e accessi rapidi.', AIHL_TEXT_DOMAIN),
+			'icon' => 'fa-solid fa-gauge-high',
+		)), $subpages);
 
 		$header_bg = '#1d2327';
 		global $_wp_admin_css_colors;
@@ -226,47 +232,38 @@ if (!function_exists('aihl_admin_page_template')) {
 		<div class="smart-admin-wrap">
 			<div class="smart-admin-header" style="background:<?php echo esc_attr( $header_bg ); ?>">
 				<div class="smart-admin-header-brand">
-					<span class="smart-admin-logo">
+					<div class="smart-admin-logo">
 						<svg class="smart-admin-logo-img" width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 							<defs><linearGradient id="se-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#e91e8c"/><stop offset="100%" style="stop-color:#ff6ec7"/></linearGradient></defs>
 							<rect width="100" height="100" rx="20" fill="url(#se-grad)"/>
 							<text x="50" y="68" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="700" font-size="52">Se</text>
 						</svg>
-						<strong><?php echo esc_html(AIHL_THEME_NAME); ?></strong>
-					</span>
-					<span class="smart-admin-version">v<?php echo esc_html(AIHL_VERSION); ?></span>
+						<span><strong><?php echo esc_html(AIHL_THEME_NAME); ?></strong><small><?php esc_html_e('AI-ready theme control panel', AIHL_TEXT_DOMAIN); ?></small></span>
+					</div>
+					<div class="smart-admin-header-actions"><a href="<?php echo esc_url(admin_url('customize.php')); ?>" class="smart-admin-top-action"><i class="fa-solid fa-palette" aria-hidden="true"></i><?php esc_html_e('Personalizza', AIHL_TEXT_DOMAIN); ?></a><span class="smart-admin-version">v<?php echo esc_html(AIHL_VERSION); ?></span></div>
 				</div>
-				<nav class="smart-admin-tabs">
-					<a href="<?php echo esc_url(admin_url('admin.php?page=aihl-dashboard')); ?>"
-					   class="smart-admin-tab<?php echo $current_slug === 'aihl-dashboard' ? ' smart-admin-tab-active' : ''; ?>">
-						<i class="fa-solid fa-gauge-high"></i> <?php esc_html_e('Dashboard', AIHL_TEXT_DOMAIN); ?>
-					</a>
-					<?php foreach ($subpages as $sp) : ?>
-						<a href="<?php echo esc_url(admin_url('admin.php?page=' . $sp['slug'])); ?>"
-						   class="smart-admin-tab<?php echo $current_slug === $sp['slug'] ? ' smart-admin-tab-active' : ''; ?>">
-							<i class="<?php echo esc_attr($sp['icon']); ?>"></i> <?php echo esc_html($sp['menu_title']); ?>
-						</a>
-					<?php endforeach; ?>
-				</nav>
 			</div>
 
-			<div class="smart-admin-body">
-				<div class="smart-admin-page-header">
-					<h1><?php echo esc_html($page_title); ?></h1>
-					<?php if ($page_description !== '') : ?>
-						<p class="smart-admin-page-desc"><?php echo esc_html($page_description); ?></p>
-					<?php endif; ?>
-				</div>
-				<?php
-				global $aihl_captured_notices;
-				if (!empty($aihl_captured_notices) && trim($aihl_captured_notices) !== '') : ?>
-					<div class="smart-admin-notices">
-						<?php echo $aihl_captured_notices; // phpcs:ignore WordPress.Security.EscapeOutput -- WP core notices already escaped ?>
+			<div class="smart-admin-shell">
+				<aside class="smart-admin-sidebar" aria-label="<?php esc_attr_e('Navigazione AI-HTML', AIHL_TEXT_DOMAIN); ?>">
+					<div class="smart-admin-sidebar-title"><?php esc_html_e('Pannello', AIHL_TEXT_DOMAIN); ?></div>
+					<nav class="smart-admin-nav">
+						<?php foreach ($all_pages as $sp) : ?>
+							<a href="<?php echo esc_url(admin_url('admin.php?page=' . $sp['slug'])); ?>" class="smart-admin-nav-item<?php echo $current_slug === $sp['slug'] ? ' smart-admin-nav-item-active' : ''; ?>">
+								<span class="smart-admin-nav-icon"><i class="<?php echo esc_attr($sp['icon']); ?>" aria-hidden="true"></i></span>
+								<span class="smart-admin-nav-copy"><strong><?php echo esc_html($sp['menu_title']); ?></strong><small><?php echo esc_html($sp['description']); ?></small></span>
+							</a>
+						<?php endforeach; ?>
+					</nav>
+				</aside>
+				<main class="smart-admin-main">
+					<div class="smart-admin-pathbar"><a href="<?php echo esc_url(admin_url('admin.php?page=aihl-dashboard')); ?>"><?php echo esc_html(AIHL_THEME_NAME); ?></a><i class="fa-solid fa-chevron-right" aria-hidden="true"></i><span><?php echo esc_html($page_title); ?></span></div>
+					<div class="smart-admin-body">
+						<div class="smart-admin-page-header"><h1><?php echo esc_html($page_title); ?></h1><?php if ($page_description !== '') : ?><p class="smart-admin-page-desc"><?php echo esc_html($page_description); ?></p><?php endif; ?></div>
+						<?php global $aihl_captured_notices; if (!empty($aihl_captured_notices) && trim($aihl_captured_notices) !== '') : ?><div class="smart-admin-notices"><?php echo $aihl_captured_notices; // phpcs:ignore WordPress.Security.EscapeOutput -- WP core notices already escaped ?></div><?php endif; ?>
+						<div class="smart-admin-content"><?php call_user_func($inner_callback); ?></div>
 					</div>
-				<?php endif; ?>
-				<div class="smart-admin-content">
-					<?php call_user_func($inner_callback); ?>
-				</div>
+				</main>
 			</div>
 
 			<div class="smart-admin-footer">
@@ -554,17 +551,13 @@ add_action('admin_enqueue_scripts', function ($hook) {
 	$css = <<<'CSS'
 /* ── AI-HTML Admin Hub ── */
 .smart-admin-wrap{margin:20px 20px 40px 2px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif}
-.smart-admin-header{overflow:hidden}
-.smart-admin-header-brand{display:flex;align-items:center;gap:10px;padding:16px 24px;border-bottom:1px solid rgba(255,255,255,.1)}
+.smart-admin-header{overflow:hidden;border:1px solid rgba(0,0,0,.08);border-bottom:0}
+.smart-admin-header-brand{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px}
 .smart-admin-logo{display:flex;align-items:center;gap:8px;color:#fff;font-size:15px;text-decoration:none}
+.smart-admin-logo strong{display:block}.smart-admin-logo small{display:block;margin-top:1px;color:rgba(255,255,255,.68);font-size:11px;text-transform:uppercase}
 .smart-admin-logo-img{max-height:28px;width:auto;flex-shrink:0}
-.smart-admin-version{font-size:11px;color:rgba(255,255,255,.5);background:rgba(255,255,255,.08);padding:2px 8px;border-radius:10px}
-.smart-admin-tabs{display:flex;flex-wrap:wrap;gap:0;padding:0 16px;overflow-x:auto}
-.smart-admin-tab{display:inline-flex;align-items:center;gap:6px;padding:12px 16px;color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;font-weight:500;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap}
-.smart-admin-tab:hover,.smart-admin-tab:focus{color:#fff;border-bottom-color:rgba(255,255,255,.3)}
-.smart-admin-tab-active{color:#fff!important;border-bottom-color:#3582c4!important}
-.smart-admin-tab i{font-size:14px;opacity:.7}
-.smart-admin-body{background:#fff;border:1px solid #dcdcde;border-top:0;padding:24px 32px 32px;min-height:400px}
+.smart-admin-header-actions{display:flex;align-items:center;gap:10px}.smart-admin-top-action{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid rgba(255,255,255,.24);border-radius:4px;color:#fff;text-decoration:none;font-size:12.5px;font-weight:600;background:rgba(255,255,255,.08)}.smart-admin-top-action:hover{color:#fff;background:rgba(255,255,255,.14)}.smart-admin-version{font-size:11px;color:rgba(255,255,255,.72);background:rgba(255,255,255,.1);padding:3px 8px;border-radius:4px}
+.smart-admin-shell{display:grid;grid-template-columns:260px minmax(0,1fr);background:#f3f5f7;border:1px solid #dcdcde;border-top:0;min-height:520px}.smart-admin-sidebar{background:#fff;border-right:1px solid #dcdcde;padding:16px 0}.smart-admin-sidebar-title{padding:0 18px 10px;color:#646970;font-size:11px;font-weight:700;text-transform:uppercase}.smart-admin-nav{display:flex;flex-direction:column}.smart-admin-nav-item{display:flex;gap:11px;padding:11px 14px 11px 18px;border-left:3px solid transparent;color:#1d2327;text-decoration:none}.smart-admin-nav-item:hover{background:#f6f7f7;color:#135e96}.smart-admin-nav-item-active{background:#eef6fc;border-left-color:#2271b1;color:#135e96}.smart-admin-nav-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:4px;background:#f0f0f1;color:#646970;flex-shrink:0}.smart-admin-nav-item-active .smart-admin-nav-icon{background:#2271b1;color:#fff}.smart-admin-nav-copy{display:flex;min-width:0;flex-direction:column;gap:2px}.smart-admin-nav-copy strong{font-size:13px}.smart-admin-nav-copy small{color:#646970;font-size:11.5px;line-height:1.35}.smart-admin-main{min-width:0;padding:18px}.smart-admin-pathbar{display:flex;align-items:center;gap:8px;margin:0 0 10px;color:#646970;font-size:12px}.smart-admin-pathbar a{color:#2271b1;text-decoration:none}.smart-admin-pathbar i{font-size:10px;color:#8c8f94}.smart-admin-body{background:#fff;border:1px solid #dcdcde;padding:24px 28px 30px;min-height:400px}
 .smart-admin-page-header{margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #f0f0f1}
 .smart-admin-page-header h1{font-size:22px;font-weight:600;margin:0 0 4px;color:#1d2327}
 .smart-admin-page-desc{color:#646970;margin:0;font-size:14px}
@@ -627,16 +620,23 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .aihl-openapi-editor{min-height:680px}
 
 @media(max-width:782px){
+.smart-admin-header-brand{align-items:flex-start;flex-direction:column}
+.smart-admin-header-actions{justify-content:flex-start}
+.smart-admin-shell{grid-template-columns:1fr}
+.smart-admin-sidebar{border-right:0;border-bottom:1px solid #dcdcde;padding:10px 0}
+.smart-admin-nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.smart-admin-nav-item{border-left:0;border-bottom:3px solid transparent;padding:10px 12px}
+.smart-admin-nav-item-active{border-bottom-color:#2271b1}
+.smart-admin-nav-copy small{display:none}
+.smart-admin-main{padding:12px}
 .smart-admin-body{padding:16px}
-.smart-admin-tabs{padding:0 8px}
-.smart-admin-tab{padding:10px 12px;font-size:12px}
 }
 @media(max-width:1100px){.aihl-api-docs-grid{grid-template-columns:1fr}.aihl-json-editor{min-height:360px}}
 CSS;
 
 	wp_add_inline_style('wp-admin', $css);
 
-	// Font Awesome per le icone nei tab
+	// Font Awesome per le icone della navigazione e delle pagine.
 	if (!wp_style_is('font-awesome-6.4.2', 'enqueued') && !wp_style_is('font-awesome-6', 'enqueued')) {
 		if (defined('AIHL_DIR_URL')) {
 			wp_enqueue_style('smart-admin-fa', AIHL_DIR_URL . '/resource/css/fontawesome/fontawesome.min.css', array(), AIHL_UNICODE);
