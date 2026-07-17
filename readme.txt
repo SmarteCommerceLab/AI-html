@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.10.3
+Stable tag: 1.10.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,9 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.10.4 =
+* Migra tutte le pagine tema al contratto Smart Admin Panel v2 con sidebar, pathbar e layout mobile coerente.
 
 = 1.10.3 =
 * Conserva lo slug richiesto dalla AI durante la creazione delle pagine bozza e lo restituisce nella risposta REST.

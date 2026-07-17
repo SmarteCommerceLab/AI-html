@@ -5,6 +5,14 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.10.4] - 2026-07-17
+
+### Modificato
+- Area amministrativa allineata al contratto Smart Admin Panel v2: header dinamico, sidebar descrittiva, pathbar e shell responsive.
+
+### Verifica
+- Aggiunto test di contratto UI contro regressioni alla navigazione legacy a tab.
+
 ## [1.10.3] - 2026-07-16
 
 ### Corretto
