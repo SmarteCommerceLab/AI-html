@@ -468,8 +468,30 @@ if (!function_exists('aihl_import_menu_json_payload')) {
 		if (!is_array($data)) {
 			return new WP_Error('invalid_json', __('JSON non valido.', AIHL_TEXT_DOMAIN));
 		}
-		if (empty($data['menus']) || !is_array($data['menus'])) {
+		if (!isset($data['menus']) || !is_array($data['menus'])) {
 			return new WP_Error('invalid_payload', __('Payload menu non valido.', AIHL_TEXT_DOMAIN));
+		}
+		if (empty($data['menus'])) {
+			if (!$replace_existing) {
+				return new WP_Error('invalid_payload', __('Payload menu non valido.', AIHL_TEXT_DOMAIN));
+			}
+
+			$existing_menus = wp_get_nav_menus(array('hide_empty' => false));
+			if (is_array($existing_menus)) {
+				foreach ($existing_menus as $existing_menu) {
+					$menu_id = isset($existing_menu->term_id) ? (int) $existing_menu->term_id : 0;
+					if ($menu_id > 0) {
+						wp_delete_nav_menu($menu_id);
+					}
+				}
+			}
+			set_theme_mod('nav_menu_locations', array());
+
+			return array(
+				'menus'       => 0,
+				'items'       => 0,
+				'failed_items' => 0,
+			);
 		}
 
 		$total_menus = 0;
