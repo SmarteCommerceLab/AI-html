@@ -70,7 +70,7 @@ if (!function_exists('aihl_render_mobile_quick_navigation')) {
 		$login_label = isset($config['login_label']) ? trim((string) $config['login_label']) : '';
 		$login_url = isset($config['login_url']) ? (string) $config['login_url'] : '';
 		?>
-		<nav class="aihl-bottom-bar d-lg-none" aria-label="<?php esc_attr_e('Navigazione rapida', AIHL_TEXT_DOMAIN); ?>">
+		<nav class="aihl-bottom-bar d-md-none" aria-label="<?php esc_attr_e('Navigazione rapida', AIHL_TEXT_DOMAIN); ?>">
 			<a class="aihl-bottom-bar-item" href="<?php echo esc_url(home_url('/')); ?>">
 				<i class="fa-solid fa-house" aria-hidden="true"></i>
 				<span><?php esc_html_e('Home', AIHL_TEXT_DOMAIN); ?></span>

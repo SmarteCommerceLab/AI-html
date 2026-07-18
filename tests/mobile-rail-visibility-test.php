@@ -32,6 +32,7 @@ $checks = array(
 		array(
 			"\$style === 'rail'",
 			'aihl-mobile-rail aihl-mobile-rail-',
+			'aihl-bottom-bar d-md-none',
 			'data-bs-target="#offcanvasNavbar"',
 		),
 	),
@@ -49,6 +50,13 @@ foreach ($checks as $group => $data) {
 if (strpos($bridge_css, '.aihl-mobile-rail') !== false) {
 	fwrite(STDERR, "Il bridge SBM contiene ancora regole strutturali del rail.\n");
 	exit(1);
+}
+
+foreach (array('@media (max-width: 767.98px)', 'padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));') as $fragment) {
+	if (strpos($theme_css, $fragment) === false) {
+		fwrite(STDERR, "Bottom bar responsive incompleta: {$fragment}\n");
+		exit(1);
+	}
 }
 
 echo "OK AI-HTML mobile rail: visibilita indipendente dalla hero verificata\n";
