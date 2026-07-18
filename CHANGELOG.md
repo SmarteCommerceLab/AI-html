@@ -5,6 +5,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.10.5] - 2026-07-18
+
+- Support governed rollback to an empty menu catalog when replacement is explicit.
+
 ## [1.10.4] - 2026-07-17
 
 ### Modificato
