@@ -240,15 +240,15 @@ add_action('wp_nav_menu_item_custom_fields', function($item_id, $item, $depth) {
 		<label for="edit-menu-item-aihl-menu-rich-layout-<?php echo esc_attr($item_id); ?>">
 			<?php esc_html_e('Layout Rich', AIHL_TEXT_DOMAIN); ?><br>
 			<select id="edit-menu-item-aihl-menu-rich-layout-<?php echo esc_attr($item_id); ?>" class="widefat code edit-menu-item-custom" name="aihl_menu_rich_layout[<?php echo esc_attr($item_id); ?>]">
-				<option value="split" <?php selected($rich_layout, 'split'); ?>><?php esc_html_e('Split â€” lista link + pannello laterale', AIHL_TEXT_DOMAIN); ?></option>
-				<option value="compact" <?php selected($rich_layout, 'compact'); ?>><?php esc_html_e('Compact â€” lista densa + pannello', AIHL_TEXT_DOMAIN); ?></option>
-				<option value="columns" <?php selected($rich_layout, 'columns'); ?>><?php esc_html_e('Columns â€” 2 colonne senza pannello', AIHL_TEXT_DOMAIN); ?></option>
-				<option value="grid" <?php selected($rich_layout, 'grid'); ?>><?php esc_html_e('Grid â€” card 3 colonne centrate', AIHL_TEXT_DOMAIN); ?></option>
-				<option value="tabbed" <?php selected($rich_layout, 'tabbed'); ?>><?php esc_html_e('Tabbed â€” item come tab con bordo', AIHL_TEXT_DOMAIN); ?></option>
+				<option value="split" <?php selected($rich_layout, 'split'); ?>><?php esc_html_e('Split - lista link + pannello laterale', AIHL_TEXT_DOMAIN); ?></option>
+				<option value="compact" <?php selected($rich_layout, 'compact'); ?>><?php esc_html_e('Compact - lista densa + pannello', AIHL_TEXT_DOMAIN); ?></option>
+				<option value="columns" <?php selected($rich_layout, 'columns'); ?>><?php esc_html_e('Columns - 2 colonne senza pannello', AIHL_TEXT_DOMAIN); ?></option>
+				<option value="grid" <?php selected($rich_layout, 'grid'); ?>><?php esc_html_e('Grid - card 3 colonne centrate', AIHL_TEXT_DOMAIN); ?></option>
+				<option value="tabbed" <?php selected($rich_layout, 'tabbed'); ?>><?php esc_html_e('Tabbed - item come tab con bordo', AIHL_TEXT_DOMAIN); ?></option>
 				<option value="directory" <?php selected($rich_layout, 'directory'); ?>><?php esc_html_e('Directory - multi-colonna tipo marketplace', AIHL_TEXT_DOMAIN); ?></option>
 				<option value="panel" <?php selected($rich_layout, 'panel'); ?>><?php esc_html_e('Panel - dropdown compatto evoluto', AIHL_TEXT_DOMAIN); ?></option>
-				<option value="featured" <?php selected($rich_layout, 'featured'); ?>><?php esc_html_e('Featured â€” immagine grande + overlay testo', AIHL_TEXT_DOMAIN); ?></option>
-				<option value="showcase" <?php selected($rich_layout, 'showcase'); ?>><?php esc_html_e('Showcase â€” hero card con bg image', AIHL_TEXT_DOMAIN); ?></option>
+				<option value="featured" <?php selected($rich_layout, 'featured'); ?>><?php esc_html_e('Featured - immagine grande + overlay testo', AIHL_TEXT_DOMAIN); ?></option>
+				<option value="showcase" <?php selected($rich_layout, 'showcase'); ?>><?php esc_html_e('Showcase - hero card con bg image', AIHL_TEXT_DOMAIN); ?></option>
 			</select>
 		</label>
 	</p>

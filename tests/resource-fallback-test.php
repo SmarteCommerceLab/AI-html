@@ -12,7 +12,9 @@ $resource_checks = array(
 	"'aihl-bootstrap-fallback'",
 	'bootstrap@5.3.8/dist/css/bootstrap.min.css',
 	'bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js',
-	"wp_script_is('smart-bootstrap', 'enqueued')",
+	"array('smart-bootstrap', 'smart-bootstrap-bundle', 'bootstrap')",
+	"wp_script_is(\$candidate_handle, 'registered')",
+	"\$main_deps[] = \$bootstrap_script_handle",
 	"\$main_deps[] = 'aihl-bootstrap-fallback'",
 );
 

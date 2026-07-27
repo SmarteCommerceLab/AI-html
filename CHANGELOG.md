@@ -5,6 +5,29 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.10.7] - 2026-07-27
+
+### Sicurezza
+- Snapshot Smart Reset non piu esposti tramite URL pubblico e scaricabili solo con capability e nonce.
+- API key accettate esclusivamente tramite header dedicati.
+- URL dei pacchetti aggiornamento limitati a HTTPS sul dominio dello Smart Repository.
+
+### Corretto
+- Cache updater riutilizzata anche quando non sono disponibili aggiornamenti o il repository risponde con errore.
+- Versione degli asset allineata automaticamente alla versione tema.
+- Parametri dinamici documentati correttamente nella specifica OpenAPI.
+- Download OpenAPI amministrativo protetto e salvataggio occhiello con nonce e sanitizzazione.
+- Dipendenza Bootstrap JavaScript applicata anche agli handle gia registrati.
+- Errori di eliminazione menu propagati senza azzerare le location.
+
+### Distribuzione
+- Pacchetto release privo di test, documentazione tecnica e script di build.
+- Workflow con validazione ZIP, changelog dinamico e verifica del deploy pubblico.
+
+## [1.10.6] - 2026-07-18
+
+- Limit mobile bottom bar rendering and reserved safe area to phone viewports.
+
 ## [1.10.5] - 2026-07-18
 
 - Support governed rollback to an empty menu catalog when replacement is explicit.

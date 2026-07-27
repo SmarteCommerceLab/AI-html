@@ -33,6 +33,7 @@ class AIHL_Public_Theme_Updater {
 		add_filter('pre_set_site_transient_update_themes', array($this, 'filter_updates'));
 		add_filter('site_transient_update_themes', array($this, 'filter_updates'));
 		add_filter('themes_api', array($this, 'filter_theme_info'), 10, 3);
+		add_filter('upgrader_pre_download', array($this, 'verify_package_download'), 10, 4);
 		add_filter('upgrader_source_selection', array($this, 'fix_install_directory'), 10, 4);
 		add_filter('theme_action_links_' . $this->theme_slug, array($this, 'add_action_links'));
 		add_action('admin_post_aihl_check_updates', array($this, 'handle_manual_update_check'));
@@ -180,10 +181,42 @@ class AIHL_Public_Theme_Updater {
 		return $source;
 	}
 
+	public function verify_package_download($reply, $package, $upgrader, $hook_extra) {
+		if ($reply !== false || empty($hook_extra['theme']) || $hook_extra['theme'] !== $this->theme_slug) {
+			return $reply;
+		}
+
+		$release = $this->get_release();
+		$checksum = strtolower((string) ($release['sha256'] ?? ''));
+		if (
+			empty($release['download_url'])
+			|| esc_url_raw((string) $package) !== (string) $release['download_url']
+			|| !preg_match('/^[a-f0-9]{64}$/', $checksum)
+		) {
+			return $reply;
+		}
+
+		$temp_file = download_url((string) $package, 300);
+		if (is_wp_error($temp_file)) {
+			return $temp_file;
+		}
+
+		$actual = strtolower((string) hash_file('sha256', $temp_file));
+		if (!hash_equals($checksum, $actual)) {
+			wp_delete_file($temp_file);
+			return new WP_Error(
+				'aihl_package_checksum_mismatch',
+				__('Il pacchetto AI-HTML non supera la verifica di integrita SHA-256.', AIHL_TEXT_DOMAIN)
+			);
+		}
+
+		return $temp_file;
+	}
+
 	private function get_release() {
 		$cache_key = $this->cache_key();
 		$cached = get_site_transient($cache_key);
-		if (is_array($cached) && $this->is_update_available($cached)) {
+		if (is_array($cached)) {
 			return $cached;
 		}
 
@@ -229,7 +262,7 @@ class AIHL_Public_Theme_Updater {
 		$version = sanitize_text_field((string) ($data['version'] ?? $data['new_version'] ?? ''));
 		$download_url = esc_url_raw((string) ($data['download_url'] ?? $data['package'] ?? ''));
 
-		if ($version === '' || $download_url === '') {
+		if ($version === '' || !$this->is_allowed_download_url($download_url)) {
 			return array();
 		}
 
@@ -245,6 +278,7 @@ class AIHL_Public_Theme_Updater {
 			'author' => wp_kses_post((string) ($data['author'] ?? 'Smart eCommerce')),
 			'description' => wp_kses_post((string) ($data['description'] ?? '')),
 			'changelog' => wp_kses_post((string) ($data['changelog'] ?? '')),
+			'sha256' => strtolower(sanitize_text_field((string) ($data['sha256'] ?? $data['checksum_sha256'] ?? ''))),
 			'banners' => $this->sanitize_asset_map($data['banners'] ?? array()),
 			'icons' => $this->sanitize_asset_map($data['icons'] ?? array()),
 		);
@@ -265,6 +299,19 @@ class AIHL_Public_Theme_Updater {
 		}
 
 		return $sanitized;
+	}
+
+	private function is_allowed_download_url($url) {
+		$download = wp_parse_url((string) $url);
+		$endpoint = wp_parse_url($this->endpoint);
+
+		if (!is_array($download) || !is_array($endpoint)) {
+			return false;
+		}
+
+		return isset($download['scheme'], $download['host'], $endpoint['host'])
+			&& strtolower((string) $download['scheme']) === 'https'
+			&& strtolower((string) $download['host']) === strtolower((string) $endpoint['host']);
 	}
 
 	private function sanitize_theme_slug($slug) {

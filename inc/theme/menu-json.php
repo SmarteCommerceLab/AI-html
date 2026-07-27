@@ -477,13 +477,21 @@ if (!function_exists('aihl_import_menu_json_payload')) {
 			}
 
 			$existing_menus = wp_get_nav_menus(array('hide_empty' => false));
+			$failed_menu_ids = array();
 			if (is_array($existing_menus)) {
 				foreach ($existing_menus as $existing_menu) {
 					$menu_id = isset($existing_menu->term_id) ? (int) $existing_menu->term_id : 0;
-					if ($menu_id > 0) {
-						wp_delete_nav_menu($menu_id);
+					if ($menu_id > 0 && !wp_delete_nav_menu($menu_id)) {
+						$failed_menu_ids[] = $menu_id;
 					}
 				}
+			}
+			if (!empty($failed_menu_ids)) {
+				return new WP_Error(
+					'menu_delete_failed',
+					__('Impossibile eliminare tutti i menu esistenti.', AIHL_TEXT_DOMAIN),
+					array('failed_menu_ids' => $failed_menu_ids)
+				);
 			}
 			set_theme_mod('nav_menu_locations', array());
 

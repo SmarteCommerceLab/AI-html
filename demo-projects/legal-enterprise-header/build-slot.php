@@ -1,4 +1,8 @@
 <?php
+if (PHP_SAPI !== 'cli') {
+	http_response_code(404);
+	exit;
+}
 
 $base = __DIR__;
 $html = file_get_contents($base . '/header.html');

@@ -106,9 +106,6 @@ if (!function_exists('smart_ai_rest_authenticate')) {
             $api_key = $request->get_header('X-SBS-AI-Key'); // compat
         }
         if (empty($api_key)) {
-            $api_key = $request->get_param('api_key');
-        }
-        if (empty($api_key)) {
             return false;
         }
         $entry = smart_ai_verify_api_key((string) $api_key);

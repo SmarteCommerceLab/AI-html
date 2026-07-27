@@ -467,6 +467,25 @@ function aihl_admin_wrap_api_docs() {
 	);
 }
 
+add_action('admin_post_aihl_download_openapi', function () {
+	if (!current_user_can('manage_options')) {
+		wp_die(esc_html__('Non hai i permessi per scaricare questa specifica.', AIHL_TEXT_DOMAIN));
+	}
+	check_admin_referer('aihl_download_openapi');
+
+	$openapi = function_exists('aihl_ai_openapi_payload') ? aihl_ai_openapi_payload() : array();
+	$json = wp_json_encode($openapi, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+	if (!is_string($json)) {
+		wp_die(esc_html__('Impossibile generare la specifica OpenAPI.', AIHL_TEXT_DOMAIN));
+	}
+
+	nocache_headers();
+	header('Content-Type: application/json; charset=utf-8');
+	header('Content-Disposition: inline; filename="ai-html-openapi.json"');
+	echo $json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON document.
+	exit;
+});
+
 function aihl_render_api_docs_content() {
 	if (!current_user_can('manage_options')) {
 		wp_die(esc_html__('Non hai i permessi per accedere a questa pagina.', AIHL_TEXT_DOMAIN));
@@ -474,7 +493,10 @@ function aihl_render_api_docs_content() {
 
 	$openapi = function_exists('aihl_ai_openapi_payload') ? aihl_ai_openapi_payload() : array();
 	$openapi_json = wp_json_encode($openapi, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-	$openapi_url = rest_url('aihtml/v1/ai/openapi');
+	$openapi_url = wp_nonce_url(
+		admin_url('admin-post.php?action=aihl_download_openapi'),
+		'aihl_download_openapi'
+	);
 	$schema = isset($openapi['components']['schemas']['AIHLOptionsPayload']['properties']['options']['properties']) && is_array($openapi['components']['schemas']['AIHLOptionsPayload']['properties']['options']['properties'])
 		? $openapi['components']['schemas']['AIHLOptionsPayload']['properties']['options']['properties']
 		: array();

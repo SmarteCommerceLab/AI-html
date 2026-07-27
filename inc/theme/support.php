@@ -1,6 +1,7 @@
 <?php
 /* Setup Theme					*/
 add_action('after_setup_theme',function()							{
+	load_theme_textdomain(AIHL_TEXT_DOMAIN, get_template_directory() . '/languages');
 	add_theme_support('html5', array('gallery','caption'));
 	add_theme_support('menus');
 	add_theme_support('post-thumbnails');
