@@ -74,6 +74,71 @@ if (!function_exists('aihl_should_load_brand_icons')) {
 	}
 }
 
+if (!function_exists('aihl_core_icon_names')) {
+	function aihl_core_icon_names() {
+		return array(
+			'address-book', 'arrow-down', 'arrow-right', 'bars', 'book', 'book-open',
+			'boxes-stacked', 'briefcase', 'broom', 'building', 'bullhorn', 'cart-shopping',
+			'chart-line', 'chevron-down', 'chevron-left', 'chevron-right', 'circle-check',
+			'clock', 'code', 'cube', 'cubes', 'database', 'envelope', 'facebook-f',
+			'folder-open', 'graduation-cap', 'headset', 'house', 'industry', 'info-circle',
+			'instagram', 'key', 'layer-group', 'linkedin-in', 'location-dot', 'newspaper',
+			'palette', 'paper-plane', 'pen-nib', 'phone', 'robot', 'rotate-left', 'search',
+			'share-nodes', 'shoe-prints', 'signal', 'sliders', 'triangle-exclamation',
+			'trophy', 'twitter', 'user', 'users', 'video', 'whatsapp', 'youtube',
+		);
+	}
+}
+
+if (!function_exists('aihl_collect_configured_icon_classes')) {
+	function aihl_collect_configured_icon_classes() {
+		$sources = array(
+			get_option(AIHL_OPTION_BASE . '_general', array()),
+		);
+
+		$post = is_singular() ? get_post() : null;
+		if ($post instanceof WP_Post) {
+			$sources[] = $post->post_content;
+		}
+
+		$menu_ids = array_values(array_unique(array_filter(array_map('absint', get_nav_menu_locations()))));
+		foreach ($menu_ids as $menu_id) {
+			$items = wp_get_nav_menu_items($menu_id, array('update_post_term_cache' => false));
+			foreach ((array) $items as $item) {
+				$sources[] = get_post_meta($item->ID, '_aihl_menu_icon', true);
+			}
+		}
+
+		$serialized = wp_json_encode($sources);
+		if (!is_string($serialized) || !preg_match_all('/\bfa-([a-z0-9-]+)\b/i', $serialized, $matches)) {
+			return array();
+		}
+
+		return array_values(array_unique(array_map('strtolower', $matches[1])));
+	}
+}
+
+if (!function_exists('aihl_requires_full_icon_font')) {
+	function aihl_requires_full_icon_font() {
+		static $requires_full = null;
+		if (null !== $requires_full) {
+			return $requires_full;
+		}
+
+		$utility_classes = array(
+			'brands', 'classic', 'regular', 'sharp', 'solid', 'spin', 'pulse', 'border',
+			'pull-left', 'pull-right', 'fw', 'ul', 'li', 'inverse', 'stack', 'stack-1x',
+			'stack-2x', 'xs', 'sm', 'lg', 'xl', '2xl', '1x', '2x', '3x', '4x', '5x',
+			'6x', '7x', '8x', '9x', '10x',
+		);
+		$allowed = array_merge(aihl_core_icon_names(), $utility_classes);
+		$unknown = array_diff(aihl_collect_configured_icon_classes(), $allowed);
+		$requires_full = (bool) apply_filters('aihl_use_full_font_awesome', !empty($unknown), $unknown);
+
+		return $requires_full;
+	}
+}
+
 add_action('wp_enqueue_scripts', function() {
 	if (is_admin()) {
 		return;
@@ -107,9 +172,13 @@ add_action('wp_enqueue_scripts', function() {
 	}
 
 	aihl_enqueue_style_if_exists('font-awesome-6.4.2', 'resource/css/fontawesome/fontawesome.min.css', array(), AIHL_UNICODE);
-	aihl_enqueue_style_if_exists('solid-6.4.2', 'resource/css/fontawesome/solid.min.css', array('font-awesome-6.4.2'), AIHL_UNICODE);
+	$full_icon_font = aihl_requires_full_icon_font();
+	$solid_path = $full_icon_font ? 'resource/css/fontawesome/solid.min.css' : 'resource/css/fontawesome/aihl-solid-core.min.css';
+	aihl_enqueue_style_if_exists('solid-6.4.2', $solid_path, array('font-awesome-6.4.2'), AIHL_UNICODE);
+	aihl_enqueue_style_if_exists('regular-6.4.2', 'resource/css/fontawesome/regular.min.css', array('font-awesome-6.4.2'), AIHL_UNICODE);
 	if (aihl_should_load_brand_icons()) {
-		aihl_enqueue_style_if_exists('brands-6.4.2', 'resource/css/fontawesome/brands.min.css', array('font-awesome-6.4.2'), AIHL_UNICODE);
+		$brands_path = $full_icon_font ? 'resource/css/fontawesome/brands.min.css' : 'resource/css/fontawesome/aihl-brands-core.min.css';
+		aihl_enqueue_style_if_exists('brands-6.4.2', $brands_path, array('font-awesome-6.4.2'), AIHL_UNICODE);
 	}
 }, 99);
 
@@ -154,7 +223,7 @@ add_action('wp_enqueue_scripts', function() {
 	}
 
 	if (aihl_enqueue_script_if_exists('ai-html-main', 'resource/js/main.js', array_values(array_unique($main_deps)), AIHL_UNICODE, true)) {
-		wp_script_add_data('ai-html-main', 'defer', true);
+		wp_script_add_data('ai-html-main', 'strategy', 'defer');
 	}
 }, 100);
 

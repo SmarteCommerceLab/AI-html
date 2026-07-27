@@ -8,7 +8,6 @@ require_once trailingslashit(get_template_directory()) . 'inc/core/loader.php';
 aihl_require_files(array(
 	'inc/option.php',
 	'inc/activation.php',
-	'inc/output-cleanup.php',
 	'inc/class-aihl-public-theme-updater.php',
 	'inc/resource.php',
 	'inc/required-plugins.php',

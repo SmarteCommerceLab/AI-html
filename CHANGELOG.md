@@ -5,6 +5,19 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.10.9] - 2026-07-27
+
+### Ottimizzato
+- Font Awesome usa subset leggeri con fallback automatico per le icone personalizzate.
+- Le icone `fa-regular` native caricano correttamente il relativo font.
+- Eventi scroll e resize accodati a `requestAnimationFrame`.
+- Query dei correlati, contratto Smart Bootstrap Manager e rendering Smart Addon alleggeriti.
+- Pacchetto di distribuzione ripulito da immagini e font ridondanti.
+
+### Corretto
+- Strategia `defer` registrata tramite API WordPress.
+- Rimosso il buffering globale dell'output non necessario.
+
 ## [1.10.8] - 2026-07-27
 
 ### Aggiunto

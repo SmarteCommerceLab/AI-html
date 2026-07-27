@@ -8,7 +8,13 @@ if (!defined('ABSPATH')) {
 }
 
 if (!function_exists('aihl_get_addon_integrations')) {
-	function aihl_get_addon_integrations() {
+	function aihl_get_addon_integrations($include_resources = true) {
+		static $cache = array();
+		$cache_key = $include_resources ? 'with-resources' : 'registry-only';
+		if (isset($cache[$cache_key])) {
+			return $cache[$cache_key];
+		}
+
 		$integrations = array(
 			'contact_form_7' => array(
 				'label'       => 'Contact Form 7',
@@ -30,13 +36,14 @@ if (!function_exists('aihl_get_addon_integrations')) {
 			$integration['provider'] = $provider;
 			$integration['configured'] = $integration['resource_id'] > 0;
 			$integration['resources'] = array();
-			if (post_type_exists($integration['post_type'])) {
+			if ($include_resources && post_type_exists($integration['post_type'])) {
 				$posts = get_posts(array(
 					'post_type'      => $integration['post_type'],
 					'post_status'    => array('publish', 'draft'),
 					'posts_per_page' => 100,
 					'orderby'        => 'title',
 					'order'          => 'ASC',
+					'no_found_rows'  => true,
 				));
 				foreach ($posts as $post) {
 					$integration['resources'][] = array(
@@ -49,7 +56,8 @@ if (!function_exists('aihl_get_addon_integrations')) {
 		}
 		unset($integration);
 
-		return apply_filters('aihl_addon_integrations', $integrations);
+		$cache[$cache_key] = apply_filters('aihl_addon_integrations', $integrations, (bool) $include_resources);
+		return $cache[$cache_key];
 	}
 }
 
@@ -138,7 +146,7 @@ if (!function_exists('aihl_get_theme_integration_manifest')) {
 if (!function_exists('aihl_render_addon_integration')) {
 	function aihl_render_addon_integration($provider, $resource_id = 0) {
 		$provider = sanitize_key((string) $provider);
-		$integrations = aihl_get_addon_integrations();
+		$integrations = aihl_get_addon_integrations(false);
 		if (!isset($integrations[$provider]) || empty($integrations[$provider]['active'])) {
 			return '';
 		}

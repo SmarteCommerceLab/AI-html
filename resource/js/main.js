@@ -11,7 +11,9 @@
         railAutohide: false,
         topbarScrollAway: false,
         lastScrollY: 0,
-        isCustomizerPreview: false
+        isCustomizerPreview: false,
+        scrollFrame: 0,
+        resizeFrame: 0
     };
 
     function bindOnce(element, key, eventName, handler, options) {
@@ -104,6 +106,29 @@
             body.classList.toggle("aihl-topbar-is-hidden", topbarHidden);
             state.lastScrollY = currentY;
         }
+    }
+
+    function scheduleScrollUpdate() {
+        if (state.scrollFrame) {
+            return;
+        }
+
+        state.scrollFrame = window.requestAnimationFrame(function () {
+            state.scrollFrame = 0;
+            onScroll();
+        });
+    }
+
+    function scheduleResizeUpdate() {
+        if (state.resizeFrame) {
+            return;
+        }
+
+        state.resizeFrame = window.requestAnimationFrame(function () {
+            state.resizeFrame = 0;
+            refreshState();
+            refreshLayoutState();
+        });
     }
 
     function initBackToTop() {
@@ -323,11 +348,8 @@
     }
 
     if (!window.aihlThemeEventsBound) {
-        window.addEventListener("scroll", onScroll, { passive: true });
-        window.addEventListener("resize", function () {
-            refreshState();
-            refreshLayoutState();
-        }, { passive: true });
+        window.addEventListener("scroll", scheduleScrollUpdate, { passive: true });
+        window.addEventListener("resize", scheduleResizeUpdate, { passive: true });
         document.addEventListener("keydown", function (event) {
             if (event.key === "Escape") {
                 document.querySelectorAll(".aihl-search-dropdown.is-open, .aihl-search-fullscreen.is-open").forEach(function (target) {

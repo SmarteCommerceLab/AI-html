@@ -19,16 +19,23 @@ if (!function_exists('aihl_is_bootstrap_manager_active')) {
 
 if (!function_exists('aihl_sbm_consumer_contract')) {
 	function aihl_sbm_consumer_contract() {
+		static $contract = null;
+
+		if (is_array($contract)) {
+			return $contract;
+		}
+
 		if (!aihl_is_bootstrap_manager_active()) {
 			return array();
 		}
 
 		if (function_exists('smart_bootstrap_manager_consumer_contract')) {
-			$contract = smart_bootstrap_manager_consumer_contract('ai-html');
-			return is_array($contract) ? $contract : array();
+			$provider_contract = smart_bootstrap_manager_consumer_contract('ai-html');
+			$contract = is_array($provider_contract) ? $provider_contract : array();
+			return $contract;
 		}
 
-		return array(
+		$contract = array(
 			'contract_version' => 'fallback',
 			'provider' => 'smart-bootstrap-manager',
 			'consumer' => 'ai-html',
@@ -50,6 +57,8 @@ if (!function_exists('aihl_sbm_consumer_contract')) {
 				'consume_css_variables_do_not_duplicate_tokens' => true,
 			),
 		);
+
+		return $contract;
 	}
 }
 

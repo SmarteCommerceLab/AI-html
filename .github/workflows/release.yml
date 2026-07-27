@@ -59,6 +59,7 @@ jobs:
             --exclude '.gitignore' \
             --exclude '.gitattributes' \
             --exclude 'tests/' \
+            --exclude 'tools/' \
             --exclude '*.md' \
             --exclude 'build-slot.php' \
             --exclude '*.zip' \

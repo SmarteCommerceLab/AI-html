@@ -64,7 +64,7 @@ AI-HTML deve essere la cornice tema dell'ecosistema:
 | Plugin detection wrapper | DONE | `inc/theme/utilities.php` | `aihtml_is_plugin_active()`, `aihtml_is_site_builder_active()` |
 | Activation hooks | DONE | `inc/activation.php` | Registrazione opzioni |
 | Required plugins status | DONE | `inc/required-plugins.php` | Riepilogo non invasivo nella Dashboard AI-HTML + pagina tecnica completa |
-| Output cleanup | DONE | `inc/output-cleanup.php` | |
+| Output cleanup | DONE | BOM verificato staticamente in test, senza buffering globale | |
 | Legacy wrapper `lib/` | DONE | `lib/*.php` | Forward a `inc/theme/*` â€” non usare per nuovo codice |
 | Legacy wrapper `customizer/` | DONE | `customizer/*.php` | Forward a `inc/customizer/*` â€” non usare per nuovo codice |
 | Re-init per transizioni pagina | DONE | `resource/js/main.js` | Barba.js e asset transizioni sono gestiti da Smart Bootstrap Manager |

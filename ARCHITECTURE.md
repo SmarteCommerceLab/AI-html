@@ -33,7 +33,6 @@ functions.php
         └── inc/core/loader.php (aihl_require_files)
               ├── inc/option.php
               ├── inc/activation.php
-              ├── inc/output-cleanup.php
               ├── inc/resource.php
               ├── inc/required-plugins.php
               ├── inc/admin/admin-hub.php

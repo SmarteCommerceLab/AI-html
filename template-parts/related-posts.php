@@ -25,7 +25,8 @@ $aihl_related_query = new WP_Query(array(
 	'posts_per_page'      => $aihl_related_count,
 	'ignore_sticky_posts' => true,
 	'no_found_rows'       => true,
-	'orderby'             => 'rand',
+	'orderby'             => apply_filters('aihl_related_posts_orderby', 'date'),
+	'order'               => 'DESC',
 ));
 
 if (!$aihl_related_query->have_posts()) {
