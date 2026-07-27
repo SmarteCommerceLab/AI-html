@@ -5,6 +5,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.10.8] - 2026-07-27
+
+### Aggiunto
+- Endpoint REST autenticato per aggiornare titolo, slug, stato e template delle pagine tramite Smart AI Key.
+
 ## [1.10.7] - 2026-07-27
 
 ### Sicurezza
