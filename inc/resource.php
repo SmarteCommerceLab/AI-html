@@ -119,15 +119,17 @@ add_action('wp_enqueue_scripts', function() {
 	}
 
 	$main_deps = array();
+	$bootstrap_script_handle = null;
+	foreach (array('smart-bootstrap', 'smart-bootstrap-bundle', 'bootstrap') as $candidate_handle) {
+		if (wp_script_is($candidate_handle, 'enqueued') || wp_script_is($candidate_handle, 'registered')) {
+			$bootstrap_script_handle = $candidate_handle;
+			break;
+		}
+	}
 
-	$has_bootstrap_script = wp_script_is('smart-bootstrap', 'enqueued')
-		|| wp_script_is('smart-bootstrap', 'registered')
-		|| wp_script_is('smart-bootstrap-bundle', 'enqueued')
-		|| wp_script_is('smart-bootstrap-bundle', 'registered')
-		|| wp_script_is('bootstrap', 'enqueued')
-		|| wp_script_is('bootstrap', 'registered');
-
-	if (!$has_bootstrap_script) {
+	if ($bootstrap_script_handle) {
+		$main_deps[] = $bootstrap_script_handle;
+	} else {
 		wp_enqueue_script(
 			'aihl-bootstrap-fallback',
 			'https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js',

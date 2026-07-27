@@ -506,6 +506,36 @@ function aihl_ai_openapi_path_from_route(string $route): string {
 	return (string) preg_replace('/\(\?P<([a-zA-Z0-9_]+)>[^)]+\)/', '{$1}', $route);
 }
 
+function aihl_ai_openapi_path_parameters(string $route, array $handler): array {
+	if (!preg_match_all('/\(\?P<([a-zA-Z0-9_]+)>([^)]+)\)/', $route, $matches, PREG_SET_ORDER)) {
+		return array();
+	}
+
+	$parameters = array();
+	$args = isset($handler['args']) && is_array($handler['args']) ? $handler['args'] : array();
+	foreach ($matches as $match) {
+		$name = (string) $match[1];
+		$pattern = (string) $match[2];
+		$arg = isset($args[$name]) && is_array($args[$name]) ? $args[$name] : array();
+		$type = isset($arg['type']) ? (string) $arg['type'] : (strpos($pattern, '\d') !== false ? 'integer' : 'string');
+		$schema = array('type' => in_array($type, array('integer', 'number', 'boolean'), true) ? $type : 'string');
+		if (isset($arg['minimum'])) {
+			$schema['minimum'] = $arg['minimum'];
+		}
+		if (!empty($arg['enum']) && is_array($arg['enum'])) {
+			$schema['enum'] = array_values($arg['enum']);
+		}
+		$parameters[] = array(
+			'name' => $name,
+			'in' => 'path',
+			'required' => true,
+			'schema' => $schema,
+		);
+	}
+
+	return $parameters;
+}
+
 function aihl_ai_openapi_methods_from_endpoint($methods): array {
 	if (is_string($methods)) {
 		$methods = array($methods);
@@ -572,7 +602,7 @@ function aihl_ai_openapi_payload(): array {
 			}
 			foreach (aihl_ai_openapi_methods_from_endpoint($handler['methods']) as $method) {
 				$method_key = strtolower($method);
-				$route_meta = $metadata[$route] ?? array();
+				$route_meta = $metadata[$path] ?? array();
 				$is_write = in_array($method, array('POST', 'PUT', 'PATCH', 'DELETE'), true);
 				$response_schema = isset($route_meta['read_schema']) ? (string) $route_meta['read_schema'] : 'GenericObject';
 				$request_schema = isset($route_meta['write_schema']) ? (string) $route_meta['write_schema'] : 'GenericObject';
@@ -594,6 +624,10 @@ function aihl_ai_openapi_payload(): array {
 					),
 					'security' => array(array('wpNonce' => array()), array('smartAiKey' => array()), array('applicationPassword' => array())),
 				);
+				$path_parameters = aihl_ai_openapi_path_parameters((string) $route, (array) $handler);
+				if (!empty($path_parameters)) {
+					$operation['parameters'] = $path_parameters;
+				}
 
 				if ($is_write) {
 					$operation['requestBody'] = array(

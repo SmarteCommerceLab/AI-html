@@ -58,6 +58,9 @@ jobs:
             --exclude 'dist/' \
             --exclude '.gitignore' \
             --exclude '.gitattributes' \
+            --exclude 'tests/' \
+            --exclude '*.md' \
+            --exclude 'build-slot.php' \
             --exclude '*.zip' \
             --exclude '*.sha256.txt'
 
@@ -65,6 +68,20 @@ jobs:
           zip -r "../${PACKAGE}" "${THEME_DIR}"
           cd ..
           sha256sum "${PACKAGE}" > "${PACKAGE}.sha256.txt"
+
+      - name: Validate release package
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          PACKAGE="AI-html-${VERSION}.zip"
+
+          unzip -t "${PACKAGE}"
+          unzip -Z1 "${PACKAGE}" | grep -qx 'AI-html/functions.php'
+          unzip -Z1 "${PACKAGE}" | grep -qx 'AI-html/style.css'
+          if unzip -Z1 "${PACKAGE}" | grep -Eq '(^|/)tests/|build-slot\.php$|\.md$|(^|/)\.git(hub)?/'; then
+            echo "Release package contains development-only files."
+            exit 1
+          fi
 
       - name: Publish GitHub release
         shell: bash
@@ -98,44 +115,55 @@ jobs:
           DOWNLOAD_URL="https://repository.smartecommerce.it/downloads/themes/${THEME_DIR}-${VERSION}.zip"
           SHA256="$(sha256sum "${PACKAGE}" | awk '{print $1}')"
           LAST_UPDATED="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-          CHANGELOG="Release ${VERSION} - controllo manuale Smart Repository disponibile anche nella schermata Temi standard."
+          CHANGELOG="$(awk -v heading="## [${VERSION}]" '
+            $0 == heading { found=1; next }
+            found && /^## / { exit }
+            found && /^- / { sub(/^- /, ""); print; exit }
+          ' CHANGELOG.md)"
+          if [ -z "${CHANGELOG}" ]; then
+            CHANGELOG="Release ${VERSION}"
+          fi
 
-          cat > "${SLUG}.json" <<JSON
-          {
-            "type": "theme",
-            "package_type": "theme",
-            "name": "AI-HTML",
-            "slug": "${SLUG}",
-            "version": "${VERSION}",
-            "new_version": "${VERSION}",
-            "download_url": "${DOWNLOAD_URL}",
-            "package": "${DOWNLOAD_URL}",
-            "homepage": "https://smartecommerce.it/",
-            "url": "https://smartecommerce.it/",
-            "requires": "6.5",
-            "tested": "7.0",
-            "requires_php": "7.4",
-            "author": "Smart eCommerce srls",
-            "description": "Tema enterprise AI-ready per siti corporate, magazine e piattaforme WordPress governate da design system, JSON e REST API.",
-            "changelog": "${CHANGELOG}",
-            "sha256": "${SHA256}",
-            "checksum_sha256": "${SHA256}",
-            "last_updated": "${LAST_UPDATED}",
-            "documentation_url": "https://repository.smartecommerce.it/swagger/ai-html/",
-            "support_url": "https://smartecommerce.it/supporto",
-            "security_url": "https://smartecommerce.it/security",
-            "privacy_url": "https://smartecommerce.it/privacy",
-            "repository_url": "https://github.com/SmarteCommerceLab/AI-html",
-            "openapi_yaml": "https://repository.smartecommerce.it/api-docs/themes/ai-html/openapi.yaml",
-            "openapi_json": "https://repository.smartecommerce.it/api-docs/themes/ai-html/openapi.json",
-            "sections": {
-              "description": "Tema enterprise AI-ready per siti corporate, magazine e piattaforme WordPress governate da design system, JSON e REST API.",
-              "changelog": "${CHANGELOG}"
-            },
-            "banners": [],
-            "icons": []
-          }
-          JSON
+          jq -n \
+            --arg version "${VERSION}" \
+            --arg download_url "${DOWNLOAD_URL}" \
+            --arg sha256 "${SHA256}" \
+            --arg last_updated "${LAST_UPDATED}" \
+            --arg changelog "${CHANGELOG}" \
+            '{
+              type: "theme",
+              package_type: "theme",
+              name: "AI-HTML",
+              slug: "ai-html",
+              version: $version,
+              new_version: $version,
+              download_url: $download_url,
+              package: $download_url,
+              homepage: "https://smartecommerce.it/",
+              url: "https://smartecommerce.it/",
+              requires: "6.5",
+              tested: "7.0",
+              requires_php: "7.4",
+              author: "Smart eCommerce srls",
+              description: "Tema enterprise AI-ready per siti corporate, magazine e piattaforme WordPress governate da design system, JSON e REST API.",
+              changelog: $changelog,
+              sha256: $sha256,
+              checksum_sha256: $sha256,
+              last_updated: $last_updated,
+              documentation_url: "https://repository.smartecommerce.it/swagger/ai-html/",
+              support_url: "https://smartecommerce.it/supporto",
+              security_url: "https://smartecommerce.it/security",
+              privacy_url: "https://smartecommerce.it/privacy",
+              repository_url: "https://github.com/SmarteCommerceLab/AI-html",
+              openapi_yaml: "https://repository.smartecommerce.it/api-docs/themes/ai-html/openapi.yaml",
+              openapi_json: "https://repository.smartecommerce.it/api-docs/themes/ai-html/openapi.json",
+              sections: {
+                description: "Tema enterprise AI-ready per siti corporate, magazine e piattaforme WordPress governate da design system, JSON e REST API.",
+                changelog: $changelog
+              },
+              banners: [],
+              icons: []
+            }' > "${SLUG}.json"
 
       - name: Deploy package and manifest to repository server
         if: ${{ env.REPOSITORY_FTP_USER != '' && env.REPOSITORY_FTP_PASSWORD != '' }}
@@ -160,3 +188,17 @@ jobs:
             --user "${REPOSITORY_FTP_USER}:${REPOSITORY_FTP_PASSWORD}" \
             --upload-file "${SLUG}.json" \
             "ftp://${REPOSITORY_FTP_HOST}${REPOSITORY_FTP_UPDATES_PATH}/${SLUG}.json"
+
+      - name: Verify public deployment
+        if: ${{ env.REPOSITORY_FTP_USER != '' && env.REPOSITORY_FTP_PASSWORD != '' }}
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          MANIFEST_URL="https://repository.smartecommerce.it/updates/themes/ai-html.json?release=${GITHUB_RUN_ID}"
+          PACKAGE_URL="https://repository.smartecommerce.it/downloads/themes/AI-html-${VERSION}.zip"
+          REMOTE_VERSION="$(curl --fail --silent --show-error "${MANIFEST_URL}" | jq -r '.version')"
+          if [ "${REMOTE_VERSION}" != "${VERSION}" ]; then
+            echo "Public manifest reports ${REMOTE_VERSION}, expected ${VERSION}."
+            exit 1
+          fi
+          curl --fail --silent --show-error --head "${PACKAGE_URL}" >/dev/null

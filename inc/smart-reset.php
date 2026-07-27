@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 add_action('admin_post_aihl_smart_reset_execute', 'aihl_handle_smart_reset_execute');
+add_action('admin_post_aihl_smart_reset_download', 'aihl_handle_smart_reset_download');
 add_action('rest_api_init', 'aihl_register_smart_reset_routes');
 
 function aihl_smart_reset_can_manage(): bool {
@@ -95,6 +96,26 @@ function aihl_register_reset_components(array $registry): array {
 	return $registry;
 }
 
+function aihl_smart_reset_snapshot_directory(): string {
+	$upload = wp_upload_dir();
+	return trailingslashit($upload['basedir']) . 'ai-html-reset';
+}
+
+function aihl_smart_reset_protect_snapshot_directory(string $dir): void {
+	$files = array(
+		'index.php' => "<?php\nif (!defined('ABSPATH')) {\n\texit;\n}\n",
+		'.htaccess' => "Require all denied\n<IfModule !mod_authz_core.c>\nDeny from all\n</IfModule>\n",
+		'web.config' => "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<configuration><system.webServer><authorization><deny users=\"*\" /></authorization></system.webServer></configuration>\n",
+	);
+
+	foreach ($files as $name => $contents) {
+		$target = trailingslashit($dir) . $name;
+		if (!file_exists($target)) {
+			file_put_contents($target, $contents, LOCK_EX);
+		}
+	}
+}
+
 function aihl_smart_reset_snapshot(): array {
 	global $wpdb;
 
@@ -120,13 +141,15 @@ function aihl_smart_reset_snapshot(): array {
 		}
 	}
 
-	$upload = wp_upload_dir();
-	$dir = trailingslashit($upload['basedir']) . 'ai-html-reset';
-	if (!is_dir($dir)) {
-		wp_mkdir_p($dir);
+	$dir = aihl_smart_reset_snapshot_directory();
+	if (!is_dir($dir) && !wp_mkdir_p($dir)) {
+		return array('error' => __('Impossibile creare la directory privata degli snapshot.', AIHL_TEXT_DOMAIN));
 	}
+	aihl_smart_reset_protect_snapshot_directory($dir);
 
-	$file = trailingslashit($dir) . 'snapshot-' . gmdate('Ymd-His') . '.json';
+	$token = strtolower(wp_generate_password(32, false, false));
+	$filename = 'snapshot-' . gmdate('Ymd-His') . '-' . $token . '.json';
+	$file = trailingslashit($dir) . $filename;
 	$payload = array(
 		'created_at' => gmdate('c'),
 		'site_url'   => home_url('/'),
@@ -134,13 +157,59 @@ function aihl_smart_reset_snapshot(): array {
 		'theme'      => defined('AIHL_VERSION') ? AIHL_VERSION : '',
 		'options'    => $options,
 	);
-	file_put_contents($file, wp_json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+	$json = wp_json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+	if (!is_string($json) || file_put_contents($file, $json, LOCK_EX) === false) {
+		return array('error' => __('Impossibile scrivere lo snapshot preventivo.', AIHL_TEXT_DOMAIN));
+	}
+
+	set_transient(
+		'aihl_reset_snapshot_' . $token,
+		array('file' => $file, 'filename' => $filename),
+		15 * MINUTE_IN_SECONDS
+	);
 
 	return array(
-		'file'  => $file,
-		'url'   => trailingslashit($upload['baseurl']) . 'ai-html-reset/' . basename($file),
-		'count' => count($options),
+		'token'    => $token,
+		'filename' => $filename,
+		'count'    => count($options),
 	);
+}
+
+function aihl_smart_reset_download_url(array $snapshot): string {
+	if (empty($snapshot['token'])) {
+		return '';
+	}
+
+	$token = sanitize_key((string) $snapshot['token']);
+	return wp_nonce_url(
+		admin_url('admin-post.php?action=aihl_smart_reset_download&token=' . rawurlencode($token)),
+		'aihl_smart_reset_download_' . $token
+	);
+}
+
+function aihl_handle_smart_reset_download(): void {
+	if (!aihl_smart_reset_can_manage()) {
+		wp_die(esc_html__('Permessi insufficienti.', AIHL_TEXT_DOMAIN));
+	}
+
+	$token = isset($_GET['token']) ? sanitize_key(wp_unslash((string) $_GET['token'])) : '';
+	check_admin_referer('aihl_smart_reset_download_' . $token);
+	$snapshot = get_transient('aihl_reset_snapshot_' . $token);
+	$base = realpath(aihl_smart_reset_snapshot_directory());
+	$file = is_array($snapshot) && !empty($snapshot['file']) ? realpath((string) $snapshot['file']) : false;
+	$base = $base ? wp_normalize_path($base) : false;
+	$file = $file ? wp_normalize_path($file) : false;
+
+	if ($token === '' || !$base || !$file || strpos($file, trailingslashit($base)) !== 0 || !is_readable($file)) {
+		wp_die(esc_html__('Snapshot non disponibile o scaduto.', AIHL_TEXT_DOMAIN));
+	}
+
+	nocache_headers();
+	header('Content-Type: application/json; charset=utf-8');
+	header('Content-Disposition: attachment; filename="' . sanitize_file_name((string) $snapshot['filename']) . '"');
+	header('Content-Length: ' . (string) filesize($file));
+	readfile($file);
+	exit;
 }
 
 function aihl_smart_reset_execute(array $component_ids, bool $dry_run = false): array {
@@ -193,8 +262,13 @@ function aihl_register_smart_reset_routes(): void {
 				return new WP_Error('aihl_reset_invalid_components', __('components deve essere un array.', AIHL_TEXT_DOMAIN), array('status' => 400));
 			}
 			$snapshot = $dry_run ? null : aihl_smart_reset_snapshot();
+			if (is_array($snapshot) && !empty($snapshot['error'])) {
+				return new WP_Error('aihl_reset_snapshot_failed', (string) $snapshot['error'], array('status' => 500));
+			}
 			$response = aihl_smart_reset_execute($ids, $dry_run);
-			$response['snapshot'] = $snapshot;
+			$response['snapshot'] = is_array($snapshot)
+				? array('filename' => $snapshot['filename'], 'count' => $snapshot['count'])
+				: null;
 			return rest_ensure_response($response);
 		},
 	));
@@ -217,6 +291,11 @@ function aihl_handle_smart_reset_execute(): void {
 		: array();
 
 	$snapshot = aihl_smart_reset_snapshot();
+	if (!empty($snapshot['error'])) {
+		set_transient('aihl_smart_reset_last_result', array('snapshot_error' => $snapshot['error']), 120);
+		wp_safe_redirect(add_query_arg(array('page' => 'aihl-smart-reset', 'reset_message' => 'snapshot-error'), admin_url('admin.php')));
+		exit;
+	}
 	$result = aihl_smart_reset_execute($components, false);
 	set_transient('aihl_smart_reset_last_result', array('snapshot' => $snapshot, 'result' => $result), 120);
 
@@ -282,11 +361,16 @@ function aihl_render_smart_reset_page(): void {
 	}
 	if (is_array($last)) {
 		delete_transient('aihl_smart_reset_last_result');
+		if (!empty($last['snapshot_error'])) {
+			echo '<div class="notice notice-error"><p>' . esc_html((string) $last['snapshot_error']) . '</p></div>';
+		} else {
 		echo '<div class="notice notice-success"><p>' . esc_html__('Reset completato. Backup preventivo creato prima delle modifiche.', AIHL_TEXT_DOMAIN) . '</p>';
-		if (!empty($last['snapshot']['url'])) {
-			echo '<p><a href="' . esc_url($last['snapshot']['url']) . '" target="_blank" rel="noopener">' . esc_html__('Scarica snapshot JSON', AIHL_TEXT_DOMAIN) . '</a></p>';
+		$download_url = !empty($last['snapshot']) ? aihl_smart_reset_download_url((array) $last['snapshot']) : '';
+		if ($download_url !== '') {
+			echo '<p><a href="' . esc_url($download_url) . '">' . esc_html__('Scarica snapshot JSON', AIHL_TEXT_DOMAIN) . '</a></p>';
 		}
 		echo '</div>';
+		}
 	}
 	?>
 	<div class="aihl-reset-console">
