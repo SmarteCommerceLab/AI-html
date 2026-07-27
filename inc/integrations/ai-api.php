@@ -66,11 +66,21 @@ function aihl_ai_register_rest_routes() {
 		),
 	));
 	register_rest_route('aihtml/v1', '/ai/pages/(?P<id>\d+)', array(
-		'methods'             => WP_REST_Server::DELETABLE,
-		'permission_callback' => 'aihl_ai_can_write',
-		'callback'            => 'aihl_ai_rest_trash_page',
-		'args'                => array(
-			'id' => array('type' => 'integer', 'minimum' => 1, 'required' => true),
+		array(
+			'methods'             => WP_REST_Server::EDITABLE,
+			'permission_callback' => 'aihl_ai_can_write',
+			'callback'            => 'aihl_ai_rest_update_page',
+			'args'                => array(
+				'id' => array('type' => 'integer', 'minimum' => 1, 'required' => true),
+			),
+		),
+		array(
+			'methods'             => WP_REST_Server::DELETABLE,
+			'permission_callback' => 'aihl_ai_can_write',
+			'callback'            => 'aihl_ai_rest_trash_page',
+			'args'                => array(
+				'id' => array('type' => 'integer', 'minimum' => 1, 'required' => true),
+			),
 		),
 	));
 	register_rest_route('aihtml/v1', '/ai/pages/(?P<id>\d+)/restore', array(
@@ -563,7 +573,7 @@ function aihl_ai_openapi_route_metadata(): array {
 		'/aihtml/v1/ai/options' => array('summary' => 'Theme AI options', 'tag' => 'Options', 'read_schema' => 'AIHLOptionsPayload', 'write_schema' => 'AIHLOptionsEnvelope'),
 		'/aihtml/v1/ai/menus' => array('summary' => 'Theme menu JSON', 'tag' => 'Menus', 'read_schema' => 'MenuPayload', 'write_schema' => 'GenericObject'),
 		'/aihtml/v1/ai/pages' => array('summary' => 'Theme pages', 'tag' => 'Pages', 'read_schema' => 'PagesPayload', 'write_schema' => 'PageCreateRequest'),
-		'/aihtml/v1/ai/pages/{id}' => array('summary' => 'Trash a non-published AI page', 'tag' => 'Pages', 'write_schema' => 'PageTrashRequest'),
+		'/aihtml/v1/ai/pages/{id}' => array('summary' => 'Update or trash an AI page', 'tag' => 'Pages', 'write_schema' => 'PageUpdateRequest'),
 		'/aihtml/v1/ai/pages/{id}/restore' => array('summary' => 'Restore a trashed AI page as a non-published draft', 'tag' => 'Pages', 'write_schema' => 'PageRestoreRequest'),
 		'/aihtml/v1/ai/pages/{id}/status' => array('summary' => 'Change page publication status', 'tag' => 'Pages', 'write_schema' => 'PageStatusRequest'),
 		'/aihtml/v1/ai/site/front-page' => array('summary' => 'Read or assign the WordPress front page', 'tag' => 'Site', 'read_schema' => 'FrontPagePayload', 'write_schema' => 'FrontPageRequest'),
@@ -729,6 +739,17 @@ function aihl_ai_openapi_payload(): array {
 						'status' => array('type' => 'string', 'enum' => array('draft', 'pending', 'private', 'publish')),
 					),
 				),
+				'PageUpdateRequest' => array(
+					'type' => 'object',
+					'minProperties' => 1,
+					'additionalProperties' => false,
+					'properties' => array(
+						'title' => array('type' => 'string'),
+						'slug' => array('type' => 'string'),
+						'status' => array('type' => 'string', 'enum' => array('draft', 'pending', 'private', 'publish')),
+						'template' => array('type' => 'string'),
+					),
+				),
 				'FrontPageRequest' => array(
 					'type' => 'object',
 					'required' => array('show_on_front'),
@@ -862,6 +883,85 @@ function aihl_ai_rest_create_page(WP_REST_Request $request) {
 		'edit_builder' => ('smart-site-home.php' === $template || 'smart-site-builder.php' === $template || 'smart-site-blog.php' === $template)
 			? rest_url('sbs/v1/ai/pages/' . $page_id . '/builder')
 			: null,
+	));
+}
+
+function aihl_ai_rest_update_page(WP_REST_Request $request) {
+	$page_id = absint($request->get_param('id'));
+	$page = get_post($page_id);
+	if (!$page || 'page' !== $page->post_type) {
+		return new WP_Error('page_not_found', 'Pagina non trovata.', array('status' => 404));
+	}
+	if ('trash' === $page->post_status) {
+		return new WP_Error('page_trashed', 'Ripristinare la pagina prima di modificarla.', array('status' => 409));
+	}
+
+	$body = $request->get_json_params();
+	if (!is_array($body)) {
+		$body = array();
+	}
+	$allowed_fields = array('title', 'slug', 'status', 'template');
+	$unknown_fields = array_diff(array_keys($body), $allowed_fields);
+	if ($unknown_fields) {
+		return new WP_Error('unsupported_page_fields', 'La richiesta contiene campi pagina non supportati.', array('status' => 422));
+	}
+	if (!$body) {
+		return new WP_Error('empty_page_update', 'Specificare almeno un campo da aggiornare.', array('status' => 422));
+	}
+
+	$requested_status = array_key_exists('status', $body)
+		? sanitize_key((string) $body['status'])
+		: (string) $page->post_status;
+	if (!in_array($requested_status, array('draft', 'pending', 'private', 'publish'), true)) {
+		return new WP_Error('invalid_page_status', 'Stato pagina non valido.', array('status' => 422));
+	}
+	if (('publish' === $page->post_status || 'publish' === $requested_status) && !aihl_ai_can_publish($request)) {
+		return new WP_Error('publish_permission_required', 'La modifica di una pagina pubblicata richiede il permesso publish.', array('status' => 403));
+	}
+
+	$allowed_templates = array('', 'default', 'smart-site-home.php', 'smart-site-builder.php', 'smart-site-blog.php');
+	$template = array_key_exists('template', $body)
+		? sanitize_text_field((string) $body['template'])
+		: (get_page_template_slug($page_id) ?: 'default');
+	if (!in_array($template, $allowed_templates, true)) {
+		return new WP_Error('invalid_template', 'Template non valido.', array('status' => 422));
+	}
+
+	$update = array('ID' => $page_id);
+	if (array_key_exists('title', $body)) {
+		$title = sanitize_text_field((string) $body['title']);
+		if ('' === $title) {
+			return new WP_Error('missing_title', 'Il titolo della pagina non puo essere vuoto.', array('status' => 422));
+		}
+		$update['post_title'] = $title;
+	}
+	if (array_key_exists('slug', $body)) {
+		$update['post_name'] = sanitize_title((string) $body['slug']);
+	}
+	if (array_key_exists('status', $body)) {
+		$update['post_status'] = $requested_status;
+	}
+
+	$result = wp_update_post($update, true);
+	if (is_wp_error($result)) {
+		return new WP_Error('page_update_failed', $result->get_error_message(), array('status' => 500));
+	}
+	if (array_key_exists('template', $body)) {
+		if ('' === $template || 'default' === $template) {
+			delete_post_meta($page_id, '_wp_page_template');
+		} else {
+			update_post_meta($page_id, '_wp_page_template', $template);
+		}
+	}
+
+	return rest_ensure_response(array(
+		'updated'  => true,
+		'page_id'  => $page_id,
+		'title'    => (string) get_the_title($page_id),
+		'slug'     => (string) get_post_field('post_name', $page_id),
+		'status'   => (string) get_post_status($page_id),
+		'template' => get_page_template_slug($page_id) ?: 'default',
+		'url'      => get_permalink($page_id),
 	));
 }
 
