@@ -714,6 +714,11 @@ function aihl_ai_openapi_payload(): array {
 						'status' => array('type' => 'string', 'enum' => array('draft', 'pending', 'private', 'publish')),
 					),
 				),
+				'PageRestoreRequest' => array(
+					'type' => 'object',
+					'additionalProperties' => false,
+					'properties' => array(),
+				),
 				'PageUpdateRequest' => array(
 					'type' => 'object',
 					'minProperties' => 1,

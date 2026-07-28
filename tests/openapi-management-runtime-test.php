@@ -36,6 +36,12 @@ class AIHL_Fake_REST_Server {
 					'args' => array('id' => array('type' => 'integer', 'minimum' => 1, 'required' => true)),
 				),
 			),
+			'/aihtml/v1/ai/pages/(?P<id>\d+)/restore' => array(
+				array(
+					'methods' => array('POST' => true),
+					'args' => array('id' => array('type' => 'integer', 'minimum' => 1, 'required' => true)),
+				),
+			),
 		);
 	}
 }
@@ -44,6 +50,14 @@ function rest_get_server(): AIHL_Fake_REST_Server { return new AIHL_Fake_REST_Se
 require dirname(__DIR__) . '/inc/integrations/ai-api.php';
 
 $openapi = aihl_ai_openapi_payload();
+
+$encoded = json_encode($openapi, JSON_THROW_ON_ERROR);
+preg_match_all('~"#/components/schemas/([^"]+)"~', $encoded, $referenceMatches);
+foreach (array_unique($referenceMatches[1]) as $schemaName) {
+	if (!isset($openapi['components']['schemas'][$schemaName])) {
+		throw new RuntimeException("Unresolved OpenAPI schema reference: {$schemaName}");
+	}
+}
 
 if (!isset($openapi['components']['schemas']['CanvasRequest'], $openapi['components']['schemas']['CodeSlot'])) {
 	throw new RuntimeException('Concrete management schemas missing.');

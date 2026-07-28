@@ -5,6 +5,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.12.1] - 2026-07-28
+
+### Corretto
+- Definito lo schema OpenAPI `PageRestoreRequest` precedentemente referenziato ma assente.
+- Aggiunta validazione bloccante di tutti i riferimenti agli schemi OpenAPI.
+
 ## [1.12.0] - 2026-07-28
 
 ### Aggiunto
