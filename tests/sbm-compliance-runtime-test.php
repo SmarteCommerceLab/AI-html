@@ -4,7 +4,7 @@ declare(strict_types=1);
 define('ABSPATH', __DIR__);
 define('AIHL_TEXT_DOMAIN', 'ai_html');
 define('AIHL_OPTION_BASE', 'ai_html');
-define('AIHL_VERSION', '1.13.1');
+define('AIHL_VERSION', '1.13.2');
 define('AIHL_UPDATE_ENDPOINT', 'https://repository.example.test/theme.json');
 define('SBIN_VERSION', '1.8.4');
 

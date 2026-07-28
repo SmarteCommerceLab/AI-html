@@ -22,6 +22,7 @@ function update_option($key, $value, $autoload = null): bool {
 	$GLOBALS['aihl_migration_options'][$key] = $value;
 	return true;
 }
+function esc_attr($value): string { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'); }
 function aihl_sbm_design_mode(): string {
 	return $GLOBALS['aihl_migration_design_mode'];
 }
@@ -73,24 +74,47 @@ $legacy_raw = array(
 	'created' => '2026-01-01 00:00:00',
 	'updated' => '2026-06-01 00:00:00',
 );
+$legacy_global_css = array(
+	'id' => 'legacy-global-css',
+	'hook' => 'global_css',
+	'type' => 'css',
+	'code' => '.sx-footer{background:#111;color:#fff;padding:40px}',
+	'css' => '',
+	'js' => '',
+	'context' => 'global',
+	'priority' => 10,
+	'active' => true,
+	'label' => 'Legacy global CSS',
+	'version' => 2,
+	'created' => '2026-01-01 00:00:00',
+	'updated' => '2026-06-01 00:00:00',
+);
 $GLOBALS['aihl_migration_options'][AIHL_CODE_SLOTS_OPTION] = array(
 	'legacy-compliant' => $legacy_compliant,
 	'legacy-raw' => $legacy_raw,
+	'legacy-global-css' => $legacy_global_css,
 );
 
 $report = aihl_migrate_legacy_code_slot_governance();
 $slots = get_option(AIHL_CODE_SLOTS_OPTION, array());
 
 migration_assert($report['completed'], 'migrazione non completata');
-migration_assert(2 === $report['migrated_count'], 'numero slot migrati errato');
+migration_assert(3 === $report['migrated_count'], 'numero slot migrati errato');
 migration_assert(1 === $report['deactivated_count'], 'slot non conforme non sospeso');
 migration_assert('governed' === $slots['legacy-compliant']['design_mode'], 'design mode non assegnato');
 migration_assert($slots['legacy-compliant']['active'], 'slot conforme disattivato');
 migration_assert(!$slots['legacy-raw']['active'], 'slot raw ancora attivo');
+migration_assert($slots['legacy-global-css']['active'], 'CSS globale legacy disattivato');
 migration_assert($legacy_raw['code'] === $slots['legacy-raw']['code'], 'markup legacy modificato');
 migration_assert($legacy_raw['css'] === $slots['legacy-raw']['css'], 'CSS legacy modificato');
 migration_assert($legacy_raw['version'] === $slots['legacy-raw']['version'], 'versione slot modificata');
 migration_assert($legacy_raw['updated'] === $slots['legacy-raw']['updated'], 'timestamp slot modificato');
+
+ob_start();
+aihl_render_code_slot('global_css');
+$rendered_css = (string) ob_get_clean();
+migration_assert(false !== strpos($rendered_css, '.sx-footer'), 'CSS globale legacy non renderizzato');
+migration_assert(false !== strpos($rendered_css, 'data-aihl-slot="legacy-global-css"'), 'CSS globale legacy senza marker slot');
 
 $first_state = $slots;
 $second_report = aihl_migrate_legacy_code_slot_governance();

@@ -144,6 +144,7 @@ if (!function_exists('aihl_code_slot_context_matches')) {
 
 define('AIHL_CODE_SLOTS_OPTION', 'aihl_code_slots');
 define('AIHL_CODE_SLOTS_GOVERNANCE_MIGRATION_OPTION', 'aihl_code_slots_governance_migration_1131');
+define('AIHL_CODE_SLOTS_GOVERNANCE_REPAIR_OPTION', 'aihl_code_slots_governance_repair_1132');
 
 if (!function_exists('aihl_code_slots_get_all')) {
 	function aihl_code_slots_get_all() {
@@ -156,6 +157,12 @@ if (!function_exists('aihl_code_slots_get')) {
 	function aihl_code_slots_get(string $id) {
 		$slots = aihl_code_slots_get_all();
 		return $slots[$id] ?? null;
+	}
+}
+
+if (!function_exists('aihl_code_slot_is_canvas_override')) {
+	function aihl_code_slot_is_canvas_override(array $slot): bool {
+		return in_array((string) ($slot['hook'] ?? ''), array('header_full', 'footer_full'), true);
 	}
 }
 
@@ -199,7 +206,7 @@ if (!function_exists('aihl_migrate_legacy_code_slot_governance')) {
 			$slot['design_mode'] = $design_mode;
 			$migrated[] = (string) $id;
 
-			if (!empty($slot['active']) && function_exists('aihl_code_slot_governance_report')) {
+			if (aihl_code_slot_is_canvas_override($slot) && !empty($slot['active']) && function_exists('aihl_code_slot_governance_report')) {
 				$governance = aihl_code_slot_governance_report($slot);
 				if (empty($governance['valid'])) {
 					$slot['active'] = false;
@@ -232,6 +239,53 @@ if (!function_exists('aihl_migrate_legacy_code_slot_governance')) {
 	}
 }
 add_action('after_setup_theme', 'aihl_migrate_legacy_code_slot_governance', 60);
+
+if (!function_exists('aihl_repair_non_canvas_slot_governance')) {
+	/**
+	 * Restores non-Canvas slots incorrectly suspended by the 1.13.1 migration.
+	 */
+	function aihl_repair_non_canvas_slot_governance(): array {
+		$existing_report = get_option(AIHL_CODE_SLOTS_GOVERNANCE_REPAIR_OPTION, array());
+		if (is_array($existing_report) && !empty($existing_report['completed'])) {
+			return $existing_report;
+		}
+
+		$migration = aihl_code_slots_governance_migration_report();
+		$slots = aihl_code_slots_get_all();
+		$restored = array();
+		$candidates = isset($migration['deactivated_slot_ids']) && is_array($migration['deactivated_slot_ids'])
+			? $migration['deactivated_slot_ids']
+			: array();
+
+		foreach ($candidates as $id) {
+			$id = sanitize_key((string) $id);
+			if ($id === '' || !isset($slots[$id]) || !is_array($slots[$id])) {
+				continue;
+			}
+			if (aihl_code_slot_is_canvas_override($slots[$id]) || !empty($slots[$id]['active'])) {
+				continue;
+			}
+			$slots[$id]['active'] = true;
+			$restored[] = $id;
+		}
+
+		if ($restored) {
+			update_option(AIHL_CODE_SLOTS_OPTION, $slots, false);
+		}
+
+		$report = array(
+			'completed' => true,
+			'target_version' => '1.13.2',
+			'completed_at' => current_time('mysql'),
+			'restored_count' => count($restored),
+			'restored_slot_ids' => $restored,
+		);
+		update_option(AIHL_CODE_SLOTS_GOVERNANCE_REPAIR_OPTION, $report, false);
+
+		return $report;
+	}
+}
+add_action('after_setup_theme', 'aihl_repair_non_canvas_slot_governance', 61);
 
 if (!function_exists('aihl_code_slots_save')) {
 	/**
@@ -298,7 +352,7 @@ if (!function_exists('aihl_code_slots_save')) {
 			'updated'       => current_time('mysql'),
 		);
 
-		if (!empty($clean['active']) && function_exists('aihl_code_slot_governance_report')) {
+		if (aihl_code_slot_is_canvas_override($clean) && !empty($clean['active']) && function_exists('aihl_code_slot_governance_report')) {
 			$governance_report = aihl_code_slot_governance_report($clean);
 			if (!$governance_report['valid']) {
 				$clean['active'] = false;
@@ -331,7 +385,7 @@ if (!function_exists('aihl_code_slots_toggle')) {
 		if (!isset($slots[$id])) {
 			return new WP_Error('not_found', __('Slot non trovato.', AIHL_TEXT_DOMAIN));
 		}
-		if ($active && function_exists('aihl_code_slot_governance_report')) {
+		if ($active && aihl_code_slot_is_canvas_override($slots[$id]) && function_exists('aihl_code_slot_governance_report')) {
 			$governance_report = aihl_code_slot_governance_report($slots[$id]);
 			if (!$governance_report['valid']) {
 				return new WP_Error(
@@ -810,8 +864,9 @@ if (!function_exists('aihl_render_code_slot')) {
 			if (!aihl_code_slot_context_matches($slot['context'] ?? 'global')) {
 				continue;
 			}
+			$is_canvas_override = aihl_code_slot_is_canvas_override($slot);
 			$governance_report = aihl_code_slot_governance_report($slot);
-			if (!$governance_report['valid']) {
+			if ($is_canvas_override && !$governance_report['valid']) {
 				continue;
 			}
 			$active[] = $slot;

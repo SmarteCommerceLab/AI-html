@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.13.1
+Stable tag: 1.13.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,11 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.13.2 =
+* Corregge la migrazione governance Canvas: gli slot CSS globali e di supporto restano attivi e renderizzati.
+* Mantiene il blocco governance solo sugli override completi header/footer non conformi.
+* Ripristina automaticamente gli slot non-Canvas gia sospesi dall'aggiornamento 1.13.1.
 
 = 1.13.1 =
 * Migra in modo idempotente gli slot legacy al contratto di governance Canvas, senza riscrivere codice, revisioni o timestamp.

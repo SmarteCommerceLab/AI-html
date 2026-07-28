@@ -5,6 +5,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.13.2] - 2026-07-28
+
+### Corretto
+- Gli slot CSS globali e di supporto non vengono piu disattivati dalla migrazione governance Canvas.
+- Il rendering blocca solo gli override completi `header_full` e `footer_full` non conformi, evitando Canvas HTML senza CSS.
+- Le installazioni gia aggiornate a 1.13.1 riattivano automaticamente gli slot non-Canvas sospesi per errore.
+
 ## [1.13.1] - 2026-07-28
 
 ### Aggiunto
