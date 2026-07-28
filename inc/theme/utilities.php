@@ -443,7 +443,19 @@ add_action('wp_enqueue_scripts', function() {
 
 	wp_add_inline_style(
 		'ai-html-theme',
-		'.header-main{max-width:' . $widht . 'px!important}main.container.site-main{max-width:' . $widht . 'px!important}footer .container{max-width:' . $widht . 'px!important}'
+		':root{--aihl-request-article-max-width:' . $widht . 'px}'
+		. 'main.container.site-main{max-width:'
+		. (
+			function_exists('aihl_sbm_effective_css_value')
+				? aihl_sbm_effective_css_value(
+					'spacing',
+					'var(--aihl-request-article-max-width)',
+					'var(--sbin-container-max-width,1320px)',
+					'min(var(--sbin-container-max-width,1320px),var(--aihl-request-article-max-width))'
+				)
+				: 'var(--aihl-request-article-max-width)'
+		)
+		. '!important}'
 	);
 }, 101);
 /*

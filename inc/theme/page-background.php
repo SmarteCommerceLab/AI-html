@@ -245,6 +245,26 @@ function aihl_resolve_page_background(array $bg): array {
 			);
 		}
 	}
+
+	if (function_exists('aihl_sbm_inherits_design_domain') && aihl_sbm_inherits_design_domain('colors')) {
+		$mode = function_exists('aihl_sbm_design_mode') ? aihl_sbm_design_mode() : 'governed';
+		if ('color' === $bg['type']) {
+			$bg['color'] = 'adaptive' === $mode
+				? 'color-mix(in srgb, var(--bs-body-bg, #fff) 92%, var(--bs-primary, #0d6efd))'
+				: 'var(--bs-body-bg, #fff)';
+		}
+		if ('' !== (string) $bg['overlay_color']) {
+			$bg['overlay_color'] = 'var(--bs-primary, #0d6efd)';
+		}
+	}
+
+	if (function_exists('aihl_sbm_effective_css_value')) {
+		$image_opacity = aihl_sbm_effective_css_value('colors', $bg['image_opacity'], '1');
+		$overlay_opacity = aihl_sbm_effective_css_value('colors', $bg['overlay_opacity'], '0.18');
+		$bg['image_opacity'] = is_numeric($image_opacity) ? (float) $image_opacity : $image_opacity;
+		$bg['overlay_opacity'] = is_numeric($overlay_opacity) ? (float) $overlay_opacity : $overlay_opacity;
+	}
+
 	return $bg;
 }
 
@@ -264,7 +284,12 @@ add_action('rest_api_init', function () {
 				if (!get_post($post_id)) {
 					return new WP_Error('not_found', 'Page not found', array('status' => 404));
 				}
-				return new WP_REST_Response(aihl_get_page_background_meta($post_id));
+				$requested = aihl_get_page_background_meta($post_id);
+				return new WP_REST_Response(array(
+					'requested' => $requested,
+					'effective' => aihl_resolve_page_background($requested),
+					'design_governance' => function_exists('aihl_sbm_design_governance') ? aihl_sbm_design_governance() : array(),
+				));
 			},
 			'permission_callback' => function (WP_REST_Request $request) {
 				return function_exists('aihl_ai_can_read') ? aihl_ai_can_read($request) : current_user_can('manage_options');
@@ -283,7 +308,12 @@ add_action('rest_api_init', function () {
 				}
 				$sanitized = aihl_sanitize_page_background($input);
 				update_post_meta($post_id, '_aihl_page_background', $sanitized);
-				return new WP_REST_Response(array('updated' => true, 'background' => $sanitized));
+				return new WP_REST_Response(array(
+					'updated' => true,
+					'requested' => $sanitized,
+					'effective' => aihl_resolve_page_background($sanitized),
+					'design_governance' => function_exists('aihl_sbm_design_governance') ? aihl_sbm_design_governance() : array(),
+				));
 			},
 			'permission_callback' => function (WP_REST_Request $request) {
 				return function_exists('aihl_ai_can_write') ? aihl_ai_can_write($request) : current_user_can('manage_options');

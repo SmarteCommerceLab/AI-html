@@ -5,6 +5,29 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.13.0] - 2026-07-28
+
+### Aggiunto
+- Resolver centrale per le modalita SBM `governed`, `adaptive` e `autonomous`.
+- Matrice REST di compliance per tutte le 71 opzioni del tema.
+- `design_mode`, validazione token e diagnostica governance per gli slot AI Canvas.
+- Stato richiesto ed effettivo per gli sfondi pagina gestiti via API.
+
+### Modificato
+- Header, footer, menu, navigazione mobile, author box, template e pattern consumano direttamente token `--bs-*` e `--sbin-*`.
+- Le opzioni visuali del tema sono richieste subordinate alla governance SBM.
+- Gli override Canvas sono racchiusi nello scope semantico SBM e gli slot non conformi vengono disattivati senza essere eliminati.
+- WOW.js e Owl Carousel restano disponibili solo come fallback standalone; con SBM attivo il motion e gestito dal provider.
+
+### Corretto
+- Rimossa ogni dichiarazione di token nel namespace provider `--sbin-*` da AI-HTML.
+- Gli slot Canvas non possono piu dichiarare una modalita piu permissiva della governance SBM globale.
+- La compliance API classifica esplicitamente tutte le 71 opzioni e non usa piu esiti Bootstrap hardcoded.
+- Il menu mobile deriva superfici, testo e bordi dalla palette SBM, senza colori locali.
+- La larghezza articolo non modifica piu header e footer e rispetta `--sbin-container-max-width`.
+- Colori menu e sfondi per pagina non possono piu prevalere sulla palette SBM in modalita governata.
+- `/ai/compliance` separa controlli Google e governance SBM.
+
 ## [1.12.4] - 2026-07-28
 
 ### Aggiunto

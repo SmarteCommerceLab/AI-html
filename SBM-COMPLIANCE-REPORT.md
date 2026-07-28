@@ -1,150 +1,87 @@
-# AI-HTML / Smart Bootstrap Manager — Compliance Report
+# AI-HTML / Smart Bootstrap Manager - Compliance Report
 
-Versione tema: 1.5.3  
-Versione SBM: 1.3.1  
-Ultimo aggiornamento: 23 giugno 2026
+Versione tema: 1.13.0
 
----
+Provider verificato: Smart Bootstrap Manager 1.8.4
 
-## Sintesi
+Contratto consumer: 1.0.0
 
-**Livello compliance: ~96%**
+Ultimo aggiornamento: 28 luglio 2026
 
-Il tema consuma esclusivamente token CSS runtime `--bs-*` e `--sbin-*` per tutti i componenti visivi. Zero colori hardcoded fuori da fallback `var()`. L'ordine di caricamento CSS rispetta la cascade SBM.
+## Regola di ownership
 
----
+Smart Bootstrap Manager possiede:
 
-## Aggiornamento UI/FX 2026-06-22
+- token `--bs-*` e `--sbin-*`;
+- palette, tipografia, spacing, radius e componenti;
+- Bootstrap CSS/JS;
+- GSAP, page transition e runtime motion.
 
-AI-HTML resta consumer di SBM per gli effetti avanzati:
+AI-HTML possiede contenuti, markup WordPress, scelte strutturali e valori richiesti dal tema. Il tema non dichiara token `--sbin-*` e non carica asset duplicati quando SBM e attivo.
 
-- Barba.js e page transitions sono caricati e configurati da SBM.
-- Il tema mantiene header, footer, template e reinizializzazione dei propri comportamenti dopo transizione.
-- Il tema non deve duplicare Bootstrap, GSAP e relativi plugin, Chart.js o Barba.js.
-- Il contenuto principale deve rimanere server-side e non dipendere da animazioni per essere leggibile.
+Il tema accetta esclusivamente il contratto nativo `smart-bootstrap-manager`, major version 1, fornito da SBM 1.8.4 o successivo. Il contratto fallback non e considerato prova di compliance.
 
-## Aggiornamento 2026-06-23 - Confine bridge/header
+## Modalita
 
-- Il bridge `aihl-bootstrap-bridge.css` non colora piu nav link, dropdown item e navbar brand.
-- I colori header/menu restano nel CSS tema `ai-html.css`, cosi overlay/fullscreen hero mantengono testo bianco quando richiesto.
-- SBM fornisce token, non regole componenti header.
+| Modalita | Comportamento AI-HTML |
+| --- | --- |
+| `governed` | I valori visuali effettivi arrivano dai token SBM. |
+| `adaptive` | Le specializzazioni sono derivate da token semantici SBM. |
+| `autonomous` | I valori del tema sono ammessi nello scope locale autorizzato da SBM. |
 
-## Matrice compliance
+Accessibilita, contenuto server-side, ownership Bootstrap e ownership motion restano immutabili in tutte le modalita.
 
-### Colori e palette
+La modalita globale imposta da SBM e un limite non aggirabile: uno slot Canvas puo scegliere una modalita piu restrittiva, ma non puo passare da `governed` ad `adaptive` o `autonomous`, ne da `adaptive` ad `autonomous`.
 
-| Requisito SBM | Stato | Evidenza |
-|---|---|---|
-| `--bs-primary` / `--bs-primary-rgb` | OK | Header, footer, menu, CTA, trust bar, badge |
-| `--bs-secondary` / `--bs-secondary-rgb` | OK | Componenti secondari |
-| `--bs-light` / `--bs-dark` / `--bs-*-rgb` | OK | Topbar dark, overlay, footer futuristic |
-| `--bs-body-bg` / `--bs-body-color` / `--bs-*-rgb` | OK | Sidebar, bottom bar, search, tutti i bg |
-| `--bs-link-color` / `--bs-link-hover-color` | OK | Nav link, footer link, utility link |
-| `--bs-border-color` | OK | Tutti i bordi: card, trust, dropdown, search, sidebar |
-| `--sbin-primary-contrast` | PARTIAL | Usato su CTA footer. Da estendere a bottom-bar e sidebar active |
-| Nessun hardcode `#0d6efd` fuori da `var()` | OK | Verificato con grep su tutti i CSS |
+## Copertura opzioni
 
-### Tipografia
+Il registro canonico contiene 71 opzioni. L'endpoint:
 
-| Requisito SBM | Stato | Evidenza |
-|---|---|---|
-| `--bs-body-font-family` | OK | Bridge CSS body |
-| `--bs-body-font-size` / `--bs-body-line-height` | OK | Bridge CSS body |
-| `--bs-headings-font-family` | OK | Bridge CSS + inline bridge |
-| `--bs-headings-line-height` | OK | Bridge CSS + inline bridge |
-| `--sbin-headings-weight` | OK | `ai-html.css` headings, `bridge` headings |
-| Nessun font duplicato se SBM mode `local`/`off` | OK | Tema non carica font propri |
-
-### Layout e spacing
-
-| Requisito SBM | Stato | Evidenza |
-|---|---|---|
-| `--bs-spacer` | OK | Header, footer, sidebar, service items |
-| `--bs-border-radius` / `sm` / `lg` | OK | Card, dropdown, input, button, sidebar |
-| `--sbin-card-border-radius` | OK | Footer CTA, trust bar, menu rich content |
-| `--sbin-input-border-radius` | OK | Form, dropdown items |
-
-### Componenti
-
-| Requisito SBM | Stato | Evidenza |
-|---|---|---|
-| `--sbin-btn-padding-y/x` | OK | Header CTA, login, footer submit |
-| `--sbin-btn-font-weight` | OK | `.btn`, bridge inline |
-| `--sbin-btn-border-radius` | OK | Tutti i bottoni, square buttons |
-| `--bs-navbar-nav-link-padding-x` | OK | Nav link padding con `max()` floor |
-| `--bs-nav-link-padding-y` | OK | Nav link padding verticale |
-| Nessun Bootstrap duplicato | OK | Enqueue condizionale su handle `smart-bootstrap` |
-| CSS tema dopo `smart-bootstrap` | OK | `ai-html-theme` dep `smart-bootstrap`, prio 99 |
-| Bridge dopo tema | OK | `aihl-bootstrap-bridge` dep `smart-bootstrap` + `ai-html-theme`, prio 120 |
-| Bridge non sovrascrive padding nav | OK | Regola `.navbar .nav-link` padding rimossa dal bridge |
-
-### Effetti
-
-| Requisito SBM | Stato | Evidenza |
-|---|---|---|
-| No librerie effetti duplicate | OK | AI-HTML non carica librerie; le scene demandano il runtime a SBM |
-| `prefers-reduced-motion` | OK | CSS globale in `ai-html.css` |
-
-### Nuovi componenti v1.2.0
-
-| Componente | Token usati | Stato |
-|---|---|---|
-| Admin Hub | Non frontend — solo admin CSS | N/A |
-| Topbar (condivisa) | `--bs-dark`, `--bs-light`, `--bs-border-color`, `--bs-primary` | OK |
-| Brand Bar | `--bs-body-bg`, `--bs-border-color`, `--bs-body-color` | OK |
-| Search Dropdown | `--bs-body-bg`, `--bs-border-color` | OK |
-| Search Fullscreen | `--bs-dark-rgb`, `--bs-light-rgb`, `--bs-primary` | OK |
-| Bottom Bar | `--bs-body-bg`, `--bs-body-color`, `--bs-border-color`, `--bs-primary` | OK |
-| Sidebar Header | `--bs-body-bg`, `--bs-body-color`, `--bs-border-color`, `--bs-primary-rgb` | OK |
-| Grid menu layout | `--bs-border-color`, `--bs-primary-rgb`, `--bs-border-radius-lg` | OK |
-| Featured menu layout | `--bs-border-color`, `--bs-primary-rgb`, `--bs-body-bg` | OK |
-| Showcase menu layout | `--bs-dark-rgb`, `--bs-light-rgb`, `--bs-light` | OK |
-| Gradient-fade sticky | `--bs-dark-rgb`, `--aihl-overlay-opacity`, `--bs-light`, `--bs-body-bg` | OK |
-| CTA Footer hero | `--bs-primary-rgb`, `--bs-secondary-rgb`, `--bs-body-bg`, `--bs-border-color` | OK |
-| Minimal footer | `--bs-body-color-rgb`, `--bs-primary` | OK |
-| Accent color item | `--aihl-item-color` (custom, non SBM) | OK — token locale, non sovrascrive SBM |
-| Badge color custom | Attributo `style` inline | OK — solo su singolo badge, non globale |
-
----
-
-## Gap residui
-
-| Priorita | Gap | Impatto |
-|---|---|---|
-| P1 | Ridurre `!important` nel bridge (target < 10 usi) | Manutenibilita cascade |
-| P2 | Estendere `--sbin-primary-contrast` a bottom-bar CTA, sidebar active state | Contrasto su bg primary custom |
-| P2 | Audit mobile offcanvas tutti i 7 layout rich + dark mode SBM | Rendering mobile |
-| P3 | Sidebar header: verificare `--bs-body-bg` in dark mode SBM | Dark mode consistency |
-| P3 | Pulizia px legacy su componenti secondari (owl, testimonial) | Token compliance marginali |
-
----
-
-## Source of Truth
-
-1. **SBM** e source of truth per: palette `--bs-*`, tipografia `--bs-body-*`/`--bs-headings-*`/`--sbin-headings-weight`, spacing `--sbin-*`/`--bs-nav-link-padding-*`, effetti `sbin-*`
-2. **AI-HTML** definisce solo varianti UI locali: `header_nav_layout`, `header_nav_text_variant`, `header_structure`, `footer_variant`, `--aihl-item-color`
-3. **SBS** salva scelte semantiche e classi Bootstrap, non colori raw
-4. Se c'e conflitto, **prevale il token runtime SBM**
-
-### Guardrail
-
-- Vietato hardcodare `#0d6efd` o equivalenti nei componenti globali
-- Vietato caricare font globali alternativi quando SBM `local`/`off`
-- Vietato ridefinire `.btn-primary`, `.text-primary`, `.bg-primary` con colori diretti
-- Nuovi componenti devono usare esclusivamente `var(--bs-*)` e `var(--sbin-*)`
-- Token nav padding: usare `--bs-navbar-nav-link-padding-x`, NON `--bs-nav-link-padding-x` (Bootstrap 5.3 lo azzera dentro `.navbar-nav`)
-
----
-
-## Verifica rapida
-
-```powershell
-# Colori hardcoded fuori da var()
-rg -n "#0d6efd|#6c757d|#212529|#f8f9fa|#dee2e6" AI-html/resource/css/ | rg -v "var\("
-
-# Bootstrap duplicato
-rg -n "bootstrap.min.css|bootstrap.bundle|cdn.jsdelivr.net/npm/bootstrap" AI-html/
-
-# Token usati
-rg -c "--bs-|--sbin-" AI-html/resource/css/
+```text
+GET /wp-json/aihtml/v1/ai/compliance
 ```
+
+restituisce per ogni opzione:
+
+- gruppo e tipo;
+- classificazione esplicita `visual` o `content`;
+- dominio visuale;
+- valore richiesto;
+- modalita SBM;
+- ereditarieta dal provider;
+- stato di compliance.
+
+La copertura e calcolata confrontando il registro corrente con le classificazioni, senza conteggi hardcoded. Un'opzione non classificata riduce il punteggio e viene restituita in `unclassified_options`.
+
+Lo schema e lo stato delle opzioni sono disponibili anche tramite:
+
+```text
+GET /wp-json/aihtml/v1/ai/options/schema
+GET /wp-json/aihtml/v1/ai/options
+```
+
+## Canvas
+
+Ogni nuovo slot salva `design_mode`. Gli override `header_full` e `footer_full` senza dichiarazione esplicita non vengono renderizzati.
+
+Il validatore blocca:
+
+- modalita dello slot piu permissive della governance globale;
+- dichiarazioni `--sbin-*`;
+- colori, font, scale, spacing e radius raw in modalita governed;
+- CSS governed privo di token semantici;
+- inizializzazioni autonome WOW, GSAP, ScrollTrigger e Owl Carousel.
+
+Gli slot non conformi sono conservati ma disattivati. Diagnostica e motivazioni sono disponibili nell'Admin Hub, nelle API Code Slots e nel payload Canvas.
+
+## Verifiche bloccanti
+
+- Nessuna dichiarazione `--sbin-*` nei sorgenti frontend del tema.
+- Nessun alias colore legacy, colore governato raw o tracking tipografico locale nei CSS verificati.
+- Bootstrap del tema solo come fallback standalone.
+- Handle e fallback Bootstrap verificati dal contratto e dal loader, senza esiti hardcoded.
+- Motion legacy disabilitato con SBM attivo.
+- Pattern, ombre, radius, tipografia e componenti basati su token.
+- Larghezza articolo subordinata a `--sbin-container-max-width`.
+- Colori menu e background subordinati alla palette SBM.
+- Test contrattuali PHP per governance opzioni e Canvas.

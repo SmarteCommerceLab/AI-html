@@ -78,6 +78,10 @@
     if (!in_array($aihl_header_nav_text_variant, array('normal', 'uppercase', 'lowercase', 'italic', 'uppercase-italic', 'lowercase-italic'), true)) {
         $aihl_header_nav_text_variant = 'normal';
     }
+    $aihl_header_nav_text_variant_requested = $aihl_header_nav_text_variant;
+    if (function_exists('aihl_sbm_inherits_design_domain') && aihl_sbm_inherits_design_domain('typography')) {
+        $aihl_header_nav_text_variant = 'normal';
+    }
     $aihl_header_nav_font_weight = (string) aihtml_option_value('header_nav_font_weight', '500');
     if (!in_array($aihl_header_nav_font_weight, array('300', '400', '500', '600', '700', '800'), true)) {
         $aihl_header_nav_font_weight = '500';
@@ -141,7 +145,29 @@
         $aihl_header_classes[] = 'bg-body';
         $aihl_header_classes[] = 'sticky-top';
     }
-    $aihl_header_style = '--sbin-overlay-opacity:' . $aihl_header_overlay_opacity . ';--sbin-overlay-blur:' . $aihl_header_overlay_blur . 'px;--aihl-overlay-opacity:' . $aihl_header_overlay_opacity . ';--aihl-overlay-blur:' . $aihl_header_overlay_blur . 'px;--aihl-nav-font-weight:' . $aihl_header_nav_font_weight . ';--aihl-nav-letter-spacing:' . $aihl_header_nav_letter_spacing . 'em;';
+    $aihl_effective_overlay_opacity = function_exists('aihl_sbm_effective_css_value')
+        ? aihl_sbm_effective_css_value('components', $aihl_header_overlay_opacity, '0.18')
+        : (string) $aihl_header_overlay_opacity;
+    $aihl_effective_overlay_blur = function_exists('aihl_sbm_effective_css_value')
+        ? aihl_sbm_effective_css_value('components', $aihl_header_overlay_blur . 'px', '8px')
+        : $aihl_header_overlay_blur . 'px';
+    $aihl_effective_nav_font_weight = function_exists('aihl_sbm_effective_css_value')
+        ? aihl_sbm_effective_css_value('typography', $aihl_header_nav_font_weight, 'var(--sbin-btn-font-weight,var(--sbin-headings-weight,500))')
+        : $aihl_header_nav_font_weight;
+    $aihl_effective_nav_letter_spacing = function_exists('aihl_sbm_effective_css_value')
+        ? aihl_sbm_effective_css_value('typography', $aihl_header_nav_letter_spacing . 'em', '0em')
+        : $aihl_header_nav_letter_spacing . 'em';
+    $aihl_header_style = implode(';', array(
+        '--aihl-request-overlay-opacity:' . $aihl_header_overlay_opacity,
+        '--aihl-request-overlay-blur:' . $aihl_header_overlay_blur . 'px',
+        '--aihl-request-nav-font-weight:' . $aihl_header_nav_font_weight,
+        '--aihl-request-nav-letter-spacing:' . $aihl_header_nav_letter_spacing . 'em',
+        '--aihl-request-nav-text-variant:' . $aihl_header_nav_text_variant_requested,
+        '--aihl-overlay-opacity:' . $aihl_effective_overlay_opacity,
+        '--aihl-overlay-blur:' . $aihl_effective_overlay_blur,
+        '--aihl-nav-font-weight:' . $aihl_effective_nav_font_weight,
+        '--aihl-nav-letter-spacing:' . $aihl_effective_nav_letter_spacing,
+    ));
 
     $aihl_has_topbar = in_array($aihl_header_structure, array('dualbar', 'topbar-nav', 'triple-row', 'stacked-centered'), true);
     $aihl_has_social_links = function_exists('aihl_get_site_builder_social_links') && !empty(aihl_get_site_builder_social_links());

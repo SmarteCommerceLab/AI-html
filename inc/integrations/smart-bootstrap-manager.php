@@ -76,6 +76,133 @@ if (!function_exists('aihl_sbm_contract_value')) {
 	}
 }
 
+if (!function_exists('aihl_sbm_design_governance')) {
+	/**
+	 * Normalized design-governance state. Without SBM the theme is autonomous.
+	 *
+	 * @return array<string,mixed>
+	 */
+	function aihl_sbm_design_governance() {
+		$defaults = array(
+			'smart_bootstrap_option_design_mode' => 'autonomous',
+			'smart_bootstrap_option_design_inherit_colors' => false,
+			'smart_bootstrap_option_design_inherit_typography' => false,
+			'smart_bootstrap_option_design_inherit_spacing' => false,
+			'smart_bootstrap_option_design_inherit_radius' => false,
+			'smart_bootstrap_option_design_inherit_components' => false,
+			'smart_bootstrap_option_design_inherit_motion' => false,
+		);
+
+		if (!aihl_is_bootstrap_manager_active()) {
+			return $defaults;
+		}
+
+		if (function_exists('smart_bootstrap_manager_get_design_governance')) {
+			$provider = smart_bootstrap_manager_get_design_governance();
+		} elseif (function_exists('smart_bootstrap_manager_design_governance_api_payload')) {
+			$payload = smart_bootstrap_manager_design_governance_api_payload();
+			$provider = is_array($payload) ? ($payload['options'] ?? array()) : array();
+		} else {
+			$provider = array();
+		}
+
+		$governance = array_merge($defaults, is_array($provider) ? $provider : array());
+		$mode = sanitize_key((string) $governance['smart_bootstrap_option_design_mode']);
+		$governance['smart_bootstrap_option_design_mode'] = in_array($mode, array('governed', 'adaptive', 'autonomous'), true)
+			? $mode
+			: 'governed';
+
+		foreach (array_keys($defaults) as $key) {
+			if ('smart_bootstrap_option_design_mode' !== $key) {
+				$governance[$key] = (bool) $governance[$key];
+			}
+		}
+
+		return $governance;
+	}
+}
+
+if (!function_exists('aihl_sbm_design_mode')) {
+	function aihl_sbm_design_mode() {
+		$governance = aihl_sbm_design_governance();
+		return (string) $governance['smart_bootstrap_option_design_mode'];
+	}
+}
+
+if (!function_exists('aihl_sbm_design_mode_rank')) {
+	/**
+	 * Lower ranks are stricter and cannot be relaxed by a consumer.
+	 */
+	function aihl_sbm_design_mode_rank($mode) {
+		$ranks = array(
+			'governed' => 0,
+			'adaptive' => 1,
+			'autonomous' => 2,
+		);
+		$mode = sanitize_key((string) $mode);
+		return $ranks[$mode] ?? $ranks['governed'];
+	}
+}
+
+if (!function_exists('aihl_sbm_constrain_design_mode')) {
+	/**
+	 * Resolve a consumer mode without allowing it to weaken global SBM policy.
+	 *
+	 * @return array{requested:string,global:string,effective:string,allowed:bool}
+	 */
+	function aihl_sbm_constrain_design_mode($requested) {
+		$requested = sanitize_key((string) $requested);
+		if (!in_array($requested, array('governed', 'adaptive', 'autonomous'), true)) {
+			$requested = aihl_sbm_design_mode();
+		}
+		$global = aihl_is_bootstrap_manager_active() ? aihl_sbm_design_mode() : 'autonomous';
+		$allowed = aihl_sbm_design_mode_rank($requested) <= aihl_sbm_design_mode_rank($global);
+
+		return array(
+			'requested' => $requested,
+			'global' => $global,
+			'effective' => $allowed ? $requested : $global,
+			'allowed' => $allowed,
+		);
+	}
+}
+
+if (!function_exists('aihl_sbm_inherits_design_domain')) {
+	function aihl_sbm_inherits_design_domain($domain) {
+		if (!aihl_is_bootstrap_manager_active()) {
+			return false;
+		}
+
+		$mode = aihl_sbm_design_mode();
+		if ('governed' === $mode) {
+			return true;
+		}
+		if ('autonomous' === $mode) {
+			return false;
+		}
+
+		$domain = sanitize_key((string) $domain);
+		$governance = aihl_sbm_design_governance();
+		$key = 'smart_bootstrap_option_design_inherit_' . $domain;
+		return !empty($governance[$key]);
+	}
+}
+
+if (!function_exists('aihl_sbm_effective_css_value')) {
+	/**
+	 * Resolve a theme request without allowing it to outrank an inherited SBM domain.
+	 */
+	function aihl_sbm_effective_css_value($domain, $requested, $governed, $adaptive = '') {
+		if (!aihl_sbm_inherits_design_domain($domain)) {
+			return (string) $requested;
+		}
+		if ('adaptive' === aihl_sbm_design_mode() && '' !== (string) $adaptive) {
+			return (string) $adaptive;
+		}
+		return (string) $governed;
+	}
+}
+
 add_filter('body_class', function($classes) {
 	if (!aihl_is_bootstrap_manager_active()) {
 		return $classes;
@@ -92,6 +219,12 @@ add_filter('body_class', function($classes) {
 	$motion_available = aihl_sbm_contract_value(array('motion', 'available'), false);
 	$classes[] = $motion_available ? 'aihl-sbm-motion-gsap' : 'aihl-sbm-motion-static';
 	$classes[] = 'aihl-sbm-contract';
+	$classes[] = 'aihl-governance-' . aihl_sbm_design_mode();
+	foreach (array('colors', 'typography', 'spacing', 'radius', 'components', 'motion') as $domain) {
+		if (aihl_sbm_inherits_design_domain($domain)) {
+			$classes[] = 'aihl-inherit-' . $domain;
+		}
+	}
 
 	return array_values(array_unique($classes));
 }, 20);
@@ -104,32 +237,23 @@ if (!function_exists('aihl_build_bootstrap_bridge_css')) {
 		$motion_available = aihl_sbm_contract_value(array('motion', 'available'), false) ? '1' : '0';
 
 		$css = ':root{';
-		$css .= '--primary:var(--bs-primary,#0d6efd);--secondary:var(--bs-secondary,#6c757d);--light:var(--bs-light,#f8f9fa);--dark:var(--bs-dark,#212529);';
-		$css .= '--aihl-brand-color:var(--bs-primary,#0d6efd);';
-		$css .= '--aihl-accent-color:var(--bs-primary,#0d6efd);';
 		$css .= '--aihl-sbm-contract-version:' . $contract_version . ';--aihl-sbm-theme-mode:' . $theme_mode . ';--aihl-sbm-resolved-theme-mode:' . $resolved_theme_mode . ';--aihl-sbm-motion-available:' . $motion_available . ';';
-		$css .= '--aihl-ui-link-color:var(--bs-link-color,var(--bs-primary,#0d6efd));';
-		$css .= '--aihl-ui-link-hover-color:var(--bs-link-hover-color,var(--bs-primary,#0d6efd));';
-		$css .= '--aihl-primary-contrast:var(--sbin-primary-contrast,#fff);';
-		$css .= '--aihl-headings-weight:var(--sbin-headings-weight,500);';
-		$css .= '--aihl-btn-padding-y:var(--sbin-btn-padding-y,.375rem);--aihl-btn-padding-x:var(--sbin-btn-padding-x,.75rem);--aihl-btn-font-weight:var(--sbin-btn-font-weight,400);--aihl-btn-border-radius:var(--sbin-btn-border-radius,var(--bs-border-radius,.375rem));';
-		$css .= '--aihl-input-border-radius:var(--sbin-input-border-radius,var(--bs-border-radius,.375rem));--aihl-card-border-radius:var(--sbin-card-border-radius,var(--bs-border-radius,.375rem));';
 		$css .= '}';
 
-		$css .= 'h1,h2,h3,h4,h5,h6,.fw-bold{font-weight:var(--aihl-headings-weight)!important;font-family:var(--bs-headings-font-family,var(--bs-body-font-family,inherit));line-height:var(--bs-headings-line-height,1.2);}';
+		$css .= 'h1,h2,h3,h4,h5,h6,.fw-bold{font-weight:var(--sbin-headings-weight,500)!important;font-family:var(--bs-headings-font-family,var(--bs-body-font-family,inherit));line-height:var(--bs-headings-line-height,1.2);}';
 		$css .= 'body{background:var(--bs-body-bg,#fff);color:var(--bs-body-color,#212529);font-family:var(--bs-body-font-family,inherit);font-size:var(--bs-body-font-size,1rem);line-height:var(--bs-body-line-height,1.5);}';
-		$css .= '.btn:not(.btn-square):not(.btn-sm-square):not(.btn-lg-square){padding:var(--aihl-btn-padding-y) var(--aihl-btn-padding-x);font-weight:var(--aihl-btn-font-weight);border-radius:var(--aihl-btn-border-radius);}';
-		$css .= '.form-control,.form-select,.input-group-text{border-radius:var(--aihl-input-border-radius);}';
-		$css .= '.card,.service-item,.team-item,.aihl-footer-cta,.aihl-menu-rich-content{border-radius:var(--aihl-card-border-radius);}';
-		$css .= '.aihl-header-nav .dropdown-menu,.aihl-menu-rich-links .dropdown-item,.aihl-mobile-rail-btn{border-radius:var(--aihl-input-border-radius);}';
-		$css .= '.aihl-header-nav .navbar-nav .nav-link,.aihl-header-nav .dropdown-menu .dropdown-item{font-weight:var(--aihl-btn-font-weight);}';
+		$css .= '.btn:not(.btn-square):not(.btn-sm-square):not(.btn-lg-square){padding:var(--sbin-btn-padding-y,.375rem) var(--sbin-btn-padding-x,.75rem);font-weight:var(--sbin-btn-font-weight,400);border-radius:var(--sbin-btn-border-radius,var(--bs-border-radius,.375rem));}';
+		$css .= '.form-control,.form-select,.input-group-text{border-radius:var(--sbin-input-border-radius,var(--bs-border-radius,.375rem));}';
+		$css .= '.card,.service-item,.team-item,.aihl-footer-cta,.aihl-menu-rich-content{border-radius:var(--sbin-card-border-radius,var(--bs-border-radius,.375rem));}';
+		$css .= '.aihl-header-nav .dropdown-menu,.aihl-menu-rich-links .dropdown-item,.aihl-mobile-rail-btn{border-radius:var(--sbin-input-border-radius,var(--bs-border-radius,.375rem));}';
+		$css .= '.aihl-header-nav .navbar-nav .nav-link,.aihl-header-nav .dropdown-menu .dropdown-item{font-weight:var(--sbin-btn-font-weight,400);}';
 		$css .= '.aihl-header-nav .dropdown-menu .dropdown-item:hover,.aihl-header-nav .dropdown-menu .dropdown-item:focus{background:rgba(var(--bs-primary-rgb,13,110,253),.1);}';
 		$css .= '.section-title h6::before,.section-title h6::after{background:rgba(var(--bs-primary-rgb,13,110,253),.45);}';
-		$css .= '.aihl-header-nav:not(.aihl-header-overlay):not(.aihl-overlay-mode-always) .navbar-brand,.aihl-header-nav:not(.aihl-header-overlay):not(.aihl-overlay-mode-always) .navbar-brand .h2{color:var(--aihl-brand-color);}';
-		$css .= '.aihl-header-nav:not(.aihl-header-overlay):not(.aihl-overlay-mode-always) .navbar-nav>.current-menu-item>.nav-link,.aihl-header-nav:not(.aihl-header-overlay):not(.aihl-overlay-mode-always) .navbar-nav>.current-menu-ancestor>.nav-link{color:var(--aihl-ui-link-hover-color);}';
-		$css .= '.aihl-footer:not(.aihl-footer-surface-dark) .aihl-footer-brand,.aihl-footer:not(.aihl-footer-surface-dark) .aihl-footer-brand .h4,.aihl-footer:not(.aihl-footer-surface-dark) .aihl-footer-kicker,.aihl-footer:not(.aihl-footer-surface-dark) .aihl-footer-contact i,.aihl-footer:not(.aihl-footer-surface-dark) .aihl-footer-menu a::before{color:var(--aihl-accent-color);}';
-		$css .= '.aihl-footer:not(.aihl-footer-surface-dark) a{color:var(--aihl-ui-link-color);}.aihl-footer:not(.aihl-footer-surface-dark) a:hover,.aihl-footer:not(.aihl-footer-surface-dark) a:focus{color:var(--aihl-ui-link-hover-color);}';
-		$css .= '.aihl-footer-form input[type="submit"],.aihl-footer-form button[type="submit"],.aihl-footer .mc4wp-form input[type="submit"],.aihl-footer .mc4wp-form button[type="submit"]{background:var(--bs-primary)!important;border-color:var(--bs-primary)!important;color:var(--aihl-primary-contrast)!important;border-radius:var(--aihl-btn-border-radius)!important;}';
+		$css .= '.aihl-header-nav:not(.aihl-header-overlay):not(.aihl-overlay-mode-always) .navbar-brand,.aihl-header-nav:not(.aihl-header-overlay):not(.aihl-overlay-mode-always) .navbar-brand .h2{color:var(--bs-primary,#0d6efd);}';
+		$css .= '.aihl-header-nav:not(.aihl-header-overlay):not(.aihl-overlay-mode-always) .navbar-nav>.current-menu-item>.nav-link,.aihl-header-nav:not(.aihl-header-overlay):not(.aihl-overlay-mode-always) .navbar-nav>.current-menu-ancestor>.nav-link{color:var(--bs-link-hover-color,var(--bs-primary,#0d6efd));}';
+		$css .= '.aihl-footer:not(.aihl-footer-surface-dark) .aihl-footer-brand,.aihl-footer:not(.aihl-footer-surface-dark) .aihl-footer-brand .h4,.aihl-footer:not(.aihl-footer-surface-dark) .aihl-footer-kicker,.aihl-footer:not(.aihl-footer-surface-dark) .aihl-footer-contact i,.aihl-footer:not(.aihl-footer-surface-dark) .aihl-footer-menu a::before{color:var(--bs-primary,#0d6efd);}';
+		$css .= '.aihl-footer:not(.aihl-footer-surface-dark) a{color:var(--bs-link-color,var(--bs-primary,#0d6efd));}.aihl-footer:not(.aihl-footer-surface-dark) a:hover,.aihl-footer:not(.aihl-footer-surface-dark) a:focus{color:var(--bs-link-hover-color,var(--bs-primary,#0d6efd));}';
+		$css .= '.aihl-footer-form input[type="submit"],.aihl-footer-form button[type="submit"],.aihl-footer .mc4wp-form input[type="submit"],.aihl-footer .mc4wp-form button[type="submit"]{background:var(--bs-primary)!important;border-color:var(--bs-primary)!important;color:var(--sbin-primary-contrast,#fff)!important;border-radius:var(--sbin-btn-border-radius,var(--bs-border-radius,.375rem))!important;}';
 		$css .= '.aihl-footer-form input[type="radio"],.aihl-footer-form input[type="checkbox"],.aihl-footer .mc4wp-form input[type="radio"],.aihl-footer .mc4wp-form input[type="checkbox"]{accent-color:var(--bs-primary)!important;}';
 		$css .= '.aihl-footer-form .form-check-input:checked,.aihl-footer .mc4wp-form .form-check-input:checked{background-color:var(--bs-primary)!important;border-color:var(--bs-primary)!important;}';
 		$css .= '.text-primary{color:var(--bs-primary)!important;}.bg-primary{background-color:var(--bs-primary)!important;}.border-primary{border-color:var(--bs-primary)!important;}';

@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.12.4
+Stable tag: 1.13.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,11 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.13.0 =
+* Subordina colori, tipografia, spacing, radius, componenti e motion alla governance di Smart Bootstrap Manager.
+* Impedisce agli slot AI Canvas di adottare una modalita piu permissiva della policy SBM globale.
+* Espone una verifica REST reale del contratto SBM, degli asset Bootstrap e della classificazione di tutte le 71 opzioni.
 
 = 1.12.4 =
 * Aggiunge l'editor interno AI Canvas per gestire codice HTML, CSS e JS degli override header e footer dal pannello Code Slots.

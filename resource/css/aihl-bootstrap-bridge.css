@@ -5,15 +5,6 @@
  * mobile rail visibility, or responsive menu layout.
  */
 
-:root {
-    --primary: var(--bs-primary, #0d6efd);
-    --secondary: var(--bs-secondary, #6c757d);
-    --light: var(--bs-light, #f8f9fa);
-    --dark: var(--bs-dark, #212529);
-    --sbin-header-overlay-opacity: var(--sbin-overlay-opacity, var(--aihl-overlay-opacity, .18));
-    --sbin-header-overlay-blur: var(--sbin-overlay-blur, var(--aihl-overlay-blur, 8px));
-}
-
 body {
     color: var(--bs-body-color, #212529);
     background-color: var(--bs-body-bg, #ffffff);
@@ -71,11 +62,10 @@ h6 {
 .container,
 .container-fluid,
 .container-xxl {
-    --sbin-space: calc(var(--bs-spacer, 1rem) * 3);
-    --aihl-space: var(--sbin-space);
+    --aihl-space: var(--sbin-section-padding-y, calc(var(--bs-spacer, 1rem) * 3));
 }
 
 .py-5 {
-    padding-top: var(--sbin-space, 3rem) !important;
-    padding-bottom: var(--sbin-space, 3rem) !important;
+    padding-top: var(--aihl-space, 3rem) !important;
+    padding-bottom: var(--aihl-space, 3rem) !important;
 }

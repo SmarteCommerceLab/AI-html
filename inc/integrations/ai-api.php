@@ -209,7 +209,9 @@ function aihl_ai_options_whitelist(): array {
 function aihl_ai_rest_options_schema() {
 	$whitelist = aihl_ai_options_whitelist();
 	$schema = array();
+	$domain_map = function_exists('aihl_sbm_option_domain_map') ? aihl_sbm_option_domain_map() : array();
 	foreach ($whitelist as $field => $def) {
+		$domain = (string) ($domain_map[$field] ?? '');
 		$schema[$field] = array(
 			'type'  => $def['type'],
 			'group' => $def['group'],
@@ -217,11 +219,14 @@ function aihl_ai_rest_options_schema() {
 			'min'   => $def['min'] ?? null,
 			'max'   => $def['max'] ?? null,
 			'current' => aihtml_option_value($field, ''),
+			'visual_domain' => $domain,
+			'governed_by_sbm' => '' !== $domain,
 		);
 	}
 	return rest_ensure_response(array(
 		'theme'  => AIHL_THEME_NAME,
 		'option_key' => AIHL_OPTION_BASE . '_general',
+		'design_governance' => function_exists('aihl_sbm_design_governance') ? aihl_sbm_design_governance() : array(),
 		'fields' => $schema,
 	));
 }
@@ -293,6 +298,8 @@ function aihl_ai_rest_get_options() {
 	return rest_ensure_response(array(
 		'theme'   => AIHL_THEME_NAME,
 		'options' => $values,
+		'design_governance' => function_exists('aihl_sbm_design_governance') ? aihl_sbm_design_governance() : array(),
+		'compliance' => function_exists('aihl_sbm_option_compliance_matrix') ? aihl_sbm_option_compliance_matrix() : array(),
 	));
 }
 
@@ -333,6 +340,8 @@ function aihl_ai_rest_update_options(WP_REST_Request $request) {
 		'saved'    => true,
 		'applied'  => $applied,
 		'rejected' => $rejected,
+		'design_governance' => function_exists('aihl_sbm_design_governance') ? aihl_sbm_design_governance() : array(),
+		'compliance' => function_exists('aihl_sbm_option_compliance_matrix') ? aihl_sbm_option_compliance_matrix() : array(),
 	));
 }
 
@@ -545,7 +554,7 @@ function aihl_ai_openapi_route_metadata(): array {
 		'/aihtml/v1/ai/reset/execute' => array('summary' => 'Execute Smart Reset', 'tag' => 'Reset', 'read_schema' => 'ResetResult', 'write_schema' => 'ResetRequest'),
 		'/aihtml/v1/ai/reset/snapshots/{token}' => array('summary' => 'Read a private Smart Reset snapshot', 'tag' => 'Reset', 'read_schema' => 'GenericObject'),
 		'/aihtml/v1/ai/author-profile' => array('summary' => 'Author profile preferences', 'tag' => 'Authors', 'read_schema' => 'GenericObject', 'write_schema' => 'AuthorProfileRequest'),
-		'/aihtml/v1/ai/pages/{id}/background' => array('summary' => 'Read, update or remove per-page background', 'tag' => 'Pages', 'read_schema' => 'PageBackground', 'write_schema' => 'PageBackground'),
+		'/aihtml/v1/ai/pages/{id}/background' => array('summary' => 'Read, update or remove per-page background', 'tag' => 'Pages', 'read_schema' => 'PageBackgroundState', 'write_schema' => 'PageBackground'),
 		'/aihtml/v1/ai/content/{id}/presentation' => array('summary' => 'Read or update theme presentation metadata for content', 'tag' => 'Pages', 'read_schema' => 'ContentPresentation', 'write_schema' => 'ContentPresentation'),
 		'/aihtml/v1/ai/page-background/patterns' => array('summary' => 'List available page background patterns', 'tag' => 'Pages', 'read_schema' => 'GenericObject'),
 		'/aihtml/v1/ai/code-slots' => array('summary' => 'List or save AI Code Slots', 'tag' => 'Canvas', 'read_schema' => 'GenericObject', 'write_schema' => 'CodeSlot'),
@@ -800,7 +809,7 @@ function aihl_ai_openapi_payload(): array {
 				'CanvasHealth' => array(
 					'type' => 'object',
 					'additionalProperties' => false,
-					'required' => array('area', 'mode', 'status', 'selected_slot_id', 'resolved_slot_id', 'editor_slot_id', 'slots_total', 'slots_active', 'fallback_native', 'issues', 'editor_url'),
+					'required' => array('area', 'mode', 'status', 'selected_slot_id', 'resolved_slot_id', 'editor_slot_id', 'slots_total', 'slots_active', 'fallback_native', 'design_mode', 'requested_design_mode', 'global_design_mode', 'design_mode_declared', 'issues', 'editor_url'),
 					'properties' => array(
 						'area' => array('type' => 'string', 'enum' => array('header', 'footer')),
 						'mode' => array('type' => 'string', 'enum' => array('native', 'canvas')),
@@ -811,6 +820,10 @@ function aihl_ai_openapi_payload(): array {
 						'slots_total' => array('type' => 'integer', 'minimum' => 0),
 						'slots_active' => array('type' => 'integer', 'minimum' => 0),
 						'fallback_native' => array('type' => 'boolean'),
+						'design_mode' => array('type' => 'string', 'enum' => array('governed', 'adaptive', 'autonomous', '')),
+						'requested_design_mode' => array('type' => 'string', 'enum' => array('governed', 'adaptive', 'autonomous', '')),
+						'global_design_mode' => array('type' => 'string', 'enum' => array('governed', 'adaptive', 'autonomous')),
+						'design_mode_declared' => array('type' => 'boolean'),
 						'issues' => array('type' => 'array', 'items' => array('$ref' => '#/components/schemas/CanvasHealthIssue')),
 						'editor_url' => array('type' => 'string', 'format' => 'uri'),
 					),
@@ -863,6 +876,17 @@ function aihl_ai_openapi_payload(): array {
 						'overlay_opacity' => array('type' => 'number', 'minimum' => 0, 'maximum' => 1),
 					),
 				),
+				'PageBackgroundState' => array(
+					'type' => 'object',
+					'additionalProperties' => false,
+					'required' => array('requested', 'effective', 'design_governance'),
+					'properties' => array(
+						'updated' => array('type' => 'boolean'),
+						'requested' => array('$ref' => '#/components/schemas/PageBackground'),
+						'effective' => array('$ref' => '#/components/schemas/PageBackground'),
+						'design_governance' => array('type' => 'object', 'additionalProperties' => true),
+					),
+				),
 				'ContentPresentation' => array(
 					'type' => 'object',
 					'additionalProperties' => false,
@@ -882,6 +906,8 @@ function aihl_ai_openapi_payload(): array {
 						'code' => array('type' => 'string'),
 						'css' => array('type' => 'string'),
 						'js' => array('type' => 'string'),
+						'design_mode' => array('type' => 'string', 'enum' => array('governed', 'adaptive', 'autonomous')),
+						'governance' => array('type' => 'object', 'additionalProperties' => true, 'readOnly' => true),
 						'context' => array('oneOf' => array(array('type' => 'string'), array('type' => 'array', 'items' => array('type' => 'string')))),
 						'priority' => array('type' => 'integer', 'minimum' => 1, 'maximum' => 999),
 						'active' => array('type' => 'boolean'),

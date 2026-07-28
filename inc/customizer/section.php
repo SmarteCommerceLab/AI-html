@@ -2,6 +2,19 @@
 * ver:2024-0429-1556
 */ ?>
 <?php
+if (!function_exists('aihl_customizer_sbm_notice')) {
+	function aihl_customizer_sbm_notice($domain) {
+		if (!function_exists('aihl_is_bootstrap_manager_active') || !aihl_is_bootstrap_manager_active()) {
+			return __('Valore usato dal tema in modalita standalone.', AIHL_TEXT_DOMAIN);
+		}
+		$mode = function_exists('aihl_sbm_design_mode') ? aihl_sbm_design_mode() : 'governed';
+		$inherits = function_exists('aihl_sbm_inherits_design_domain') && aihl_sbm_inherits_design_domain($domain);
+		return $inherits
+			? sprintf(__('Valore richiesto. In modalita SBM %s il valore effettivo deriva dai token del provider.', AIHL_TEXT_DOMAIN), $mode)
+			: sprintf(__('Valore autorizzato dalla modalita SBM %s nello scope del tema.', AIHL_TEXT_DOMAIN), $mode);
+	}
+}
+
 if (!function_exists('aihl_sanitize_header_overlay_mode')) {
 	function aihl_sanitize_header_overlay_mode($value) {
 		$value = sanitize_text_field((string) $value);
@@ -205,7 +218,9 @@ function aihl_customizer_canvas_slot_choices(string $area): array {
 		return $choices;
 	}
 	foreach (aihl_code_slots_get_all() as $id => $slot) {
-		if (($slot['hook'] ?? '') === $hook && !empty($slot['active'])) {
+		$governance_ok = !function_exists('aihl_code_slot_governance_report')
+			|| !empty(aihl_code_slot_governance_report($slot)['valid']);
+		if (($slot['hook'] ?? '') === $hook && !empty($slot['active']) && $governance_ok) {
 			$choices[(string) $id] = sprintf('%s (#%s)', (string) ($slot['label'] ?? $id), (string) $id);
 		}
 	}
@@ -408,7 +423,7 @@ add_action('customize_register',function($wp_customize) {
 	// ----------------------------------------------------------------------/ Related Link - Active
 	ai_html_toggle_item_add($wp_customize,AIHL_OPTION_BASE.'_'.'general','article_related_link'        ,AIHL_TEXT_DOMAIN.'_'.'article_section','Link correlati','Mostra Link relativi al contenuto',false,'related_link');
 	// ----------------------------------------------------------------------/ content-size
-	ai_html_textbox_item_add($wp_customize,AIHL_OPTION_BASE.'_'.'general','article_content_size'       ,AIHL_TEXT_DOMAIN.'_'.'article_section','Width(px)','Imposta la larghezza del sito','1280');
+	ai_html_textbox_item_add($wp_customize,AIHL_OPTION_BASE.'_'.'general','article_content_size'       ,AIHL_TEXT_DOMAIN.'_'.'article_section','Larghezza articolo richiesta (px)',aihl_customizer_sbm_notice('spacing'),'1280');
 	aihl_assign_setting_sanitizer(
 		$wp_customize,
 		AIHL_OPTION_BASE.'_general[article_content_size]',
@@ -658,6 +673,7 @@ add_action('customize_register',function($wp_customize) {
 		'section'  => $section,
 		'settings' => $base.'[header_nav_text_variant]',
 		'label'    => __('Header Menu Text Variant', AIHL_TEXT_DOMAIN),
+		'description' => aihl_customizer_sbm_notice('typography'),
 		'choices'  => array(
 			'normal'           => __('Normale', AIHL_TEXT_DOMAIN),
 			'uppercase'        => __('Stampatello maiuscolo', AIHL_TEXT_DOMAIN),
@@ -681,6 +697,7 @@ add_action('customize_register',function($wp_customize) {
 		'section'  => $section,
 		'settings' => $base.'[header_nav_font_weight]',
 		'label'    => __('Header Menu Font Weight', AIHL_TEXT_DOMAIN),
+		'description' => aihl_customizer_sbm_notice('typography'),
 		'choices'  => array(
 			'300' => '300',
 			'400' => '400',
@@ -703,7 +720,7 @@ add_action('customize_register',function($wp_customize) {
 		'section'     => $section,
 		'settings'    => $base.'[header_nav_letter_spacing]',
 		'label'       => __('Header Menu Letter Spacing (em)', AIHL_TEXT_DOMAIN),
-		'description' => __('Range: 0 - 0.2', AIHL_TEXT_DOMAIN),
+		'description' => aihl_customizer_sbm_notice('typography'),
 		'input_attrs' => array(
 			'min'  => '0',
 			'max'  => '0.2',
@@ -767,8 +784,8 @@ add_action('customize_register',function($wp_customize) {
 		'label'    => __('Header Login URL', AIHL_TEXT_DOMAIN),
 	));
 
-	ai_html_textbox_item_add($wp_customize,$base,'header_overlay_opacity',$section,'Overlay Opacity (0-1)','Default 0.18','0.18');
-	ai_html_textbox_item_add($wp_customize,$base,'header_overlay_blur',$section,'Overlay Blur px','Default 8','8');
+	ai_html_textbox_item_add($wp_customize,$base,'header_overlay_opacity',$section,'Overlay Opacity richiesta (0-1)',aihl_customizer_sbm_notice('components'),'0.18');
+	ai_html_textbox_item_add($wp_customize,$base,'header_overlay_blur',$section,'Overlay Blur richiesto (px)',aihl_customizer_sbm_notice('components'),'8');
 	aihl_assign_setting_sanitizer($wp_customize, $base.'[header_overlay_opacity]', 'aihl_sanitize_overlay_opacity');
 	aihl_assign_setting_sanitizer($wp_customize, $base.'[header_overlay_blur]', 'aihl_sanitize_overlay_blur');
 
@@ -912,13 +929,13 @@ add_action('customize_register',function($wp_customize) {
 		),
 	));
 
-	ai_html_textbox_item_add($wp_customize,$base,'page_bg_color',$section,'Colore sfondo','Hex color default per pagine','');
+	ai_html_textbox_item_add($wp_customize,$base,'page_bg_color',$section,'Colore sfondo richiesto',aihl_customizer_sbm_notice('colors'),'');
 	aihl_assign_setting_sanitizer($wp_customize, $base.'[page_bg_color]', aihl_customizer_sanitizer('page_bg_color'));
 
 	ai_html_textbox_item_add($wp_customize,$base,'page_bg_image',$section,'Immagine sfondo URL','URL immagine di sfondo default','');
 	aihl_assign_setting_sanitizer($wp_customize, $base.'[page_bg_image]', 'esc_url_raw');
 
-	ai_html_textbox_item_add($wp_customize,$base,'page_bg_image_opacity',$section,'Opacità immagine (0-1)','Default 1','1');
+	ai_html_textbox_item_add($wp_customize,$base,'page_bg_image_opacity',$section,'Opacità immagine richiesta (0-1)',aihl_customizer_sbm_notice('colors'),'1');
 
 	aihl_assign_setting_sanitizer($wp_customize, $base.'[page_bg_image_opacity]', 'aihl_sanitize_unit_interval');
 
@@ -962,9 +979,9 @@ add_action('customize_register',function($wp_customize) {
 		),
 	));
 
-	ai_html_textbox_item_add($wp_customize,$base,'page_bg_overlay_color',$section,'Overlay colore','Hex color overlay','');
+	ai_html_textbox_item_add($wp_customize,$base,'page_bg_overlay_color',$section,'Overlay colore richiesto',aihl_customizer_sbm_notice('colors'),'');
 	aihl_assign_setting_sanitizer($wp_customize, $base.'[page_bg_overlay_color]', aihl_customizer_sanitizer('page_bg_overlay_color'));
-	ai_html_textbox_item_add($wp_customize,$base,'page_bg_overlay_opacity',$section,'Overlay opacità (0-1)','Default 0.18','0.18');
+	ai_html_textbox_item_add($wp_customize,$base,'page_bg_overlay_opacity',$section,'Overlay opacità richiesta (0-1)',aihl_customizer_sbm_notice('colors'),'0.18');
 	aihl_assign_setting_sanitizer($wp_customize, $base.'[page_bg_overlay_opacity]', 'aihl_sanitize_unit_interval');
 });
 ?>
@@ -1083,7 +1100,7 @@ add_action('customize_register',function($wp_customize) {
 	));
 	aihl_customizer_add_divider($wp_customize,'footer_background_remote_url_separetor',$section);
 
-	ai_html_textbox_item_add($wp_customize,$base,'footer_background_opacity',$section,'Opacita immagine (0-1)','Default 0.12','0.12');
+	ai_html_textbox_item_add($wp_customize,$base,'footer_background_opacity',$section,'Opacita immagine richiesta (0-1)',aihl_customizer_sbm_notice('colors'),'0.12');
 	aihl_assign_setting_sanitizer($wp_customize, $base.'[footer_background_opacity]', 'aihl_sanitize_unit_interval');
 
 	$wp_customize->add_setting($base.'[footer_background_position]', array(
@@ -1149,7 +1166,7 @@ add_action('customize_register',function($wp_customize) {
 	));
 	aihl_customizer_add_divider($wp_customize,'footer_background_repeat_separetor',$section);
 
-	ai_html_textbox_item_add($wp_customize,$base,'footer_overlay_opacity',$section,'Opacita overlay (0-1)','Default 0','0');
+	ai_html_textbox_item_add($wp_customize,$base,'footer_overlay_opacity',$section,'Opacita overlay richiesta (0-1)',aihl_customizer_sbm_notice('colors'),'0');
 	aihl_assign_setting_sanitizer($wp_customize, $base.'[footer_overlay_opacity]', 'aihl_sanitize_unit_interval');
 
 	$wp_customize->add_setting($base.'[footer_overlay_tone]', array(

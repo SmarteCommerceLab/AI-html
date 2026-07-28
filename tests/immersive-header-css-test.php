@@ -16,7 +16,7 @@ $required_fragments = array(
 	'.aihl-header-nav.aihl-header-overlay.is-scrolled',
 	'background: rgba(var(--bs-dark-rgb, 33, 37, 41), .92) !important;',
 	'body.aihl-has-fullscreen-hero .aihl-header-nav:not(.is-scrolled) .navbar-nav .nav-link',
-	'text-shadow: 0 1px 14px rgba(0, 0, 0, .42);',
+	'text-shadow: 0 1px 14px rgba(var(--bs-dark-rgb, 33, 37, 41), .42);',
 	'.aihl-header-nav.aihl-sticky-style-gradient-fade:not(.is-scrolled)',
 	'.aihl-header-nav.aihl-sticky-style-gradient-fade.is-scrolled',
 );

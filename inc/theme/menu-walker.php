@@ -203,7 +203,10 @@ if (!class_exists('AIHL_Nav_Menu_Walker')) {
 
 			$inline_style = '';
 			if ($accent_color !== '') {
-				$inline_style .= '--aihl-item-color:' . esc_attr($accent_color) . ';';
+				$effective_accent_color = function_exists('aihl_sbm_effective_css_value')
+					? aihl_sbm_effective_css_value('colors', $accent_color, 'var(--bs-primary,#0d6efd)')
+					: $accent_color;
+				$inline_style .= '--aihl-item-color:' . esc_attr($effective_accent_color) . ';';
 				$link_classes[] = 'aihl-menu-has-color';
 			}
 
@@ -232,7 +235,10 @@ if (!class_exists('AIHL_Nav_Menu_Walker')) {
 			if ($depth > 0 && $badge !== '') {
 				$badge_style_attr = '';
 				if ($badge_color !== '') {
-					$badge_style_attr = ' style="background:' . esc_attr($badge_color) . '!important;border-color:' . esc_attr($badge_color) . '!important"';
+					$effective_badge_color = function_exists('aihl_sbm_effective_css_value')
+						? aihl_sbm_effective_css_value('colors', $badge_color, 'var(--bs-primary,#0d6efd)')
+						: $badge_color;
+					$badge_style_attr = ' style="background:' . esc_attr($effective_badge_color) . '!important;border-color:' . esc_attr($effective_badge_color) . '!important"';
 				}
 				$label .= '<span class="aihl-menu-badge badge rounded-pill bg-primary ms-2"' . $badge_style_attr . '>' . esc_html($badge) . '</span>';
 			}

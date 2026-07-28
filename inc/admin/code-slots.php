@@ -181,6 +181,10 @@ if (!function_exists('aihl_code_slots_save')) {
 		$slots = aihl_code_slots_get_all();
 		$existing = $slots[$id] ?? null;
 		$version = $existing ? (int) ($existing['version'] ?? 0) + 1 : 1;
+		$design_mode = sanitize_key((string) ($slot['design_mode'] ?? ($existing['design_mode'] ?? '')));
+		if (!in_array($design_mode, array('governed', 'adaptive', 'autonomous'), true)) {
+			$design_mode = function_exists('aihl_sbm_design_mode') ? aihl_sbm_design_mode() : 'autonomous';
+		}
 
 		// Sanitizzazione codice per tipo
 		$code = $slot['code'] ?? '';
@@ -207,6 +211,7 @@ if (!function_exists('aihl_code_slots_save')) {
 			'css'           => $css,
 			'js'            => $js,
 			'context'       => $slot['context'] ?? 'global',
+			'design_mode'   => $design_mode,
 			'priority'      => isset($slot['priority']) ? max(1, min(999, (int) $slot['priority'])) : 10,
 			'active'        => isset($slot['active']) ? (bool) $slot['active'] : true,
 			'label'         => sanitize_text_field($slot['label'] ?? $id),
@@ -217,6 +222,13 @@ if (!function_exists('aihl_code_slots_save')) {
 			'created'       => $existing['created'] ?? current_time('mysql'),
 			'updated'       => current_time('mysql'),
 		);
+
+		if (!empty($clean['active']) && function_exists('aihl_code_slot_governance_report')) {
+			$governance_report = aihl_code_slot_governance_report($clean);
+			if (!$governance_report['valid']) {
+				$clean['active'] = false;
+			}
+		}
 
 		$slots[$id] = $clean;
 		update_option(AIHL_CODE_SLOTS_OPTION, $slots, false);
@@ -243,6 +255,16 @@ if (!function_exists('aihl_code_slots_toggle')) {
 		$slots = aihl_code_slots_get_all();
 		if (!isset($slots[$id])) {
 			return new WP_Error('not_found', __('Slot non trovato.', AIHL_TEXT_DOMAIN));
+		}
+		if ($active && function_exists('aihl_code_slot_governance_report')) {
+			$governance_report = aihl_code_slot_governance_report($slots[$id]);
+			if (!$governance_report['valid']) {
+				return new WP_Error(
+					'aihl_slot_governance_failed',
+					__('Lo slot non puo essere attivato finche non supera la governance SBM.', AIHL_TEXT_DOMAIN),
+					array('status' => 409, 'governance' => $governance_report)
+				);
+			}
 		}
 		$slots[$id]['active'] = $active;
 		$slots[$id]['updated'] = current_time('mysql');
@@ -327,6 +349,141 @@ if (!function_exists('aihl_code_slots_get_admin_canvas_slot')) {
 	}
 }
 
+if (!function_exists('aihl_code_slot_governance_report')) {
+	/**
+	 * Validate a slot against SBM design and motion ownership.
+	 *
+	 * @return array{valid:bool,mode:string,declared:bool,issues:array<int,array<string,string>>}
+	 */
+	function aihl_code_slot_governance_report(array $slot): array {
+		$declared_mode = sanitize_key((string) ($slot['design_mode'] ?? ''));
+		$declared = in_array($declared_mode, array('governed', 'adaptive', 'autonomous'), true);
+		$requested_mode = $declared
+			? $declared_mode
+			: (function_exists('aihl_sbm_design_mode') ? aihl_sbm_design_mode() : 'autonomous');
+		$constraint = function_exists('aihl_sbm_constrain_design_mode')
+			? aihl_sbm_constrain_design_mode($requested_mode)
+			: array(
+				'requested' => $requested_mode,
+				'global' => $requested_mode,
+				'effective' => $requested_mode,
+				'allowed' => true,
+			);
+		$mode = (string) $constraint['effective'];
+		$hook = sanitize_key((string) ($slot['hook'] ?? ''));
+		$type = sanitize_key((string) ($slot['type'] ?? 'html'));
+		$code = (string) ($slot['code'] ?? '');
+		$css = 'css' === $type ? $code : (string) ($slot['css'] ?? '');
+		$js = 'js' === $type ? $code : (string) ($slot['js'] ?? '');
+		$issues = array();
+
+		if (in_array($hook, array('header_full', 'footer_full'), true) && !$declared) {
+			$issues[] = array(
+				'code' => 'design_mode_missing',
+				'severity' => 'error',
+				'message' => __('Il Canvas deve dichiarare design_mode.', AIHL_TEXT_DOMAIN),
+			);
+		}
+
+		if (empty($constraint['allowed'])) {
+			$issues[] = array(
+				'code' => 'design_mode_exceeds_global_policy',
+				'severity' => 'error',
+				'message' => sprintf(
+					/* translators: 1: requested mode, 2: global SBM mode. */
+					__('La modalita Canvas %1$s e piu permissiva della governance SBM globale %2$s.', AIHL_TEXT_DOMAIN),
+					(string) $constraint['requested'],
+					(string) $constraint['global']
+				),
+			);
+		}
+
+		$style_sources = $css . "\n";
+		if (preg_match_all('/\bstyle\s*=\s*(["\'])(.*?)\1/is', $code, $inline_matches)) {
+			$style_sources .= implode(";\n", $inline_matches[2]);
+		}
+		if (preg_match_all('/<style\b[^>]*>(.*?)<\/style>/is', $code, $style_matches)) {
+			$style_sources .= "\n" . implode("\n", $style_matches[1]);
+		}
+
+		if (preg_match('/--sbin-[a-z0-9-]+\s*:/i', $style_sources)) {
+			$issues[] = array(
+				'code' => 'sbm_namespace_override',
+				'severity' => 'error',
+				'message' => __('Lo slot dichiara token --sbin-* riservati a Smart Bootstrap Manager.', AIHL_TEXT_DOMAIN),
+			);
+		}
+
+		$css_without_tokens = preg_replace('/var\([^;{}]+\)/i', 'var(--governed-token)', $style_sources);
+		$css_without_tokens = preg_replace('/url\([^)]*\)/i', 'url(asset)', (string) $css_without_tokens);
+		$has_raw_color = (bool) preg_match(
+			'/(?:^|[;{])\s*(?:color|background(?:-color)?|border(?:-[a-z-]+)?-color|fill|stroke)\s*:\s*(?:#[0-9a-f]{3,8}\b|rgba?\(|hsla?\()/im',
+			(string) $css_without_tokens
+		);
+		$has_raw_font = (bool) preg_match('/font-family\s*:\s*(?!var\()/i', (string) $css_without_tokens);
+		$has_raw_radius = (bool) preg_match('/border-radius\s*:\s*(?!var\(|0\b|50%)[^;}{]+/i', (string) $css_without_tokens);
+		$has_raw_spacing = (bool) preg_match(
+			'/(?:padding|margin|gap|row-gap|column-gap)\s*:\s*(?!var\(|calc\([^;]*var\()[^;}{]*(?:px|rem|em)\b/i',
+			(string) $css_without_tokens
+		);
+		$has_raw_type_scale = (bool) preg_match(
+			'/(?:font-size|line-height|letter-spacing)\s*:\s*(?!var\(|calc\([^;]*var\()[^;}{]+/i',
+			(string) $css_without_tokens
+		);
+		$uses_semantic_tokens = (bool) preg_match('/var\(--(?:bs|sbin|canvas)-/i', $style_sources);
+
+		if ('governed' === $mode && ($has_raw_color || $has_raw_font || $has_raw_radius || $has_raw_spacing || $has_raw_type_scale)) {
+			$issues[] = array(
+				'code' => 'governed_raw_visual_value',
+				'severity' => 'error',
+				'message' => __('Il CSS governed contiene colori, tipografia, spaziature o radius non derivati dai token SBM.', AIHL_TEXT_DOMAIN),
+			);
+		} elseif ('adaptive' === $mode && ($has_raw_color || $has_raw_font || $has_raw_radius || $has_raw_spacing || $has_raw_type_scale)) {
+			$issues[] = array(
+				'code' => 'adaptive_raw_visual_value',
+				'severity' => 'warning',
+				'message' => __('Il CSS adaptive contiene valori visuali non derivati da token semantici.', AIHL_TEXT_DOMAIN),
+			);
+		}
+
+		if ('governed' === $mode && trim($style_sources) !== '' && !$uses_semantic_tokens) {
+			$issues[] = array(
+				'code' => 'governed_tokens_missing',
+				'severity' => 'error',
+				'message' => __('Il CSS governed deve consumare token --bs-*, --sbin-* o --canvas-*.', AIHL_TEXT_DOMAIN),
+			);
+		}
+
+		if (preg_match('/\b(?:new\s+WOW\s*\(|gsap\s*\.|ScrollTrigger\b|owlCarousel\s*\()/i', $js . "\n" . $code)) {
+			$issues[] = array(
+				'code' => 'motion_runtime_override',
+				'severity' => 'error',
+				'message' => __('Motion e carousel runtime devono essere richiesti tramite SBM o componenti Bootstrap.', AIHL_TEXT_DOMAIN),
+			);
+		}
+
+		$valid = !(bool) array_filter($issues, static function(array $issue): bool {
+			return 'error' === ($issue['severity'] ?? '');
+		});
+
+		return array(
+			'valid' => $valid,
+			'mode' => $mode,
+			'requested_mode' => (string) $constraint['requested'],
+			'global_mode' => (string) $constraint['global'],
+			'declared' => $declared,
+			'issues' => array_values($issues),
+		);
+	}
+}
+
+if (!function_exists('aihl_code_slot_api_payload')) {
+	function aihl_code_slot_api_payload(array $slot): array {
+		$slot['governance'] = aihl_code_slot_governance_report($slot);
+		return $slot;
+	}
+}
+
 if (!function_exists('aihl_canvas_health_report')) {
 	/**
 	 * Restituisce una diagnosi stabile e serializzabile della sorgente Canvas.
@@ -376,6 +533,8 @@ if (!function_exists('aihl_canvas_health_report')) {
 
 		$diagnostic_slot = is_array($selected) && ($selected['hook'] ?? '') === $hook ? $selected : $editor_slot;
 		if (is_array($diagnostic_slot)) {
+			$governance_report = aihl_code_slot_governance_report($diagnostic_slot);
+			$issues = array_merge($issues, $governance_report['issues']);
 			$markup = trim((string) ($diagnostic_slot['code'] ?? ''));
 			if ($markup === '') {
 				$issues[] = array('code' => 'canvas_markup_empty', 'severity' => 'error', 'message' => __('Lo slot Canvas non contiene markup HTML.', AIHL_TEXT_DOMAIN));
@@ -424,6 +583,10 @@ if (!function_exists('aihl_canvas_health_report')) {
 			'slots_total' => $slots_total,
 			'slots_active' => $slots_active,
 			'fallback_native' => 'canvas' === $mode && !is_array($resolved),
+			'design_mode' => isset($governance_report) ? $governance_report['mode'] : '',
+			'requested_design_mode' => isset($governance_report) ? $governance_report['requested_mode'] : '',
+			'global_design_mode' => isset($governance_report) ? $governance_report['global_mode'] : (function_exists('aihl_sbm_design_mode') ? aihl_sbm_design_mode() : 'autonomous'),
+			'design_mode_declared' => isset($governance_report) ? $governance_report['declared'] : false,
 			'issues' => array_values($issues),
 			'editor_url' => function_exists('admin_url') ? admin_url($editor_query) : $editor_query,
 		);
@@ -447,6 +610,10 @@ if (!function_exists('aihl_get_canvas_override_slot')) {
 				continue;
 			}
 			if (!aihl_code_slot_context_matches($slot['context'] ?? 'global')) {
+				continue;
+			}
+			$governance_report = aihl_code_slot_governance_report($slot);
+			if (!$governance_report['valid']) {
 				continue;
 			}
 			$slot['id'] = (string) ($slot['id'] ?? $id);
@@ -568,6 +735,10 @@ if (!function_exists('aihl_render_code_slot')) {
 			if (!aihl_code_slot_context_matches($slot['context'] ?? 'global')) {
 				continue;
 			}
+			$governance_report = aihl_code_slot_governance_report($slot);
+			if (!$governance_report['valid']) {
+				continue;
+			}
 			$active[] = $slot;
 		}
 
@@ -583,6 +754,23 @@ if (!function_exists('aihl_render_code_slot')) {
 
 		foreach ($active as $slot) {
 			$type = $slot['type'] ?? 'html';
+			$is_canvas_override = in_array($hook, array('header_full', 'footer_full'), true);
+			if ($is_canvas_override) {
+				$governance_report = aihl_code_slot_governance_report($slot);
+				$governance = function_exists('aihl_sbm_design_governance') ? aihl_sbm_design_governance() : array();
+				$inherit_attribute = static function(string $domain) use ($governance): string {
+					$key = 'smart_bootstrap_option_design_inherit_' . $domain;
+					return !empty($governance[$key]) ? 'on' : 'off';
+				};
+				echo '<div class="sbs-ai-canvas aihl-ai-canvas aihl-ai-canvas-' . esc_attr('header_full' === $hook ? 'header' : 'footer') . '"';
+				echo ' data-sbs-design-mode="' . esc_attr($governance_report['mode']) . '"';
+				echo ' data-sbs-inherit-colors="' . esc_attr($inherit_attribute('colors')) . '"';
+				echo ' data-sbs-inherit-typography="' . esc_attr($inherit_attribute('typography')) . '"';
+				echo ' data-sbs-inherit-spacing="' . esc_attr($inherit_attribute('spacing')) . '"';
+				echo ' data-sbs-inherit-radius="' . esc_attr($inherit_attribute('radius')) . '"';
+				echo ' data-sbs-inherit-components="' . esc_attr($inherit_attribute('components')) . '"';
+				echo '>';
+			}
 
 			switch ($type) {
 				case 'css':
@@ -625,6 +813,9 @@ if (!function_exists('aihl_render_code_slot')) {
 					echo "\n";
 					echo '<!-- /aihl-slot -->' . "\n";
 					break;
+			}
+			if ($is_canvas_override) {
+				echo '</div>';
 			}
 		}
 	}
@@ -680,9 +871,10 @@ add_action('rest_api_init', function () {
 			'permission_callback' => $can_read,
 			'callback'            => function () {
 				$slots = aihl_code_slots_get_all();
+				$payload = array_map('aihl_code_slot_api_payload', array_values($slots));
 				return rest_ensure_response(array(
 					'count' => count($slots),
-					'slots' => array_values($slots),
+					'slots' => $payload,
 				));
 			},
 		),
@@ -699,7 +891,7 @@ add_action('rest_api_init', function () {
 				if (is_wp_error($result)) {
 					return $result;
 				}
-				return rest_ensure_response($result);
+				return rest_ensure_response(aihl_code_slot_api_payload($result));
 			},
 		),
 	));
@@ -714,7 +906,7 @@ add_action('rest_api_init', function () {
 				if (!$slot) {
 					return new WP_Error('not_found', 'Slot non trovato.', array('status' => 404));
 				}
-				return rest_ensure_response($slot);
+				return rest_ensure_response(aihl_code_slot_api_payload($slot));
 			},
 		),
 		array(
@@ -730,7 +922,7 @@ add_action('rest_api_init', function () {
 				if (is_wp_error($result)) {
 					return $result;
 				}
-				return rest_ensure_response($result);
+				return rest_ensure_response(aihl_code_slot_api_payload($result));
 			},
 		),
 		array(
@@ -1193,6 +1385,7 @@ if (!function_exists('aihl_render_code_slots_page')) {
 				'hook'     => sanitize_key(wp_unslash($_POST['slot_hook'] ?? '')),
 				'type'     => sanitize_key(wp_unslash($_POST['slot_type'] ?? 'html')),
 				'context'  => sanitize_text_field(wp_unslash($_POST['slot_context'] ?? 'global')),
+				'design_mode' => sanitize_key(wp_unslash($_POST['slot_design_mode'] ?? '')),
 				'priority' => (int) ($_POST['slot_priority'] ?? 10),
 				'active'   => !empty($_POST['slot_active']),
 				'code'     => wp_unslash($_POST['slot_code'] ?? ''),
@@ -1223,7 +1416,10 @@ if (!function_exists('aihl_render_code_slots_page')) {
 		if (isset($_POST['aihl_code_slot_toggle']) && check_admin_referer('aihl_code_slots_nonce')) {
 			$tog_id = sanitize_key(wp_unslash($_POST['aihl_code_slot_toggle']));
 			$tog_active = !empty($_POST['aihl_toggle_to']);
-			aihl_code_slots_toggle($tog_id, $tog_active);
+			$toggle_result = aihl_code_slots_toggle($tog_id, $tog_active);
+			if (is_wp_error($toggle_result)) {
+				$save_result = $toggle_result;
+			}
 			$slots = aihl_code_slots_get_all();
 		}
 
@@ -1275,6 +1471,7 @@ if (!function_exists('aihl_render_code_slots_page')) {
 				'hook' => $canvas_area ? $canvas_area . '_full' : 'before_header',
 				'type' => $canvas_area ? 'mixed' : 'html',
 				'context' => 'global',
+				'design_mode' => function_exists('aihl_sbm_design_mode') ? aihl_sbm_design_mode() : 'autonomous',
 				'priority' => 10,
 				'active' => true,
 				'code' => '',
@@ -1319,6 +1516,23 @@ if (!function_exists('aihl_render_code_slots_page')) {
 						<td>
 							<input type="text" name="slot_context" value="<?php echo esc_attr(is_array($s['context']) ? implode(', ', $s['context']) : $s['context']); ?>" class="regular-text">
 							<p class="description"><?php esc_html_e('Valori: global, front_page, page:{slug}, template:{name}, category:{slug}, logged_in, !logged_in, 404, search. Separa con virgola per combinare.', AIHL_TEXT_DOMAIN); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th><?php esc_html_e('Governance design', AIHL_TEXT_DOMAIN); ?></th>
+						<td>
+							<select name="slot_design_mode">
+								<?php
+								$global_design_mode = function_exists('aihl_sbm_design_mode') ? aihl_sbm_design_mode() : 'autonomous';
+								foreach (array('governed' => 'Governed', 'adaptive' => 'Adaptive', 'autonomous' => 'Autonomous') as $mode_key => $mode_label) :
+									if (function_exists('aihl_sbm_design_mode_rank') && aihl_sbm_design_mode_rank($mode_key) > aihl_sbm_design_mode_rank($global_design_mode)) {
+										continue;
+									}
+								?>
+									<option value="<?php echo esc_attr($mode_key); ?>" <?php selected($s['design_mode'] ?? $global_design_mode, $mode_key); ?>><?php echo esc_html($mode_label); ?></option>
+								<?php endforeach; ?>
+							</select>
+							<p class="description"><?php echo esc_html(sprintf(__('La modalita dello slot non puo essere piu permissiva della governance SBM globale (%s).', AIHL_TEXT_DOMAIN), $global_design_mode)); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -1482,8 +1696,10 @@ if (!function_exists('aihl_render_code_slots_page')) {
 				</div>
 			<?php else : ?>
 				<div class="aihl-slots-list">
-					<?php foreach ($slots as $slot) : ?>
-						<div class="aihl-slot-card <?php echo empty($slot['active']) ? 'aihl-slot-inactive' : ''; ?>">
+					<?php foreach ($slots as $slot) :
+						$slot_governance = aihl_code_slot_governance_report($slot);
+						?>
+						<div class="aihl-slot-card <?php echo empty($slot['active']) ? 'aihl-slot-inactive' : ''; ?> <?php echo empty($slot_governance['valid']) ? 'aihl-slot-invalid' : ''; ?>">
 							<div class="aihl-slot-card-header">
 								<div class="aihl-slot-card-title">
 									<span class="aihl-slot-status <?php echo empty($slot['active']) ? 'aihl-slot-status-off' : 'aihl-slot-status-on'; ?>"></span>
@@ -1493,6 +1709,7 @@ if (!function_exists('aihl_render_code_slots_page')) {
 								<div class="aihl-slot-badges">
 									<span class="aihl-slot-badge aihl-sbadge-hook"><?php echo esc_html($slot['hook']); ?></span>
 									<span class="aihl-slot-badge aihl-sbadge-type"><?php echo esc_html(strtoupper($slot['type'] ?? 'html')); ?></span>
+									<span class="aihl-slot-badge aihl-sbadge-mode"><?php echo esc_html(strtoupper($slot_governance['mode'])); ?></span>
 									<span class="aihl-slot-badge aihl-sbadge-ctx"><?php echo esc_html(is_array($slot['context']) ? implode(', ', $slot['context']) : ($slot['context'] ?? 'global')); ?></span>
 									<?php if (!empty($slot['version'])) : ?>
 										<span class="aihl-slot-badge aihl-sbadge-ver">v<?php echo (int) $slot['version']; ?></span>
@@ -1600,6 +1817,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .aihl-slots-list{display:flex;flex-direction:column;gap:10px}
 .aihl-slot-card{background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:16px 18px;transition:border-color .15s}
 .aihl-slot-card:hover{border-color:#2271b1}
+.aihl-slot-card.aihl-slot-invalid{border-color:#d63638}
 .aihl-slot-inactive{opacity:.6}
 .aihl-slot-card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
 .aihl-slot-card-title{display:flex;align-items:center;gap:8px}
@@ -1612,6 +1830,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .aihl-slot-badge{font-size:10px;padding:2px 7px;border-radius:6px;font-weight:600;letter-spacing:.02em}
 .aihl-sbadge-hook{background:#eff6ff;color:#1e40af}
 .aihl-sbadge-type{background:#fdf2f8;color:#9d174d}
+.aihl-sbadge-mode{background:#fef3c7;color:#92400e}
 .aihl-sbadge-ctx{background:#f0fdf4;color:#166534}
 .aihl-sbadge-ver{background:#f0f0f1;color:#646970}
 .aihl-slot-card-preview{margin-top:8px}

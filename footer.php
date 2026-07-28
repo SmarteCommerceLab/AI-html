@@ -82,13 +82,21 @@ $aihl_footer_cta_btn2_url = esc_url((string) aihtml_option_value('footer_cta_btn
 
 $aihl_footer_columns_count = (int) aihtml_option_value('footer_columns_count', 4);
 $aihl_footer_columns_count = max(3, min(5, $aihl_footer_columns_count));
+$aihl_footer_bg_opacity_effective = function_exists('aihl_sbm_effective_css_value')
+	? aihl_sbm_effective_css_value('colors', $aihl_footer_bg_opacity, '0.12')
+	: (string) $aihl_footer_bg_opacity;
+$aihl_footer_overlay_opacity_effective = function_exists('aihl_sbm_effective_css_value')
+	? aihl_sbm_effective_css_value('colors', $aihl_footer_overlay_opacity, '0')
+	: (string) $aihl_footer_overlay_opacity;
 
 $aihl_footer_style = array(
-	'--aihl-footer-bg-opacity:' . $aihl_footer_bg_opacity,
+	'--aihl-request-footer-bg-opacity:' . $aihl_footer_bg_opacity,
+	'--aihl-request-footer-overlay-opacity:' . $aihl_footer_overlay_opacity,
+	'--aihl-footer-bg-opacity:' . $aihl_footer_bg_opacity_effective,
 	'--aihl-footer-bg-position:' . $aihl_footer_bg_position,
 	'--aihl-footer-bg-size:' . $aihl_footer_bg_size,
 	'--aihl-footer-bg-repeat:' . $aihl_footer_bg_repeat,
-	'--aihl-footer-overlay-opacity:' . $aihl_footer_overlay_opacity,
+	'--aihl-footer-overlay-opacity:' . $aihl_footer_overlay_opacity_effective,
 	'--aihl-footer-overlay-color:' . $aihl_footer_overlay_colors[$aihl_footer_overlay_tone],
 );
 if ($aihl_footer_bg_enabled && $aihl_footer_bg_image !== '') {

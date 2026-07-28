@@ -46,7 +46,6 @@ function get_post_type($id): string { return in_array((int) $id, array(10, 20), 
 function flush_rewrite_rules($hard = true): void {}
 function rest_ensure_response($value) { return $value; }
 function rest_url($path = ''): string { return 'https://example.test/wp-json/' . ltrim($path, '/'); }
-function aihl_sanitize_registered_option($value, $field) { return in_array($value, array('native', 'canvas'), true) ? $value : 'native'; }
 function aihl_code_slots_get($id) { return $GLOBALS['management_slots'][$id] ?? null; }
 function aihl_get_structure_render_mode($area): string {
 	$options = get_option(AIHL_OPTION_BASE . '_general', array());
@@ -58,6 +57,7 @@ function aihl_get_canvas_override_slot($area): ?array {
 	return $id !== '' ? aihl_code_slots_get($id) : null;
 }
 
+require dirname(__DIR__) . '/inc/theme-option-registry.php';
 require dirname(__DIR__) . '/inc/integrations/management-api.php';
 
 function runtime_assert(bool $condition, string $message): void {
@@ -66,6 +66,15 @@ function runtime_assert(bool $condition, string $message): void {
 		exit(1);
 	}
 }
+
+$matrix = aihl_sbm_option_compliance_matrix();
+runtime_assert(71 === count($matrix), 'matrice compliance non copre tutte le opzioni');
+runtime_assert(
+	0 === count(array_filter($matrix, static fn(array $option): bool => 'unclassified' === $option['classification'])),
+	'matrice compliance contiene opzioni non classificate'
+);
+runtime_assert('visual' === $matrix['footer_columns_count']['classification'], 'layout colonne footer non classificato come visuale');
+runtime_assert('content' === $matrix['footer_cta_title']['classification'], 'testo CTA footer non classificato come contenuto');
 
 $site = aihl_api_update_site_settings(new WP_REST_Request(array(
 	'blogname' => ' New <b>name</b> ',

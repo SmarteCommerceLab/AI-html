@@ -50,12 +50,18 @@ if (!function_exists('aihl_is_template')) {
 
 if (!function_exists('aihl_should_load_animation_assets')) {
 	function aihl_should_load_animation_assets() {
+		if (function_exists('aihl_is_bootstrap_manager_active') && aihl_is_bootstrap_manager_active()) {
+			return false;
+		}
 		return aihl_is_template(array('about.php', 'contact.php')) || aihl_queried_post_contains(' wow ') || aihl_queried_post_contains('wow ');
 	}
 }
 
 if (!function_exists('aihl_should_load_owl_assets')) {
 	function aihl_should_load_owl_assets() {
+		if (function_exists('aihl_is_bootstrap_manager_active') && aihl_is_bootstrap_manager_active()) {
+			return false;
+		}
 		return aihl_queried_post_contains('testimonial-carousel') || aihl_queried_post_contains('owl-carousel');
 	}
 }
