@@ -13,6 +13,7 @@ $GLOBALS['aihl_test_context'] = array(
 	'page' => '',
 	'logged_in' => false,
 );
+$GLOBALS['aihl_test_menu_id'] = 7;
 
 class WP_Error {
 	private string $message;
@@ -54,6 +55,16 @@ function get_option($key, $default = false) { return $GLOBALS['aihl_test_options
 function update_option($key, $value, $autoload = null): bool { $GLOBALS['aihl_test_options'][$key] = $value; return true; }
 function delete_option($key): bool { unset($GLOBALS['aihl_test_options'][$key]); return true; }
 function esc_attr($value): string { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'); }
+function admin_url($path = ''): string { return 'https://example.test/wp-admin/' . ltrim((string) $path, '/'); }
+function aihl_resolve_nav_menu($location): array {
+	return array(
+		'requested_location' => (string) $location,
+		'location' => (string) $location,
+		'menu_id' => (int) $GLOBALS['aihl_test_menu_id'],
+		'menu_name' => $GLOBALS['aihl_test_menu_id'] ? 'Test menu' : '',
+		'source' => $GLOBALS['aihl_test_menu_id'] ? 'assigned' : 'unavailable',
+	);
+}
 function is_wp_error($value): bool { return $value instanceof WP_Error; }
 function is_front_page(): bool { return (bool) $GLOBALS['aihl_test_context']['front_page']; }
 function is_home(): bool { return false; }
@@ -106,6 +117,12 @@ $GLOBALS['aihl_test_options'][AIHL_OPTION_BASE . '_general'] = array(
 assert_true('canvas' === aihl_get_structure_render_mode('header'), 'modalita header Canvas');
 assert_true(aihl_should_render_canvas_structure('header'), 'Canvas header selezionato e disponibile');
 assert_true(!aihl_should_render_canvas_structure('footer'), 'footer nativo non usa Canvas');
+$health = aihl_canvas_health_report('header');
+assert_true($health['status'] === 'warning', 'Canvas senza smart-menu segnalato');
+assert_true($health['resolved_slot_id'] === 'test-header', 'diagnostica espone lo slot risolto');
+assert_true(str_contains($health['editor_url'], 'edit=test-header'), 'diagnostica collega lo slot all editor');
+$health_codes = array_column($health['issues'], 'code');
+assert_true(in_array('navigation_component_missing', $health_codes, true), 'diagnostica rileva componente menu assente');
 $GLOBALS['aihl_test_options'][AIHL_OPTION_BASE . '_general']['header_render_mode'] = 'native';
 assert_true(!aihl_should_render_canvas_structure('header'), 'header nativo ignora lo slot attivo');
 
@@ -128,6 +145,7 @@ $second = aihl_code_slots_save(array(
 	'code' => '<header data-priority-slot>Priority</header>',
 ));
 assert_true(!is_wp_error($second), 'secondo override salvato');
+assert_true('priority-header' === aihl_code_slots_get_admin_canvas_slot('header')['id'], 'editor admin seleziona lo slot Canvas attivo piu rilevante');
 
 $GLOBALS['aihl_test_options'][AIHL_OPTION_BASE . '_general']['header_render_mode'] = 'canvas';
 ob_start();
@@ -137,11 +155,31 @@ assert_true(str_contains($output, 'data-priority-slot'), 'automatico seleziona p
 assert_true(!str_contains($output, 'data-test-slot'), 'un solo override completo viene renderizzato');
 
 $GLOBALS['aihl_test_options'][AIHL_OPTION_BASE . '_general']['header_canvas_slot_id'] = 'test-header';
+assert_true('test-header' === aihl_code_slots_get_admin_canvas_slot('header')['id'], 'editor admin rispetta la selezione esplicita Canvas');
 ob_start();
 aihl_render_code_slot('header_full');
 $output = ob_get_clean();
 assert_true(str_contains($output, 'data-test-slot'), 'selezione esplicita ha precedenza');
 assert_true(!str_contains($output, 'data-priority-slot'), 'selezione esplicita resta unica');
+
+$menu_slot = aihl_code_slots_save(array(
+	'id' => 'test-header',
+	'label' => 'Test Header Menu',
+	'hook' => 'header_full',
+	'type' => 'mixed',
+	'context' => 'global',
+	'priority' => 10,
+	'active' => true,
+	'code' => '<header><smart-menu location="topic"></smart-menu></header>',
+	'css' => '.test{display:block}',
+	'js' => 'window.testSlot=true;',
+));
+assert_true(!is_wp_error($menu_slot), 'slot con componente menu salvato');
+$GLOBALS['aihl_test_menu_id'] = 0;
+$health = aihl_canvas_health_report('header');
+assert_true($health['status'] === 'error', 'menu non risolvibile blocca lo stato operativo');
+assert_true(in_array('navigation_unresolved', array_column($health['issues'], 'code'), true), 'diagnostica rileva menu non risolvibile');
+$GLOBALS['aihl_test_menu_id'] = 7;
 
 $updated = aihl_code_slots_save(array(
 	'id' => 'test-header',

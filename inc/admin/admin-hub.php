@@ -320,6 +320,61 @@ if (!function_exists('aihl_render_dashboard_content')) {
 			<?php endforeach; ?>
 		</div>
 
+		<?php if (function_exists('aihl_canvas_health_report')) : ?>
+			<section class="aihl-canvas-health" aria-labelledby="aihl-canvas-health-title">
+				<div class="aihl-canvas-health-heading">
+					<div>
+						<span class="smart-dependency-summary-kicker"><?php esc_html_e('Diagnostica runtime', AIHL_TEXT_DOMAIN); ?></span>
+						<h2 id="aihl-canvas-health-title"><?php esc_html_e('Stato AI Canvas', AIHL_TEXT_DOMAIN); ?></h2>
+					</div>
+					<a class="button" href="<?php echo esc_url(admin_url('admin.php?page=aihl-api-docs')); ?>">
+						<i class="fa-solid fa-code" aria-hidden="true"></i>
+						<?php esc_html_e('Apri Swagger', AIHL_TEXT_DOMAIN); ?>
+					</a>
+				</div>
+				<div class="aihl-canvas-health-grid">
+					<?php foreach (array('header', 'footer') as $area) :
+						$health = aihl_canvas_health_report($area);
+						$status = sanitize_key((string) ($health['status'] ?? 'error'));
+						$issues = isset($health['issues']) && is_array($health['issues']) ? $health['issues'] : array();
+						$status_labels = array(
+							'ok' => __('Operativo', AIHL_TEXT_DOMAIN),
+							'warning' => __('Da verificare', AIHL_TEXT_DOMAIN),
+							'error' => __('Fallback nativo', AIHL_TEXT_DOMAIN),
+							'inactive' => __('Modalita nativa', AIHL_TEXT_DOMAIN),
+						);
+					?>
+						<article class="aihl-canvas-health-card aihl-canvas-health-<?php echo esc_attr($status); ?>">
+							<div class="aihl-canvas-health-card-head">
+								<div>
+									<span><?php echo esc_html(ucfirst($area)); ?></span>
+									<strong><?php echo esc_html($status_labels[$status] ?? $status); ?></strong>
+								</div>
+								<span class="aihl-canvas-health-badge"><?php echo esc_html((string) ($health['mode'] ?? 'native')); ?></span>
+							</div>
+							<dl>
+								<div><dt><?php esc_html_e('Slot risolto', AIHL_TEXT_DOMAIN); ?></dt><dd><?php echo esc_html((string) ($health['resolved_slot_id'] ?: __('Nessuno', AIHL_TEXT_DOMAIN))); ?></dd></div>
+								<div><dt><?php esc_html_e('Slot attivi', AIHL_TEXT_DOMAIN); ?></dt><dd><?php echo esc_html((string) ($health['slots_active'] ?? 0)); ?></dd></div>
+							</dl>
+							<?php if ($issues) : ?>
+								<ul>
+									<?php foreach ($issues as $issue) : ?>
+										<li><?php echo esc_html((string) ($issue['message'] ?? '')); ?></li>
+									<?php endforeach; ?>
+								</ul>
+							<?php else : ?>
+								<p><?php esc_html_e('Nessuna anomalia rilevata.', AIHL_TEXT_DOMAIN); ?></p>
+							<?php endif; ?>
+							<a class="button button-small" href="<?php echo esc_url((string) ($health['editor_url'] ?? '')); ?>">
+								<i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+								<?php esc_html_e('Gestisci Canvas', AIHL_TEXT_DOMAIN); ?>
+							</a>
+						</article>
+					<?php endforeach; ?>
+				</div>
+			</section>
+		<?php endif; ?>
+
 		<h2 class="smart-dash-section-title"><?php esc_html_e('Strumenti', AIHL_TEXT_DOMAIN); ?></h2>
 		<div class="smart-dash-cards">
 			<?php foreach ($subpages as $sp) : ?>
@@ -625,6 +680,17 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .smart-dash-stat-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:#2271b1;color:#fff;border-radius:8px;font-size:15px;flex-shrink:0}
 .smart-dash-stat-label{display:block;font-size:11px;color:#646970;text-transform:uppercase;letter-spacing:.03em;font-weight:600}
 .smart-dash-stat-value{display:block;font-size:14px;color:#1d2327;font-weight:600}
+.aihl-canvas-health{margin:0 0 28px;padding:20px;border:1px solid #dcdcde;border-radius:8px;background:#f6f7f7}
+.aihl-canvas-health-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.aihl-canvas-health-heading h2{margin:2px 0 0;font-size:18px}
+.aihl-canvas-health-heading .button,.aihl-canvas-health-card .button{display:inline-flex;align-items:center;gap:6px}
+.aihl-canvas-health-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.aihl-canvas-health-card{padding:16px;border:1px solid #c3c4c7;border-left-width:4px;border-radius:6px;background:#fff}
+.aihl-canvas-health-ok{border-left-color:#00a32a}.aihl-canvas-health-warning{border-left-color:#dba617}.aihl-canvas-health-error{border-left-color:#d63638}.aihl-canvas-health-inactive{border-left-color:#8c8f94}
+.aihl-canvas-health-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.aihl-canvas-health-card-head span{display:block;color:#646970;font-size:11px;text-transform:uppercase}.aihl-canvas-health-card-head strong{display:block;margin-top:2px;font-size:15px}
+.aihl-canvas-health-badge{padding:4px 7px;border-radius:4px;background:#f0f0f1;color:#1d2327!important;font-weight:700}
+.aihl-canvas-health-card dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}.aihl-canvas-health-card dl div{min-width:0}.aihl-canvas-health-card dt{color:#646970;font-size:11px}.aihl-canvas-health-card dd{overflow:hidden;margin:2px 0 0;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+.aihl-canvas-health-card ul{margin:0 0 14px 18px;color:#50575e;list-style:disc}.aihl-canvas-health-card p{margin:0 0 14px;color:#50575e}
 .smart-dash-section-title{font-size:16px;font-weight:600;margin:0 0 14px;color:#1d2327}
 .smart-dash-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
 .smart-dash-card{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;background:#fff;border:1px solid #dcdcde;border-radius:8px;text-decoration:none;color:#1d2327;transition:border-color .15s,box-shadow .15s}
@@ -652,6 +718,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .smart-admin-nav-copy small{display:none}
 .smart-admin-main{padding:12px}
 .smart-admin-body{padding:16px}
+.aihl-canvas-health-heading{align-items:flex-start;flex-direction:column}.aihl-canvas-health-grid{grid-template-columns:1fr}
 }
 @media(max-width:1100px){.aihl-api-docs-grid{grid-template-columns:1fr}.aihl-json-editor{min-height:360px}}
 CSS;

@@ -1,164 +1,113 @@
-# AI-HTML Theme — Roadmap di prodotto
+# AI-HTML Theme - Roadmap di sviluppo
 
-Versione: 1.4.0  
-Ultimo aggiornamento: 9 giugno 2026
+Versione di riferimento: 1.12.4
+Ultimo aggiornamento: 28 luglio 2026
 
----
+## Ruolo del tema
 
-## Identita del prodotto
+AI-HTML e la shell WordPress dello Smart eCommerce Stack. Governa struttura,
+presentazione, identita, navigazione, integrazioni runtime e API del tema.
 
-AI-HTML e il **tema base fondazione** dell'ecosistema Smart eCommerce per WordPress. Non e un tema consumer finale: e il layer su cui si costruiscono temi enterprise verticali.
+Confini di responsabilita:
 
-### Ecosistema di riferimento
-
-| Plugin | Ruolo | Dipendenza |
-|---|---|---|
-| Smart Bootstrap Manager (SBM) | Token CSS, palette, tipografia, layout, effetti | Raccomandata |
-| Smart Customizer Framework (SCF) | Controlli Customizer avanzati (Builder, Compose) | Richiesta per Customizer completo |
-| Smart Builder Site (SBS) | Page Builder corporate e blog | Raccomandata per home/pagine |
-
-### Target utente
-
-- Sviluppatori che costruiscono siti enterprise WordPress
-- Agenzie che usano l'ecosistema Smart eCommerce
-- Progetti corporate, SaaS, editorial, dashboard, landing page
-
----
-
-## Stato attuale — v1.4.0
-
-### Completato (Sprint 1-5)
-
-| Area | Feature count | Note |
-|---|---|---|
-| Header | 8 strutture, 4 nav layout, 4 sticky style, 4 search, 3 toggle | Copertura enterprise completa |
-| Menu | 7 rich layout, 12 campi item, JSON import/export con 4 preset | Sistema menu piu avanzato dell'ecosistema |
-| Footer | 7 varianti, trust bar dinamica, CTA hero, mega-footer | Copertura enterprise completa |
-| Mobile | 3 stili (rail, bottom-bar, none) | |
-| Admin | Hub unificato con dashboard + 5 sottopagine + template comune | |
-| Template Parts | 5 blocchi riusabili (card-post, post-meta, author-box, share-buttons, related-posts) | |
-| Blog | home.php (3 layout), archive.php, single.php riscritto con template-parts | |
-| Quality | Escaping e i18n completati | |
-| Customizer | 50+ controlli in 8 sezioni | |
-| Integrazioni | SBM, SBS, SCF, SEO, Google Compliance 2026, AI Auth | |
-| Documentazione | 5 documenti tecnici (Architecture, Dev Status, Roadmap, Changelog, SBM Compliance) | |
-| Provisioning JSON | Opzioni complete, menu, logo/media remoti, demo e test automatico | |
-
-### Gap residui v1.4.0
-
-| Priorita | Gap |
+| Componente | Responsabilita |
 |---|---|
-| Alta | Verificare form import sotto nuovi slug admin hub |
-| Alta | Audit mobile offcanvas con tutti i 7 layout rich |
-| Media | Ridurre `!important` nel bridge CSS |
-| Media | Estendere `--sbin-primary-contrast` a bottom-bar, sidebar, CTA custom |
-| Bassa | Sidebar header in dark mode SBM |
-| Bassa | Escaping output audit completo |
-| Bassa | i18n non uniforme su file legacy |
+| AI-HTML | Header, footer, menu, template, Customizer, Canvas e API strutturali |
+| Smart Bootstrap Manager | Bootstrap, token, tipografia, componenti, motion e design governance |
+| Smart Builder Site | Contenuto pagina, widget Builder/Compose, revisioni e rendering |
+| Smart Customizer Frameworks | Controlli Customizer avanzati e relativo catalogo |
 
----
+CPT applicativi, autenticazione, area membri e regole di accesso non devono
+essere implementati nel tema. AI-HTML puo fornire esclusivamente template e
+integrazioni per plugin proprietari di tali domini.
 
-## Sprint futuri
+## 1.12.4 - Stabilizzazione Canvas
 
-### Sprint 6 — Template Parts e Blog — COMPLETATO v1.3.0
+Stato: in rilascio.
 
-**Obiettivo**: Blog completo con componenti riusabili. **FATTO.**
+- Editor amministrativo dedicato per Canvas Header e Footer.
+- Editor HTML, CSS e JavaScript a schede con CodeMirror.
+- Diagnostica di slot, fallback nativo e risoluzione menu.
+- Stato Canvas disponibile nella dashboard e nella REST API.
+- Schema OpenAPI concreto per diagnostica e stato Canvas.
+- Collegamento diretto dal Customizer all'editor dello slot.
+- CI su PHP minimo supportato e PHP corrente.
+- Costruzione e validazione preventiva del pacchetto di release.
 
-| # | Task | Priorita |
-|---|---|---|
-| 1 | Creare `template-parts/card-post.php` — card articolo con thumbnail, titolo, excerpt, meta | Alta |
-| 2 | Creare `template-parts/post-meta.php` — data, autore, categoria, tempo lettura | Alta |
-| 3 | Creare `template-parts/author-box.php` — avatar, bio, link social | Alta |
-| 4 | Creare `template-parts/share-buttons.php` — condivisione social (no JS esterno) | Media |
-| 5 | Creare `home.php` — blog index con layout configurabile (griglia/lista/magazine) da Customizer | Alta |
-| 6 | Creare `archive.php` potenziato — sidebar opzionale, filtri, layout configurabile | Alta |
-| 7 | Paginazione avanzata — load more / infinite scroll opzionale | Media |
-| 8 | Related posts in `single.php` via template-part | Media |
+Criteri di uscita:
 
-**Criteri di done**: Blog navigabile con card, meta, author box, paginazione. Layout selezionabile dal Customizer.
+- suite PHP completa senza errori;
+- sorgenti compatibili con PHP 7.4;
+- versione sincronizzata tra header, costante e stable tag;
+- pacchetto privo di test, strumenti e file di sviluppo;
+- fallback nativo sempre disponibile per Canvas non valido.
 
----
+## 1.13.0 - Customizer modulare
 
-### Sprint 7 — Vetrina data-driven
+- Conservare i pannelli incapsulati e la gerarchia corrente.
+- Separare il file sezioni per dominio: Header, Footer, Blog, Identita e Integrazioni.
+- Usare il registro opzioni come sorgente unica per sanitizzazione, Customizer e API.
+- Definire un contratto condiviso per pannelli nidificati con SCF.
+- Conservare un adapter interno per il funzionamento standalone.
+- Aggiungere test browser per apertura pannelli, salvataggio e anteprima.
 
-**Obiettivo**: CPT per servizi/progetti con gestione da backend.
+Criterio di uscita: nessuna sezione piatta fuori dal pannello AI-HTML e nessuna
+divergenza tra opzioni Customizer e API.
 
-| # | Task | Priorita |
-|---|---|---|
-| 1 | Registrare CPT `vetrina_item` con tassonomie `vetrina_category` e `vetrina_tag` | Alta |
-| 2 | Campi custom: headline, excerpt, CTA (label+url), icona (FA), ordine, immagine | Alta |
-| 3 | Template `archive-vetrina_item.php` con griglia card | Alta |
-| 4 | Template `single-vetrina_item.php` con layout dettaglio | Alta |
-| 5 | Shortcode `[aihl_vetrina]` per embedding in pagine | Media |
-| 6 | Integrazione con Smart Builder Site widget | Media |
+## 1.14.0 - Canvas Governance
 
-**Criteri di done**: Vetrina servizi gestibile da backend senza ACF, con archive e single dedicati.
+- Versionare lo schema dei Canvas.
+- Validare componenti runtime, menu, logo e dipendenze prima dell'attivazione.
+- Aggiungere anteprima isolata, snapshot e rollback.
+- Applicare le modalita SBM `governed`, `adaptive` e `autonomous`.
+- Impedire l'attivazione di un Canvas strutturalmente invalido.
+- Aggiungere test visuali per header e footer su desktop e mobile.
 
----
+Criterio di uscita: un Canvas invalido non puo sostituire la struttura nativa.
 
-### Sprint 8 — Qualita tecnica
+## 1.15.0 - Modularizzazione API
 
-**Obiettivo**: Pulizia codice, i18n, accessibilita.
+- Separare route, controller, schema e servizi di dominio.
+- Ridurre i moduli principali a responsabilita singola.
+- Eliminare gli schemi OpenAPI generici dalle operazioni gestionali.
+- Aggiungere `dry_run` e idempotenza a deploy, import e reset.
+- Introdurre test di contratto con SBM, SBS e SCF.
+- Verificare automaticamente la copertura API di tutte le opzioni gestibili.
 
-| # | Task | Priorita |
-|---|---|---|
-| 1 | i18n completa: `__()` / `esc_html__()` su TUTTI i file con `AIHL_TEXT_DOMAIN` | Alta |
-| 2 | Escaping audit: verificare `esc_html`, `esc_attr`, `esc_url` su tutti gli output | Alta |
-| 3 | Cleanup encoding UTF-8 e accenti nei file legacy | Media |
-| 4 | Migrazione WOW.js/Owl Carousel verso effetti SBM o fallback documentati | Media |
-| 5 | Riduzione `!important` nel bridge CSS (target: < 10 occorrenze) | Media |
-| 6 | Audit WCAG 2.1 AA: focus ring, color contrast, screen reader, keyboard nav | Alta |
-| 7 | Rimozione codice commentato e file inutilizzati | Bassa |
+Criterio di uscita: ogni funzione amministrativa, salvo il bootstrap delle
+credenziali, e disponibile tramite API autenticata e documentata.
 
-**Criteri di done**: Zero warning PHP, i18n completa, WCAG AA sui componenti principali.
+## 1.16.0 - Frontend e prestazioni
 
----
+- Migrare WOW.js e Owl Carousel verso componenti SBS/SBM o alternative native.
+- Ridurre `!important` e colori non tokenizzati.
+- Caricare asset per template e capacita effettivamente utilizzate.
+- Verificare immagini responsive e Core Web Vitals.
+- Aggiungere budget Lighthouse sulle pagine di riferimento.
 
-### Sprint 9 — SEO e Performance
+Criterio di uscita: Lighthouse mobile almeno 90 su home, archivio e articolo.
 
-**Obiettivo**: Lighthouse >= 80, SEO strutturale.
+## 1.17.0 - Accessibilita e SEO
 
-| # | Task | Priorita |
-|---|---|---|
-| 1 | Breadcrumbs con fallback tema (senza dipendenza plugin) | Alta |
-| 2 | Schema.org markup per article, breadcrumb, organization | Alta |
-| 3 | Immagini responsive con `srcset` e `sizes` coerenti | Media |
-| 4 | Lazyload nativo (`loading="lazy"` + `decoding="async"`) audit | Media |
-| 5 | Rimozione asset CSS/JS non utilizzati nelle pagine dove non servono | Media |
-| 6 | Critical CSS inline per above-the-fold | Media |
-| 7 | Lighthouse audit e fix fino a score >= 80 su mobile (home + single) | Alta |
+- Audit WCAG 2.2 AA.
+- Test automatici tastiera, focus, menu multilivello e reduced motion.
+- Breadcrumb e dati strutturati senza duplicazioni con plugin SEO attivi.
+- Verifica semantica dei componenti Canvas e dei template editoriali.
 
-**Criteri di done**: Lighthouse mobile >= 80, breadcrumbs funzionanti, schema.org validato.
+## 2.0 - Pulizia architetturale
 
----
+- Rimuovere wrapper legacy dopo un ciclo documentato di deprecazione.
+- Introdurre autoload e namespace per i nuovi servizi.
+- Aggiornare i requisiti minimi con una procedura di migrazione.
+- Versionare formalmente i contratti tra tema e plugin.
+- Mantenere compatibilita dei dati e rollback durante l'aggiornamento.
 
-### Sprint 10 — Sidebar evoluta e Area Member
+## Gate globali
 
-**Obiettivo**: Layout dashboard e area riservata.
-
-| # | Task | Priorita |
-|---|---|---|
-| 1 | Sidebar con navigazione accordion/tree (multi-livello collassabile) | Alta |
-| 2 | Integrazione con login/logout WordPress nativo | Alta |
-| 3 | Template `dashboard.php` con widget area configurabili | Media |
-| 4 | Protezione contenuti per utenti loggati (gate template) | Media |
-| 5 | Notifiche in-page per area riservata | Bassa |
-
-**Criteri di done**: Area member navigabile con sidebar, login WP integrato, dashboard con widget.
-
----
-
-## Criteri di done globali (tema v2.0)
-
-- [ ] Tema attivabile senza fatal anche senza plugin opzionali
-- [ ] Home corporate editabile da backend (via SBS)
-- [ ] Blog completo: listing, categorie, ricerca, single con card/meta/author
-- [ ] Header/Footer selezionabili da Customizer con anteprima live
-- [ ] 8 strutture header + 7 varianti footer funzionanti
-- [ ] Menu system con 7 layout rich + JSON import/export
-- [ ] Admin Hub con dashboard e pagine unificate
-- [ ] Lighthouse mobile >= 80 su home e single
-- [ ] WCAG 2.1 AA sui componenti principali
-- [ ] i18n completa con text domain uniforme
-- [ ] SBM compliance >= 95%
-- [ ] Documentazione tecnica aggiornata
+- Tema attivabile senza plugin opzionali.
+- Header e footer nativi sempre disponibili come fallback.
+- Menu mai selezionati in modo ambiguo.
+- Customizer gerarchico verificato nel browser.
+- API e OpenAPI prive di riferimenti irrisolti.
+- Pacchetto, checksum, manifest e download pubblico verificati.
+- Documentazione e versione aggiornate nello stesso commit della release.

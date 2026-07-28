@@ -287,6 +287,149 @@ if (!function_exists('aihl_code_slots_rollback')) {
  * 3b. Override check — verifica se un hook override ha slot attivi
  * ============================================================================ */
 
+if (!function_exists('aihl_code_slots_get_admin_canvas_slot')) {
+	/**
+	 * Restituisce lo slot Canvas piu rilevante per l'editor admin.
+	 * Non valuta il contesto pubblico: qui serve aprire il codice salvato.
+	 */
+	function aihl_code_slots_get_admin_canvas_slot(string $area): ?array {
+		$area = in_array($area, array('header', 'footer'), true) ? $area : 'header';
+		$hook = $area . '_full';
+		$options = get_option(AIHL_OPTION_BASE . '_general', array());
+		$selected_id = is_array($options) ? sanitize_key((string) ($options[$area . '_canvas_slot_id'] ?? '')) : '';
+		$matches = array();
+
+		foreach (aihl_code_slots_get_all() as $id => $slot) {
+			if (($slot['hook'] ?? '') !== $hook) {
+				continue;
+			}
+			$slot['id'] = (string) ($slot['id'] ?? $id);
+			if ($selected_id !== '' && $slot['id'] === $selected_id) {
+				return $slot;
+			}
+			$matches[] = $slot;
+		}
+
+		if (!$matches) {
+			return null;
+		}
+
+		usort($matches, static function (array $a, array $b): int {
+			$active = (int) !empty($b['active']) <=> (int) !empty($a['active']);
+			if ($active !== 0) {
+				return $active;
+			}
+			$priority = ((int) ($a['priority'] ?? 10)) <=> ((int) ($b['priority'] ?? 10));
+			return $priority !== 0 ? $priority : strcmp((string) ($a['id'] ?? ''), (string) ($b['id'] ?? ''));
+		});
+
+		return $matches[0];
+	}
+}
+
+if (!function_exists('aihl_canvas_health_report')) {
+	/**
+	 * Restituisce una diagnosi stabile e serializzabile della sorgente Canvas.
+	 */
+	function aihl_canvas_health_report(string $area): array {
+		$area = in_array($area, array('header', 'footer'), true) ? $area : 'header';
+		$hook = $area . '_full';
+		$options = get_option(AIHL_OPTION_BASE . '_general', array());
+		$options = is_array($options) ? $options : array();
+		$mode = sanitize_key((string) ($options[$area . '_render_mode'] ?? 'native'));
+		$mode = in_array($mode, array('native', 'canvas'), true) ? $mode : 'native';
+		$selected_id = sanitize_key((string) ($options[$area . '_canvas_slot_id'] ?? ''));
+		$selected = $selected_id !== '' ? aihl_code_slots_get($selected_id) : null;
+		$editor_slot = aihl_code_slots_get_admin_canvas_slot($area);
+		$resolved = function_exists('aihl_get_canvas_override_slot') ? aihl_get_canvas_override_slot($area) : null;
+		$issues = array();
+		$slots_total = 0;
+		$slots_active = 0;
+
+		foreach (aihl_code_slots_get_all() as $slot) {
+			if (($slot['hook'] ?? '') !== $hook) {
+				continue;
+			}
+			$slots_total++;
+			if (!empty($slot['active'])) {
+				$slots_active++;
+			}
+		}
+
+		if ($selected_id !== '') {
+			if (!is_array($selected)) {
+				$issues[] = array('code' => 'selected_slot_missing', 'severity' => 'error', 'message' => __('Lo slot Canvas selezionato non esiste.', AIHL_TEXT_DOMAIN));
+			} elseif (($selected['hook'] ?? '') !== $hook) {
+				$issues[] = array('code' => 'selected_slot_wrong_area', 'severity' => 'error', 'message' => __('Lo slot selezionato appartiene a un\'altra area.', AIHL_TEXT_DOMAIN));
+			} elseif (empty($selected['active'])) {
+				$issues[] = array('code' => 'selected_slot_inactive', 'severity' => 'error', 'message' => __('Lo slot Canvas selezionato non e attivo.', AIHL_TEXT_DOMAIN));
+			}
+		}
+
+		if ('canvas' === $mode && !is_array($resolved)) {
+			$issues[] = array(
+				'code' => 'canvas_fallback_native',
+				'severity' => 'error',
+				'message' => __('Nessuno slot Canvas valido nel contesto corrente: verra usata la struttura nativa.', AIHL_TEXT_DOMAIN),
+			);
+		}
+
+		$diagnostic_slot = is_array($selected) && ($selected['hook'] ?? '') === $hook ? $selected : $editor_slot;
+		if (is_array($diagnostic_slot)) {
+			$markup = trim((string) ($diagnostic_slot['code'] ?? ''));
+			if ($markup === '') {
+				$issues[] = array('code' => 'canvas_markup_empty', 'severity' => 'error', 'message' => __('Lo slot Canvas non contiene markup HTML.', AIHL_TEXT_DOMAIN));
+			} elseif (false === stripos($markup, '<smart-menu')) {
+				$issues[] = array(
+					'code' => 'navigation_component_missing',
+					'severity' => 'warning',
+					'message' => __('Il Canvas non dichiara un componente smart-menu; verificare la navigazione.', AIHL_TEXT_DOMAIN),
+				);
+			} elseif (function_exists('aihl_resolve_nav_menu')) {
+				$location = 'header' === $area ? 'topic' : 'footer';
+				if (preg_match('/<smart-menu\b([^>]*)>/i', $markup, $menu_match)
+					&& preg_match('/\blocation\s*=\s*(["\'])(.*?)\1/i', $menu_match[1], $location_match)) {
+					$location = sanitize_key((string) $location_match[2]);
+				}
+				$menu = aihl_resolve_nav_menu($location);
+				if (empty($menu['menu_id'])) {
+					$issues[] = array(
+						'code' => 'navigation_unresolved',
+						'severity' => 'error',
+						'message' => sprintf(__('Nessun menu risolvibile per la posizione %s.', AIHL_TEXT_DOMAIN), $location),
+					);
+				}
+			}
+		}
+
+		$has_error = (bool) array_filter($issues, static function (array $issue): bool {
+			return 'error' === ($issue['severity'] ?? '');
+		});
+		$has_warning = (bool) array_filter($issues, static function (array $issue): bool {
+			return 'warning' === ($issue['severity'] ?? '');
+		});
+		$status = 'native' === $mode ? 'inactive' : ($has_error ? 'error' : ($has_warning ? 'warning' : 'ok'));
+		$editor_id = is_array($editor_slot) ? sanitize_key((string) ($editor_slot['id'] ?? '')) : '';
+		$editor_query = $editor_id !== ''
+			? 'admin.php?page=aihl-code-slots&edit=' . rawurlencode($editor_id)
+			: 'admin.php?page=aihl-code-slots&new=1&canvas=' . $area;
+
+		return array(
+			'area' => $area,
+			'mode' => $mode,
+			'status' => $status,
+			'selected_slot_id' => $selected_id,
+			'resolved_slot_id' => is_array($resolved) ? (string) ($resolved['id'] ?? '') : '',
+			'editor_slot_id' => $editor_id,
+			'slots_total' => $slots_total,
+			'slots_active' => $slots_active,
+			'fallback_native' => 'canvas' === $mode && !is_array($resolved),
+			'issues' => array_values($issues),
+			'editor_url' => function_exists('admin_url') ? admin_url($editor_query) : $editor_query,
+		);
+	}
+}
+
 if (!function_exists('aihl_get_canvas_override_slot')) {
 	/**
 	 * Restituisce l'unico slot Canvas vincitore per l'area corrente.
@@ -1057,6 +1200,12 @@ if (!function_exists('aihl_render_code_slots_page')) {
 				'js'       => wp_unslash($_POST['slot_js'] ?? ''),
 				'author'   => 'admin',
 			);
+			if ('css' === $slot_data['type']) {
+				$slot_data['code'] = $slot_data['css'];
+			}
+			if ('js' === $slot_data['type']) {
+				$slot_data['code'] = $slot_data['js'];
+			}
 			$save_result = aihl_code_slots_save($slot_data);
 			if (!is_wp_error($save_result)) {
 				$slots = aihl_code_slots_get_all(); // Refresh
@@ -1103,6 +1252,8 @@ if (!function_exists('aihl_render_code_slots_page')) {
 			$edit_slot = aihl_code_slots_get(sanitize_key($_GET['edit']));
 		}
 		$is_new = isset($_GET['new']);
+		$canvas_area = isset($_GET['canvas']) ? sanitize_key((string) $_GET['canvas']) : '';
+		$canvas_area = in_array($canvas_area, array('header', 'footer'), true) ? $canvas_area : '';
 
 		?>
 		<?php if ($save_result && !is_wp_error($save_result)) : ?>
@@ -1118,7 +1269,18 @@ if (!function_exists('aihl_render_code_slots_page')) {
 		<?php endif; ?>
 
 		<?php if ($edit_slot || $is_new) :
-			$s = $edit_slot ?: array('id' => '', 'label' => '', 'hook' => 'before_header', 'type' => 'html', 'context' => 'global', 'priority' => 10, 'active' => true, 'code' => '', 'css' => '', 'js' => '');
+			$s = $edit_slot ?: array(
+				'id' => '',
+				'label' => $canvas_area ? sprintf('AI Canvas %s', ucfirst($canvas_area)) : '',
+				'hook' => $canvas_area ? $canvas_area . '_full' : 'before_header',
+				'type' => $canvas_area ? 'mixed' : 'html',
+				'context' => 'global',
+				'priority' => 10,
+				'active' => true,
+				'code' => '',
+				'css' => '',
+				'js' => '',
+			);
 		?>
 			<!-- Editor singolo slot -->
 			<form method="post">
@@ -1167,19 +1329,34 @@ if (!function_exists('aihl_render_code_slots_page')) {
 						<th><?php esc_html_e('Attivo', AIHL_TEXT_DOMAIN); ?></th>
 						<td><label><input type="checkbox" name="slot_active" value="1" <?php checked($s['active']); ?>> <?php esc_html_e('Abilita questo slot', AIHL_TEXT_DOMAIN); ?></label></td>
 					</tr>
-					<tr class="aihl-slot-field-code">
-						<th><?php esc_html_e('Codice', AIHL_TEXT_DOMAIN); ?></th>
-						<td><textarea name="slot_code" rows="12" class="large-text code" style="font-family:monospace;font-size:13px;"><?php echo esc_textarea($s['code']); ?></textarea></td>
-					</tr>
-					<tr class="aihl-slot-field-css" style="display:none;">
-						<th><?php esc_html_e('CSS', AIHL_TEXT_DOMAIN); ?></th>
-						<td><textarea name="slot_css" rows="8" class="large-text code" style="font-family:monospace;font-size:13px;"><?php echo esc_textarea($s['css'] ?? ''); ?></textarea></td>
-					</tr>
-					<tr class="aihl-slot-field-js" style="display:none;">
-						<th><?php esc_html_e('JavaScript', AIHL_TEXT_DOMAIN); ?></th>
-						<td><textarea name="slot_js" rows="8" class="large-text code" style="font-family:monospace;font-size:13px;"><?php echo esc_textarea($s['js'] ?? ''); ?></textarea></td>
-					</tr>
 				</table>
+
+				<div class="aihl-code-editor-shell" data-aihl-code-editor>
+					<div class="aihl-code-editor-head">
+						<div>
+							<strong><?php esc_html_e('Editor AI Canvas', AIHL_TEXT_DOMAIN); ?></strong>
+							<span><?php esc_html_e('Gestione separata di markup, stile e script dello slot.', AIHL_TEXT_DOMAIN); ?></span>
+						</div>
+						<div class="aihl-code-editor-actions">
+							<button type="button" class="button button-small" data-aihl-copy-active title="<?php esc_attr_e('Copia sezione attiva', AIHL_TEXT_DOMAIN); ?>"><i class="fa-regular fa-copy"></i></button>
+							<button type="button" class="button button-small" data-aihl-paste-active title="<?php esc_attr_e('Incolla dagli appunti', AIHL_TEXT_DOMAIN); ?>"><i class="fa-regular fa-clipboard"></i></button>
+						</div>
+					</div>
+					<div class="aihl-code-editor-tabs" role="tablist" aria-label="<?php esc_attr_e('Sezioni codice slot', AIHL_TEXT_DOMAIN); ?>">
+						<button type="button" class="button button-small is-active" data-aihl-editor-tab="html">HTML</button>
+						<button type="button" class="button button-small" data-aihl-editor-tab="css">CSS</button>
+						<button type="button" class="button button-small" data-aihl-editor-tab="js">JS</button>
+					</div>
+					<div class="aihl-code-editor-pane is-active" data-aihl-editor-pane="html">
+						<textarea id="aihl-slot-code" name="slot_code" rows="18" class="large-text code aihl-code-textarea" spellcheck="false"><?php echo esc_textarea($s['code']); ?></textarea>
+					</div>
+					<div class="aihl-code-editor-pane" data-aihl-editor-pane="css">
+						<textarea id="aihl-slot-css" name="slot_css" rows="18" class="large-text code aihl-code-textarea" spellcheck="false"><?php echo esc_textarea($s['css'] ?? ''); ?></textarea>
+					</div>
+					<div class="aihl-code-editor-pane" data-aihl-editor-pane="js">
+						<textarea id="aihl-slot-js" name="slot_js" rows="18" class="large-text code aihl-code-textarea" spellcheck="false"><?php echo esc_textarea($s['js'] ?? ''); ?></textarea>
+					</div>
+				</div>
 
 				<p>
 					<button type="submit" name="aihl_code_slot_save" value="1" class="button button-primary">
@@ -1197,21 +1374,54 @@ if (!function_exists('aihl_render_code_slots_page')) {
 				function upd(){desc.textContent=hooks[sel.value]||'';}
 				sel.addEventListener('change',upd);upd();
 
-				// Toggle campi mixed
+				// Toggle editor sections according to the selected slot type.
 				var radios=document.querySelectorAll('[name=slot_type]');
 				function togFields(){
 					var t=document.querySelector('[name=slot_type]:checked').value;
-					document.querySelector('.aihl-slot-field-code').style.display=(t==='css'||t==='js')?'none':'';
-					document.querySelector('.aihl-slot-field-css').style.display=(t==='mixed'||t==='css')?'':'none';
-					document.querySelector('.aihl-slot-field-js').style.display=(t==='mixed'||t==='js')?'':'none';
-					// Per css/js puri, usa il campo code come textarea principale
-					if(t==='css'){
-						document.querySelector('.aihl-slot-field-css').style.display='';
-						document.querySelector('[name=slot_css]').setAttribute('name','slot_code');
-					}else if(t==='js'){
-						document.querySelector('.aihl-slot-field-js').style.display='';
-						document.querySelector('[name=slot_js]').setAttribute('name','slot_code');
+					var allowed=t==='mixed'?['html','css','js']:(t==='css'?['css']:(t==='js'?['js']:['html']));
+					document.querySelectorAll('[data-aihl-editor-tab]').forEach(function(tab){
+						var show=allowed.indexOf(tab.getAttribute('data-aihl-editor-tab'))!==-1;
+						tab.style.display=show?'':'none';
+						if(!show){tab.classList.remove('is-active');}
+					});
+					document.querySelectorAll('[data-aihl-editor-pane]').forEach(function(pane){
+						var show=allowed.indexOf(pane.getAttribute('data-aihl-editor-pane'))!==-1;
+						pane.style.display=show?'':'none';
+						if(!show){pane.classList.remove('is-active');}
+					});
+					if(!document.querySelector('[data-aihl-editor-tab].is-active')){
+						var first=null;
+						document.querySelectorAll('[data-aihl-editor-tab]').forEach(function(tab){if(!first&&tab.style.display!=='none'){first=tab;}});
+						if(first){activateTab(first.getAttribute('data-aihl-editor-tab'));}
 					}
+				}
+				function activateTab(name){
+					document.querySelectorAll('[data-aihl-editor-tab]').forEach(function(tab){tab.classList.toggle('is-active',tab.getAttribute('data-aihl-editor-tab')===name);});
+					document.querySelectorAll('[data-aihl-editor-pane]').forEach(function(pane){pane.classList.toggle('is-active',pane.getAttribute('data-aihl-editor-pane')===name);});
+					if(window.aihlSlotEditors&&window.aihlSlotEditors[name]){setTimeout(function(){window.aihlSlotEditors[name].refresh();window.aihlSlotEditors[name].focus();},30);}
+				}
+				document.querySelectorAll('[data-aihl-editor-tab]').forEach(function(tab){
+					tab.addEventListener('click',function(){activateTab(tab.getAttribute('data-aihl-editor-tab'));});
+				});
+				function activeTextarea(){
+					var pane=document.querySelector('[data-aihl-editor-pane].is-active');
+					return pane ? pane.querySelector('textarea') : null;
+				}
+				var copy=document.querySelector('[data-aihl-copy-active]');
+				var paste=document.querySelector('[data-aihl-paste-active]');
+				if(copy&&navigator.clipboard){copy.addEventListener('click',function(){var ta=activeTextarea();if(ta){navigator.clipboard.writeText(ta.value);}});}
+				if(paste&&navigator.clipboard){paste.addEventListener('click',function(){var ta=activeTextarea();if(ta){navigator.clipboard.readText().then(function(text){ta.value=text;ta.dispatchEvent(new Event('change',{bubbles:true}));});}});}
+				if(window.wp&&wp.codeEditor&&window.aihlCodeEditorSettings){
+					window.aihlSlotEditors=window.aihlSlotEditors||{};
+					[['html','aihl-slot-code'],['css','aihl-slot-css'],['js','aihl-slot-js']].forEach(function(item){
+						var textarea=document.getElementById(item[1]);
+						var settings=window.aihlCodeEditorSettings[item[0]];
+						if(textarea&&settings){
+							window.aihlSlotEditors[item[0]]=wp.codeEditor.initialize(textarea,settings).codemirror;
+						}
+					});
+					var form=document.querySelector('[data-aihl-code-editor]').closest('form');
+					if(form){form.addEventListener('submit',function(){Object.keys(window.aihlSlotEditors).forEach(function(key){window.aihlSlotEditors[key].save();});});}
 				}
 				radios.forEach(function(r){r.addEventListener('change',togFields);});
 				togFields();
@@ -1220,6 +1430,36 @@ if (!function_exists('aihl_render_code_slots_page')) {
 
 		<?php else : ?>
 			<!-- Lista slot -->
+			<div class="aihl-canvas-manager">
+				<div class="aihl-canvas-manager-head">
+					<h3><?php esc_html_e('AI Canvas Header e Footer', AIHL_TEXT_DOMAIN); ?></h3>
+					<p><?php esc_html_e('Accesso diretto agli override completi usati dal tema quando la sorgente struttura e impostata su Canvas.', AIHL_TEXT_DOMAIN); ?></p>
+				</div>
+				<div class="aihl-canvas-grid">
+					<?php foreach (array('header' => __('Header', AIHL_TEXT_DOMAIN), 'footer' => __('Footer', AIHL_TEXT_DOMAIN)) as $area => $label) :
+						$canvas_slot = aihl_code_slots_get_admin_canvas_slot($area);
+						$edit_url = $canvas_slot
+							? admin_url('admin.php?page=aihl-code-slots&edit=' . rawurlencode((string) $canvas_slot['id']))
+							: admin_url('admin.php?page=aihl-code-slots&new=1&canvas=' . $area);
+						?>
+						<div class="aihl-canvas-card">
+							<div>
+								<strong><?php echo esc_html($label); ?></strong>
+								<span><?php echo esc_html($area . '_full'); ?></span>
+								<?php if ($canvas_slot) : ?>
+									<code><?php echo esc_html($canvas_slot['label'] ?? $canvas_slot['id']); ?></code>
+								<?php else : ?>
+									<code><?php esc_html_e('Nessuno slot Canvas', AIHL_TEXT_DOMAIN); ?></code>
+								<?php endif; ?>
+							</div>
+							<a href="<?php echo esc_url($edit_url); ?>" class="button button-small" title="<?php esc_attr_e('Apri editor Canvas', AIHL_TEXT_DOMAIN); ?>">
+								<i class="fa-solid fa-code"></i> <?php echo $canvas_slot ? esc_html__('Apri editor', AIHL_TEXT_DOMAIN) : esc_html__('Crea Canvas', AIHL_TEXT_DOMAIN); ?>
+							</a>
+						</div>
+					<?php endforeach; ?>
+				</div>
+			</div>
+
 			<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
 				<a href="<?php echo esc_url(admin_url('admin.php?page=aihl-code-slots&new=1')); ?>" class="button button-primary">
 					<i class="fa-solid fa-plus"></i> <?php esc_html_e('Nuovo Slot', AIHL_TEXT_DOMAIN); ?>
@@ -1316,9 +1556,47 @@ add_action('admin_enqueue_scripts', function ($hook) {
 	if (strpos($hook, 'aihl-code-slots') === false) {
 		return;
 	}
+	if (function_exists('wp_enqueue_code_editor')) {
+		$settings = array(
+			'html' => wp_enqueue_code_editor(array('type' => 'text/html')),
+			'css'  => wp_enqueue_code_editor(array('type' => 'text/css')),
+			'js'   => wp_enqueue_code_editor(array('type' => 'application/javascript')),
+		);
+		if (function_exists('wp_add_inline_script')) {
+			wp_add_inline_script(
+				'code-editor',
+				'window.aihlCodeEditorSettings=' . wp_json_encode($settings) . ';',
+				'before'
+			);
+		}
+	}
 	$css = <<<'CSS'
 .aihl-slots-empty{text-align:center;padding:60px 20px;background:#f6f7f7;border:1px dashed #dcdcde;border-radius:8px}
 .aihl-slots-empty p{margin:4px 0;color:#646970}
+.aihl-canvas-manager{border:1px solid #dcdcde;background:#fff;border-radius:6px;margin:0 0 18px}
+.aihl-canvas-manager-head{padding:14px 16px;border-bottom:1px solid #f0f0f1}
+.aihl-canvas-manager-head h3{margin:0 0 3px;font-size:15px}
+.aihl-canvas-manager-head p{margin:0;color:#646970;font-size:12px}
+.aihl-canvas-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border-top:0}
+.aihl-canvas-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-right:1px solid #f0f0f1}
+.aihl-canvas-card:last-child{border-right:0}
+.aihl-canvas-card strong,.aihl-canvas-card span,.aihl-canvas-card code{display:block}
+.aihl-canvas-card strong{font-size:14px;color:#1d2327}
+.aihl-canvas-card span{font-size:11px;color:#646970;text-transform:uppercase;font-weight:600}
+.aihl-canvas-card code{margin-top:5px;font-size:11px;white-space:normal}
+.aihl-code-editor-shell{border:1px solid #dcdcde;background:#fff;border-radius:6px;margin:12px 0 14px;overflow:hidden}
+.aihl-code-editor-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid #f0f0f1;background:#f6f7f7}
+.aihl-code-editor-head strong,.aihl-code-editor-head span{display:block}
+.aihl-code-editor-head strong{font-size:13px;color:#1d2327}
+.aihl-code-editor-head span{font-size:11px;color:#646970}
+.aihl-code-editor-actions{display:flex;align-items:center;gap:5px}
+.aihl-code-editor-tabs{display:flex;align-items:center;gap:4px;padding:8px 10px;border-bottom:1px solid #f0f0f1;background:#fff}
+.aihl-code-editor-tabs .button{min-height:28px;padding:0 10px}
+.aihl-code-editor-tabs .button.is-active{border-color:#2271b1;color:#0a4b78;box-shadow:inset 0 2px 0 #2271b1}
+.aihl-code-editor-pane{display:none}
+.aihl-code-editor-pane.is-active{display:block}
+.aihl-code-textarea{width:100%;min-height:420px;border:0;box-shadow:none;font-family:Consolas,Monaco,monospace;font-size:13px;line-height:1.5}
+.aihl-code-editor-shell .CodeMirror{min-height:420px;border:0;font-size:13px;line-height:1.5}
 .aihl-slots-list{display:flex;flex-direction:column;gap:10px}
 .aihl-slot-card{background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:16px 18px;transition:border-color .15s}
 .aihl-slot-card:hover{border-color:#2271b1}
@@ -1345,6 +1623,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .aihl-api-ref th{font-size:11px;font-weight:700;color:#9d174d;width:60px;padding:6px 8px}
 .aihl-api-ref td{padding:6px 8px;font-size:12px}
 .aihl-api-ref code{font-size:11px}
+@media (max-width:782px){.aihl-canvas-grid{grid-template-columns:1fr}.aihl-canvas-card{border-right:0;border-bottom:1px solid #f0f0f1}.aihl-canvas-card:last-child{border-bottom:0}.aihl-code-editor-head{align-items:flex-start;flex-direction:column}.aihl-code-textarea,.aihl-code-editor-shell .CodeMirror{min-height:320px}}
 CSS;
 	wp_add_inline_style('wp-admin', $css);
 });

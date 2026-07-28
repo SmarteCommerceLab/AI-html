@@ -212,6 +212,21 @@ function aihl_customizer_canvas_slot_choices(string $area): array {
 	return $choices;
 }
 
+function aihl_customizer_canvas_management_description(string $area): string {
+	$area = in_array($area, array('header', 'footer'), true) ? $area : 'header';
+	$slot = function_exists('aihl_code_slots_get_admin_canvas_slot') ? aihl_code_slots_get_admin_canvas_slot($area) : null;
+	$query = is_array($slot) && !empty($slot['id'])
+		? 'admin.php?page=aihl-code-slots&edit=' . rawurlencode(sanitize_key((string) $slot['id']))
+		: 'admin.php?page=aihl-code-slots&new=1&canvas=' . $area;
+	$url = admin_url($query);
+
+	return sprintf(
+		/* translators: %s: URL editor Canvas. */
+		__('Automatico sceglie un solo slot compatibile in base a priorita e contesto. <a href="%s" target="_blank" rel="noopener noreferrer">Gestisci il Canvas</a>.', AIHL_TEXT_DOMAIN),
+		esc_url($url)
+	);
+}
+
 function aihl_customizer_sanitizer(string $field): callable {
 	return static function ($value) use ($field) {
 		return aihl_sanitize_registered_option($value, $field);
@@ -535,7 +550,7 @@ add_action('customize_register',function($wp_customize) {
 		'section' => $section,
 		'settings' => $base.'[header_canvas_slot_id]',
 		'label' => __('Canvas header selezionato', AIHL_TEXT_DOMAIN),
-		'description' => __('Automatico sceglie un solo slot compatibile in base a priorita e contesto.', AIHL_TEXT_DOMAIN),
+		'description' => aihl_customizer_canvas_management_description('header'),
 		'choices' => aihl_customizer_canvas_slot_choices('header'),
 	));
 	aihl_customizer_add_divider($wp_customize,'header_canvas_slot_separator',$section);
@@ -991,7 +1006,7 @@ add_action('customize_register',function($wp_customize) {
 		'section' => $section,
 		'settings' => $base.'[footer_canvas_slot_id]',
 		'label' => __('Canvas footer selezionato', AIHL_TEXT_DOMAIN),
-		'description' => __('Automatico sceglie un solo slot compatibile in base a priorita e contesto.', AIHL_TEXT_DOMAIN),
+		'description' => aihl_customizer_canvas_management_description('footer'),
 		'choices' => aihl_customizer_canvas_slot_choices('footer'),
 	));
 	aihl_customizer_add_divider($wp_customize,'footer_canvas_slot_separator',$section);

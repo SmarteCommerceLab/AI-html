@@ -1,7 +1,7 @@
 # AI-HTML Theme â€” Stato di sviluppo
 
-Versione: 1.8.8
-Ultimo aggiornamento: 8 luglio 2026
+Versione: 1.12.4
+Ultimo aggiornamento: 28 luglio 2026
 
 I loghi configurati via Customizer/API mantengono proporzioni native con limiti responsive; le varianti principale, overlay, chiara e footer restano governate dal contratto del tema.
 
@@ -16,6 +16,15 @@ Documentazione canonica cross-prodotto: `../docs/smart-stack/`.
 Header e footer dichiarano ora una sorgente esplicita `native` o `canvas`. La modalita
 Canvas richiede uno slot contestualmente attivo; in sua assenza il tema usa il fallback
 nativo per evitare strutture mancanti.
+
+## Aggiornamento 2026-07-28 - Editor AI Canvas header/footer
+
+- La pagina AI-HTML > Code Slots include accessi diretti agli override Canvas `header_full` e `footer_full`.
+- L'editor dello slot separa HTML, CSS e JavaScript in schede dedicate e usa CodeMirror quando disponibile in WordPress.
+- Lo storage resta `aihl_code_slots`: API, import/export JSON e renderer pubblico non cambiano contratto.
+- Dashboard e API `/aihtml/v1/ai/canvas` espongono stato, anomalie, fallback nativo e risoluzione menu.
+- OpenAPI documenta la risposta con gli schemi `CanvasPayload`, `CanvasAreaState` e `CanvasHealth`.
+- La CI verifica sintassi PHP 7.4/8.3, suite completa e contenuto del pacchetto di release.
 
 ## Aggiornamento 2026-07-08 - Contract consumer SBM
 

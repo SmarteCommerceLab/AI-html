@@ -24,6 +24,10 @@ class AIHL_Fake_REST_Server {
 				array('methods' => array('GET' => true)),
 				array('methods' => array('POST' => true)),
 			),
+			'/aihtml/v1/ai/canvas' => array(
+				array('methods' => array('GET' => true)),
+				array('methods' => array('POST' => true)),
+			),
 			'/aihtml/v1/ai/code-slots/(?P<slot_id>[a-z0-9_-]+)' => array(
 				array(
 					'methods' => array('DELETE' => true),
@@ -59,8 +63,17 @@ foreach (array_unique($referenceMatches[1]) as $schemaName) {
 	}
 }
 
-if (!isset($openapi['components']['schemas']['CanvasRequest'], $openapi['components']['schemas']['CodeSlot'])) {
+if (!isset(
+	$openapi['components']['schemas']['CanvasRequest'],
+	$openapi['components']['schemas']['CanvasPayload'],
+	$openapi['components']['schemas']['CanvasHealth'],
+	$openapi['components']['schemas']['CodeSlot']
+)) {
 	throw new RuntimeException('Concrete management schemas missing.');
+}
+$canvas = $openapi['paths']['/aihtml/v1/ai/canvas']['get'];
+if (($canvas['responses']['200']['content']['application/json']['schema']['$ref'] ?? '') !== '#/components/schemas/CanvasPayload') {
+	throw new RuntimeException('Canvas diagnostics response schema missing.');
 }
 $update = $openapi['paths']['/aihtml/v1/ai/update'];
 if (!isset($update['get'], $update['post'])) {

@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.12.3
+Stable tag: 1.12.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,10 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.12.4 =
+* Aggiunge l'editor interno AI Canvas per gestire codice HTML, CSS e JS degli override header e footer dal pannello Code Slots.
+* Espone diagnostica Canvas, fallback nativo e stato menu nella dashboard, nelle API e in OpenAPI.
 
 = 1.12.3 =
 * Ripristina i menu di header e footer nei Canvas AI quando le posizioni non sono assegnate, usando alias e fallback semantici non ambigui.

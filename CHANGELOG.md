@@ -5,6 +5,19 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.12.4] - 2026-07-28
+
+### Aggiunto
+- Editor interno AI Canvas nella pagina Code Slots, con accessi diretti per gli override `header_full` e `footer_full`.
+- Gestione a schede HTML, CSS e JavaScript con copia/incolla e CodeMirror quando disponibile in WordPress.
+- Diagnostica Canvas in dashboard e REST API per slot, fallback nativo e risoluzione menu.
+- Schemi OpenAPI concreti per stato e anomalie Canvas.
+- Gate CI su PHP 7.4 e 8.3 con costruzione preventiva del pacchetto di release.
+
+### Corretto
+- Gli slot CSS e JavaScript puri sincronizzano il contenuto modificato con il campo `code` usato dal renderer.
+- Il Customizer collega direttamente l'header e il footer al relativo editor Canvas.
+
 ## [1.12.3] - 2026-07-28
 
 ### Modificato

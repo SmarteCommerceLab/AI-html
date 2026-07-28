@@ -108,6 +108,7 @@ function aihl_api_canvas_payload(): array {
 			'selected_slot_id' => is_array($options) ? (string) ($options[$area . '_canvas_slot_id'] ?? '') : '',
 			'resolved_slot_id' => is_array($winner) ? (string) ($winner['id'] ?? '') : '',
 			'available' => is_array($winner),
+			'health' => function_exists('aihl_canvas_health_report') ? aihl_canvas_health_report($area) : array(),
 		);
 	}
 	return $result;

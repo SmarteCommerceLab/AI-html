@@ -11,12 +11,67 @@ permissions:
 jobs:
   contracts:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['7.4', '8.3']
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: ${{ matrix.php-version }}
       - name: PHP syntax
-        run: find . -type f -name '*.php' -not -path './dist/*' -print0 | xargs -0 -n1 php -l
+        run: |
+          if [ "${{ matrix.php-version }}" = "7.4" ]; then
+            find . -type f -name '*.php' -not -path './tests/*' -not -path './dist/*' -print0 | xargs -0 -n1 php -l
+          else
+            find . -type f -name '*.php' -not -path './dist/*' -print0 | xargs -0 -n1 php -l
+          fi
       - name: Contract tests
+        if: matrix.php-version == '8.3'
         run: for test in tests/*-test.php; do php "$test"; done
+
+  release-package:
+    needs: contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate synchronized version
+        shell: bash
+        run: |
+          HEADER_VERSION="$(grep -E '^Version:' style.css | head -n1 | sed -E 's/Version:[[:space:]]*//')"
+          CONSTANT_VERSION="$(grep -E "define\\('AIHL_VERSION'" functions.php | head -n1 | sed -E "s/.*'([^']+)'.*/\\1/")"
+          STABLE_TAG="$(grep -E '^Stable tag:' readme.txt | head -n1 | sed -E 's/Stable tag:[[:space:]]*//')"
+          test "${HEADER_VERSION}" = "${CONSTANT_VERSION}"
+          test "${HEADER_VERSION}" = "${STABLE_TAG}"
+          echo "VERSION=${HEADER_VERSION}" >> "$GITHUB_ENV"
+      - name: Build release candidate
+        shell: bash
+        run: |
+          mkdir -p dist/AI-html
+          rsync -a ./ dist/AI-html/ \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'dist/' \
+            --exclude '.gitignore' \
+            --exclude '.gitattributes' \
+            --exclude 'tests/' \
+            --exclude 'tools/' \
+            --exclude '*.md' \
+            --exclude 'build-slot.php' \
+            --exclude '*.zip' \
+            --exclude '*.sha256.txt'
+          cd dist
+          zip -qr "../AI-html-${VERSION}.zip" AI-html
+      - name: Validate release candidate
+        shell: bash
+        run: |
+          PACKAGE="AI-html-${VERSION}.zip"
+          unzip -t "${PACKAGE}"
+          unzip -Z1 "${PACKAGE}" | grep -qx 'AI-html/functions.php'
+          unzip -Z1 "${PACKAGE}" | grep -qx 'AI-html/style.css'
+          unzip -Z1 "${PACKAGE}" | grep -qx 'AI-html/inc/admin/code-slots.php'
+          if unzip -Z1 "${PACKAGE}" | grep -Eq '(^|/)tests/|(^|/)tools/|build-slot\.php$|\.md$|(^|/)\.git(hub)?/'; then
+            echo "Release package contains development-only files."
+            exit 1
+          fi
