@@ -405,6 +405,9 @@ function aihl_sbm_runtime_diagnostics(): array {
 	$migration = function_exists('aihl_code_slots_governance_migration_report')
 		? aihl_code_slots_governance_migration_report()
 		: array();
+	$repair = defined('AIHL_CODE_SLOTS_GOVERNANCE_REPAIR_OPTION')
+		? get_option(AIHL_CODE_SLOTS_GOVERNANCE_REPAIR_OPTION, array())
+		: array();
 
 	return array(
 		'observed_after_enqueue' => $observed,
@@ -426,6 +429,7 @@ function aihl_sbm_runtime_diagnostics(): array {
 		'legacy_motion' => $legacy_motion,
 		'legacy_motion_active' => $legacy_motion_active,
 		'canvas_migration' => $migration,
+		'slot_repair' => is_array($repair) ? $repair : array(),
 	);
 }
 

@@ -297,6 +297,10 @@ if (!function_exists('aihl_render_dashboard_content')) {
 		$migration = isset($runtime['canvas_migration']) && is_array($runtime['canvas_migration'])
 			? $runtime['canvas_migration']
 			: array();
+		$repair = isset($runtime['slot_repair']) && is_array($runtime['slot_repair'])
+			? $runtime['slot_repair']
+			: array();
+		$suspended_count = max(0, (int) ($migration['deactivated_count'] ?? 0) - (int) ($repair['restored_count'] ?? 0));
 
 		if (function_exists('aihl_render_plugin_dependency_summary')) {
 			aihl_render_plugin_dependency_summary();
@@ -311,7 +315,7 @@ if (!function_exists('aihl_render_dashboard_content')) {
 			array(
 				'label' => __('Migrazione Canvas', AIHL_TEXT_DOMAIN),
 				'value' => !empty($migration['completed'])
-					? sprintf(__('%1$d migrati, %2$d sospesi', AIHL_TEXT_DOMAIN), (int) ($migration['migrated_count'] ?? 0), (int) ($migration['deactivated_count'] ?? 0))
+					? sprintf(__('%1$d migrati, %2$d sospesi', AIHL_TEXT_DOMAIN), (int) ($migration['migrated_count'] ?? 0), $suspended_count)
 					: __('In attesa', AIHL_TEXT_DOMAIN),
 				'icon' => 'fa-solid fa-shield-halved',
 			),

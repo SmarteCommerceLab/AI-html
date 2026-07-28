@@ -121,4 +121,19 @@ $second_report = aihl_migrate_legacy_code_slot_governance();
 migration_assert($report === $second_report, 'report non idempotente');
 migration_assert($first_state === get_option(AIHL_CODE_SLOTS_OPTION, array()), 'seconda migrazione ha riscritto gli slot');
 
+$broken_slots = get_option(AIHL_CODE_SLOTS_OPTION, array());
+$broken_slots['legacy-global-css']['active'] = false;
+update_option(AIHL_CODE_SLOTS_OPTION, $broken_slots, false);
+$broken_report = $report;
+$broken_report['deactivated_count'] = 2;
+$broken_report['deactivated_slot_ids'][] = 'legacy-global-css';
+update_option(AIHL_CODE_SLOTS_GOVERNANCE_MIGRATION_OPTION, $broken_report, false);
+
+$repair = aihl_repair_non_canvas_slot_governance();
+$repaired_slots = get_option(AIHL_CODE_SLOTS_OPTION, array());
+migration_assert(1 === $repair['restored_count'], 'slot non-Canvas sospeso non ripristinato');
+migration_assert($repaired_slots['legacy-global-css']['active'], 'CSS globale non riattivato dalla riparazione 1.13.2');
+migration_assert(!$repaired_slots['legacy-raw']['active'], 'override Canvas non conforme riattivato per errore');
+migration_assert($repair === aihl_repair_non_canvas_slot_governance(), 'riparazione 1.13.2 non idempotente');
+
 echo "AI-HTML legacy Canvas governance migration OK\n";

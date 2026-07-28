@@ -202,4 +202,20 @@ assert_true((int) $rolled_back['priority'] === 10, 'rollback ripristina priorita
 assert_true($rolled_back['css'] === '.test{display:block}', 'rollback ripristina CSS');
 assert_true($rolled_back['js'] === 'window.testSlot=true;', 'rollback ripristina JS');
 
+$global_css = aihl_code_slots_save(array(
+	'id' => 'site-global-css',
+	'label' => 'Site global CSS',
+	'hook' => 'global_css',
+	'type' => 'css',
+	'design_mode' => 'governed',
+	'active' => true,
+	'code' => '.sx-header{background:#fff;padding:20px}',
+));
+assert_true(!is_wp_error($global_css), 'salvataggio CSS globale');
+assert_true($global_css['active'], 'CSS globale raw non deve essere sospeso dalla governance Canvas');
+$disabled_global_css = aihl_code_slots_toggle('site-global-css', false);
+assert_true(!$disabled_global_css['active'], 'CSS globale disattivabile');
+$enabled_global_css = aihl_code_slots_toggle('site-global-css', true);
+assert_true($enabled_global_css['active'], 'CSS globale raw riattivabile senza blocco Canvas');
+
 echo "OK AI-HTML Code Slots: vincitore unico, selezione, rollback, contesti e Mixed verificati\n";
