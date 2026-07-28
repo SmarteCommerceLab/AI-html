@@ -5,6 +5,16 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.12.3] - 2026-07-28
+
+### Modificato
+- Il resolver dei menu e condiviso da template nativi, componenti Canvas AI e manifest di integrazione.
+- Il manifest API espone posizione, menu e origine della risoluzione effettiva.
+
+### Corretto
+- Header e footer non restano vuoti quando il menu esiste in una posizione compatibile o non e ancora assegnato.
+- I fallback scelgono alias semantici o menu riconoscibili per nome e rifiutano candidati ambigui.
+
 ## [1.12.2] - 2026-07-28
 
 ### Corretto

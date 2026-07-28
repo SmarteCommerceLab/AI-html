@@ -69,12 +69,20 @@ if (!function_exists('aihl_get_theme_integration_manifest')) {
 		foreach ($locations as $location => $label) {
 			$menu_id = absint($assigned[$location] ?? 0);
 			$menu = $menu_id ? wp_get_nav_menu_object($menu_id) : false;
+			$resolved = function_exists('aihl_resolve_nav_menu')
+				? aihl_resolve_nav_menu($location)
+				: array('location' => $location, 'menu_id' => $menu_id, 'menu_name' => $menu ? $menu->name : '', 'source' => $menu ? 'assigned' : 'unavailable');
 			$menus[$location] = array(
-				'label'      => wp_strip_all_tags($label),
-				'assigned'   => (bool) $menu,
-				'menu_id'    => $menu_id,
-				'menu_name'  => $menu ? $menu->name : '',
-				'item_count' => $menu ? (int) $menu->count : 0,
+				'label'             => wp_strip_all_tags($label),
+				'assigned'          => (bool) $menu,
+				'menu_id'           => $menu_id,
+				'menu_name'         => $menu ? $menu->name : '',
+				'item_count'        => $menu ? (int) $menu->count : 0,
+				'resolved'          => !empty($resolved['menu_id']),
+				'resolved_location' => (string) ($resolved['location'] ?? ''),
+				'resolved_menu_id'  => absint($resolved['menu_id'] ?? 0),
+				'resolved_name'     => (string) ($resolved['menu_name'] ?? ''),
+				'resolution_source' => (string) ($resolved['source'] ?? 'unavailable'),
 			);
 		}
 
@@ -199,17 +207,25 @@ if (!function_exists('aihl_render_dynamic_component')) {
 
 		if ('smart-menu' === $name) {
 			$location = sanitize_key($attributes['location'] ?? 'topic');
-			if (!has_nav_menu($location)) {
+			$resolved = function_exists('aihl_resolve_nav_menu')
+				? aihl_resolve_nav_menu($location)
+				: array('menu_id' => has_nav_menu($location) ? 1 : 0);
+			if (empty($resolved['menu_id'])) {
 				return '';
 			}
-			return wp_nav_menu(array(
-				'theme_location' => $location,
+			$args = array(
 				'menu_class'     => sanitize_text_field($attributes['class'] ?? 'aihl-runtime-menu'),
 				'container'      => false,
 				'depth'          => max(1, min(5, absint($attributes['depth'] ?? 3))),
 				'fallback_cb'    => false,
 				'echo'           => false,
-			));
+			);
+			if (function_exists('aihl_resolve_nav_menu_args')) {
+				$args = aihl_resolve_nav_menu_args($location, $args);
+			} else {
+				$args['theme_location'] = $location;
+			}
+			return wp_nav_menu($args);
 		}
 
 		if ('smart-social' === $name) {

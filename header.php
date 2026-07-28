@@ -158,13 +158,12 @@
             </a>
         </div>
         <nav class="aihl-sidebar-menu flex-grow-1">
-            <?php wp_nav_menu(array(
+            <?php wp_nav_menu(aihl_resolve_nav_menu_args('topic', array(
                 'menu_class' => 'aihl-sidebar-nav-list list-unstyled mb-0',
                 'container' => '',
                 'depth' => 2,
-                'theme_location' => 'topic',
                 'fallback_cb' => false,
-            )); ?>
+            ))); ?>
         </nav>
         <?php if ($aihl_header_search_style !== 'none') : ?>
         <div class="aihl-sidebar-search px-3 mb-3">
@@ -203,14 +202,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="<?php esc_attr_e('Chiudi menu', AIHL_TEXT_DOMAIN); ?>"></button>
                 </div>
                 <div class="offcanvas-body">
-                    <?php wp_nav_menu(array(
+                    <?php wp_nav_menu(aihl_resolve_nav_menu_args('topic', array(
                         'menu_class' => 'aihl-mobile-menu list-unstyled',
                         'container' => '',
                         'depth' => 3,
-                        'theme_location' => 'topic',
                         'walker' => new AIHL_Mobile_Nav_Menu_Walker(),
                         'fallback_cb' => false,
-                    )); ?>
+                    ))); ?>
                 </div>
             </div>
         </div>
@@ -225,13 +223,12 @@
             <div class="aihl-topbar-inner">
                 <div class="aihl-topbar-left">
                     <?php
-                    wp_nav_menu(array(
-                        'theme_location' => 'naviga',
+                    wp_nav_menu(aihl_resolve_nav_menu_args('naviga', array(
                         'menu_class' => 'aihl-utility-menu list-unstyled d-flex align-items-center mb-0',
                         'container' => '',
                         'depth' => 1,
                         'fallback_cb' => false,
-                    ));
+                    )));
                     ?>
                 </div>
                 <div class="aihl-topbar-right">
@@ -337,14 +334,13 @@
             <?php if ($aihl_header_structure === 'mega-centered') : ?>
                 <!-- Mega Centered: left menu + logo + right menu -->
                 <div class="aihl-mc-left d-none d-lg-flex">
-                    <?php wp_nav_menu(array(
+                    <?php wp_nav_menu(aihl_resolve_nav_menu_args('topic_left', array(
                         'menu_class' => 'navbar-nav aihl-mc-nav',
                         'container' => '',
                         'depth' => 3,
-                        'theme_location' => 'topic_left',
                         'walker' => new AIHL_Nav_Menu_Walker(),
                         'fallback_cb' => false,
-                    )); ?>
+                    ))); ?>
                 </div>
             <?php endif; ?>
 
@@ -359,14 +355,13 @@
 
             <?php if ($aihl_header_structure === 'mega-centered') : ?>
                 <div class="aihl-mc-right d-none d-lg-flex">
-                    <?php wp_nav_menu(array(
+                    <?php wp_nav_menu(aihl_resolve_nav_menu_args('topic_right', array(
                         'menu_class' => 'navbar-nav aihl-mc-nav',
                         'container' => '',
                         'depth' => 3,
-                        'theme_location' => has_nav_menu('topic_right') ? 'topic_right' : 'utili',
                         'walker' => new AIHL_Nav_Menu_Walker(),
                         'fallback_cb' => false,
-                    )); ?>
+                    ))); ?>
                 </div>
             <?php endif; ?>
 
@@ -391,22 +386,20 @@
                     } elseif ($aihl_header_structure === 'triple-row') {
                         $aihl_nav_menu_class = 'navbar-nav aihl-desktop-menu d-none d-lg-flex flex-grow-1 py-lg-0';
                     }
-                    wp_nav_menu( array(
+                    wp_nav_menu(aihl_resolve_nav_menu_args('topic', array(
                         'menu_class' => $aihl_nav_menu_class,
                         'container' => '',
                         'depth' => 3,
-                        'theme_location' => 'topic',
                         'walker' => new AIHL_Nav_Menu_Walker(),
                         'fallback_cb' => false,
-                    )); ?>
-                    <?php wp_nav_menu(array(
+                    ))); ?>
+                    <?php wp_nav_menu(aihl_resolve_nav_menu_args('topic', array(
                         'menu_class' => 'aihl-mobile-menu list-unstyled d-lg-none',
                         'container' => '',
                         'depth' => 3,
-                        'theme_location' => 'topic',
                         'walker' => new AIHL_Mobile_Nav_Menu_Walker(),
                         'fallback_cb' => false,
-                    )); ?>
+                    ))); ?>
                     <div class="aihl-mobile-search d-lg-none">
                         <form
                             class	= "search-form"

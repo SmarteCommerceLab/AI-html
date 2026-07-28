@@ -31,7 +31,9 @@ $aihl_contact_email = aihl_register_class::get_text('contatti_email');
 $aihl_mailchimp_id = absint(aihl_register_class::get_text('mailchip_footer'));
 $aihl_has_newsletter = $aihl_mailchimp_id > 0 && shortcode_exists('mc4wp_form');
 $aihl_has_social_links = function_exists('aihl_get_site_builder_social_links') && !empty(aihl_get_site_builder_social_links());
-$aihl_has_footer_menu = has_nav_menu('utili');
+$aihl_has_footer_menu = function_exists('aihl_has_resolved_nav_menu')
+	? aihl_has_resolved_nav_menu('utili')
+	: has_nav_menu('utili');
 $aihl_footer_variant = sanitize_key((string) aihtml_option_value('footer_variant', 'enterprise'));
 $aihl_footer_variants = array('enterprise', 'futuristic', 'corporate', 'compact', 'mega-footer', 'minimal', 'cta-footer');
 if (!in_array($aihl_footer_variant, $aihl_footer_variants, true)) {
@@ -145,13 +147,12 @@ $aihl_footer_classes = array(
 			</div>
 			<?php if ($aihl_has_footer_menu) : ?>
 			<div class="aihl-footer-inline-menu">
-				<?php wp_nav_menu(array(
+				<?php wp_nav_menu(aihl_resolve_nav_menu_args('utili', array(
 					'menu_class' => 'aihl-footer-inline-list list-unstyled d-flex flex-wrap gap-3 mb-0',
 					'container' => '',
 					'depth' => 1,
-					'theme_location' => 'utili',
 					'fallback_cb' => false,
-				)); ?>
+				))); ?>
 			</div>
 			<?php endif; ?>
 			<?php if ($aihl_has_social_links) : ?>
@@ -323,13 +324,12 @@ $aihl_footer_classes = array(
 				<div class="col-lg-3 col-md-6">
 					<h2 class="h6 text-uppercase fw-semibold mb-3"><?php esc_html_e('Link utili', AIHL_TEXT_DOMAIN); ?></h2>
 					<?php
-					wp_nav_menu(array(
+					wp_nav_menu(aihl_resolve_nav_menu_args('utili', array(
 						'menu_class' => 'aihl-footer-menu list-unstyled mb-0',
 						'container' => '',
 						'depth' => 1,
-						'theme_location' => 'utili',
 						'fallback_cb' => false,
-					));
+					)));
 					?>
 				</div>
 			<?php endif; ?>
