@@ -5,6 +5,25 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.12.0] - 2026-07-28
+
+### Aggiunto
+- Catalogo macchina della copertura gestionale API su 18 domini operativi.
+- API per impostazioni sito, selezione Canvas, compliance, dipendenze, componenti runtime e aggiornamenti tema.
+- API per occhiello editoriale, snapshot privati del reset e contenuto pagina.
+- Schemi OpenAPI concreti per i principali payload di scrittura.
+- Contratto tecnico `API-MANAGEMENT.md` e test bloccanti di copertura.
+
+### Modificato
+- Profilo autore e sfondi pagina adottano l'autenticazione Smart AI condivisa.
+- Introspection e capabilities includono il catalogo completo delle funzioni gestibili.
+- L'upgrade via API richiede esplicitamente la capability WordPress `update_themes`.
+
+### Corretto
+- Payload di esempio delle opzioni e route Reset nella discovery API.
+- Operazioni OpenAPI `DELETE` senza request body improprio.
+- Aggiornamento pagina esteso al contenuto HTML sanitizzato.
+
 ## [1.11.0] - 2026-07-28
 
 ### Aggiunto

@@ -267,10 +267,37 @@ function aihl_register_smart_reset_routes(): void {
 			}
 			$response = aihl_smart_reset_execute($ids, $dry_run);
 			$response['snapshot'] = is_array($snapshot)
-				? array('filename' => $snapshot['filename'], 'count' => $snapshot['count'])
+				? array(
+					'token' => $snapshot['token'],
+					'filename' => $snapshot['filename'],
+					'count' => $snapshot['count'],
+					'api' => rest_url('aihtml/v1/ai/reset/snapshots/' . rawurlencode((string) $snapshot['token'])),
+				)
 				: null;
 			return rest_ensure_response($response);
 		},
+	));
+
+	register_rest_route('aihtml/v1', '/ai/reset/snapshots/(?P<token>[a-z0-9]+)', array(
+		'methods' => WP_REST_Server::READABLE,
+		'permission_callback' => 'aihl_ai_can_write',
+		'callback' => function (WP_REST_Request $request) {
+			$token = sanitize_key((string) $request->get_param('token'));
+			$snapshot = get_transient('aihl_reset_snapshot_' . $token);
+			$base = realpath(aihl_smart_reset_snapshot_directory());
+			$file = is_array($snapshot) && !empty($snapshot['file']) ? realpath((string) $snapshot['file']) : false;
+			$base = $base ? wp_normalize_path($base) : false;
+			$file = $file ? wp_normalize_path($file) : false;
+			if ($token === '' || !$base || !$file || strpos($file, trailingslashit($base)) !== 0 || !is_readable($file)) {
+				return new WP_Error('aihl_reset_snapshot_missing', __('Snapshot non disponibile o scaduto.', AIHL_TEXT_DOMAIN), array('status' => 404));
+			}
+			$payload = json_decode((string) file_get_contents($file), true);
+			if (!is_array($payload)) {
+				return new WP_Error('aihl_reset_snapshot_invalid', __('Snapshot non valido.', AIHL_TEXT_DOMAIN), array('status' => 500));
+			}
+			return rest_ensure_response($payload);
+		},
+		'args' => array('token' => array('type' => 'string', 'required' => true)),
 	));
 }
 

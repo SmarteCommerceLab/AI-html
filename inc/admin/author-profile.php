@@ -158,9 +158,12 @@ function aihl_register_author_profile_rest(): void {
 	register_rest_route('aihtml/v1', '/ai/author-profile', array(
 		array(
 			'methods'             => WP_REST_Server::READABLE,
-			'permission_callback' => static function () { return is_user_logged_in(); },
-			'callback'            => static function () {
-				$user_id = get_current_user_id();
+			'permission_callback' => 'aihl_ai_can_read',
+			'callback'            => static function (WP_REST_Request $request) {
+				$user_id = absint($request->get_param('user_id') ?: get_current_user_id());
+				if ($user_id < 1 || !get_userdata($user_id)) {
+					return new WP_Error('aihl_author_not_found', __('Autore non trovato.', AIHL_TEXT_DOMAIN), array('status' => 404));
+				}
 				return rest_ensure_response(array(
 					'user_id'   => $user_id,
 					'selected'  => aihl_sanitize_author_style(get_user_meta($user_id, 'aihl_author_box_style', true)),
@@ -171,9 +174,12 @@ function aihl_register_author_profile_rest(): void {
 		),
 		array(
 			'methods'             => WP_REST_Server::EDITABLE,
-			'permission_callback' => static function () { return is_user_logged_in(); },
+			'permission_callback' => 'aihl_ai_can_write',
 			'callback'            => static function (WP_REST_Request $request) {
-				$user_id = get_current_user_id();
+				$user_id = absint($request->get_param('user_id') ?: get_current_user_id());
+				if ($user_id < 1 || !get_userdata($user_id)) {
+					return new WP_Error('aihl_author_not_found', __('Autore non trovato.', AIHL_TEXT_DOMAIN), array('status' => 404));
+				}
 				$style = aihl_sanitize_author_style($request->get_param('style'));
 				update_user_meta($user_id, 'aihl_author_box_style', $style);
 				return rest_ensure_response(array('updated' => true, 'selected' => $style, 'resolved' => aihl_get_author_box_style($user_id)));

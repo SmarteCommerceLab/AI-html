@@ -795,6 +795,7 @@ if (!function_exists('aihl_rest_introspection')) {
 				'home_url'            => get_home_url(),
 			),
 			'reset_registry' => array_keys(function_exists('aihl_get_smart_reset_registry') ? aihl_get_smart_reset_registry() : array()),
+			'management_catalog' => function_exists('aihl_api_management_catalog') ? aihl_api_management_catalog() : array(),
 		));
 	}
 }
@@ -840,8 +841,8 @@ if (!function_exists('aihl_rest_capabilities')) {
 			array(
 				'method'      => 'POST',
 				'path'        => '/ai/options',
-				'description' => 'Aggiorna opzioni tema. Body JSON con coppie chiave:valore. Usa /ai/options/schema per i campi disponibili.',
-				'example'     => '{"header_structure":"dualbar","footer_variant":"futuristic","header_cta_label":"Richiedi demo"}',
+				'description' => 'Aggiorna opzioni tema. Il body usa l envelope options; consulta /ai/options/schema.',
+				'example'     => '{"options":{"header_structure":"dualbar","footer_variant":"futuristic","header_cta_label":"Richiedi demo"}}',
 			),
 			array(
 				'method'      => 'GET',
@@ -973,15 +974,16 @@ if (!function_exists('aihl_rest_capabilities')) {
 			),
 			'base_url'  => $base_url,
 			'endpoints' => $endpoints,
+			'management_catalog' => function_exists('aihl_api_management_catalog') ? aihl_api_management_catalog() : array(),
 			'workflow'   => array(
 				'1_discover'    => 'GET /ai/capabilities — stai leggendo questo',
 				'2_understand'  => 'GET /ai/introspection + /ai/integration-manifest — leggi stato e risorse runtime',
-				'3_configure'   => 'POST /ai/options — modifica header, footer, CTA, contatti',
+				'3_configure'   => 'POST /ai/options con envelope options - modifica header, footer, CTA, contatti',
 				'4_structure'   => 'POST /ai/menus + POST /ai/pages — crea menu e pagine',
 				'5_customize'   => 'POST /ai/code-slots — inietta HTML/CSS/JS in qualsiasi punto',
 				'6_override'    => 'POST /ai/code-slots con hook=header_full o footer_full — sostituisci intero header/footer',
 				'7_deploy'      => 'POST /ai/deploy — deploy completo da project.json',
-				'8_reset'       => 'POST /ai/reset — resetta e ricomincia',
+				'8_reset'       => 'POST /ai/reset/execute - reset selettivo con snapshot preventivo',
 			),
 			'code_slots' => array(
 				'override_hooks'  => $override_hooks,

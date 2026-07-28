@@ -42,6 +42,7 @@ aihl_require_files(array(
 	'inc/integrations/seo.php',
 	'inc/integrations/ai-auth-core.php',
 	'inc/integrations/ai-api.php',
+	'inc/integrations/management-api.php',
 	'inc/theme/options-json.php',
 ));
 

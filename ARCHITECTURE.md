@@ -1,6 +1,6 @@
 # AI-HTML Theme — Architettura tecnica
 
-Versione: 1.11.0
+Versione: 1.12.0
 Ultimo aggiornamento: 28 luglio 2026
 
 ---

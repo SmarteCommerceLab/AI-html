@@ -190,6 +190,7 @@ function aihl_ai_rest_auth_capabilities(WP_REST_Request $request) {
 		'read'    => aihl_ai_can_read($request),
 		'write'   => aihl_ai_can_write($request),
 		'publish' => aihl_ai_can_publish($request),
+		'update_themes' => current_user_can('update_themes'),
 	));
 }
 
@@ -519,6 +520,19 @@ function aihl_ai_openapi_route_metadata(): array {
 		'/aihtml/v1/ai/pages/{id}/restore' => array('summary' => 'Restore a trashed AI page as a non-published draft', 'tag' => 'Pages', 'write_schema' => 'PageRestoreRequest'),
 		'/aihtml/v1/ai/pages/{id}/status' => array('summary' => 'Change page publication status', 'tag' => 'Pages', 'write_schema' => 'PageStatusRequest'),
 		'/aihtml/v1/ai/site/front-page' => array('summary' => 'Read or assign the WordPress front page', 'tag' => 'Site', 'read_schema' => 'FrontPagePayload', 'write_schema' => 'FrontPageRequest'),
+		'/aihtml/v1/ai/site/settings' => array('summary' => 'Read or update WordPress settings governed by AI-HTML', 'tag' => 'Site', 'read_schema' => 'SiteSettings', 'write_schema' => 'SiteSettings'),
+		'/aihtml/v1/ai/management' => array('summary' => 'Complete API management coverage catalog', 'tag' => 'Management', 'read_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/canvas' => array('summary' => 'Read or select Canvas sources for header and footer', 'tag' => 'Canvas', 'read_schema' => 'GenericObject', 'write_schema' => 'CanvasRequest'),
+		'/aihtml/v1/ai/dependencies' => array('summary' => 'Theme dependency status and lifecycle API discovery', 'tag' => 'Management', 'read_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/compliance' => array('summary' => 'Run theme compliance checks', 'tag' => 'Management', 'read_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/runtime-components/render' => array('summary' => 'Render a governed runtime component', 'tag' => 'Integration', 'read_schema' => 'GenericObject', 'write_schema' => 'RuntimeComponentRequest'),
+		'/aihtml/v1/ai/update' => array(
+			'summary' => 'Inspect, refresh or install a theme update',
+			'tag' => 'Updates',
+			'read_schema' => 'GenericObject',
+			'write_schema' => 'ThemeUpdateRequest',
+			'write_security' => array(array('wpNonce' => array()), array('applicationPassword' => array())),
+		),
 		'/aihtml/v1/ai/auth/capabilities' => array('summary' => 'Capabilities granted to the current Smart AI key', 'tag' => 'AI', 'read_schema' => 'AuthCapabilities'),
 		'/aihtml/v1/ai/options/schema' => array('summary' => 'Theme options schema', 'tag' => 'Options', 'read_schema' => 'AIHLOptionsSchema'),
 		'/aihtml/v1/ai/openapi' => array('summary' => 'OpenAPI document', 'tag' => 'Documentation', 'read_schema' => 'OpenAPI'),
@@ -529,7 +543,20 @@ function aihl_ai_openapi_route_metadata(): array {
 		'/aihtml/v1/ai/deploy/projects' => array('summary' => 'List deploy projects', 'tag' => 'Deploy', 'read_schema' => 'DeployProjects'),
 		'/aihtml/v1/ai/reset/registry' => array('summary' => 'Smart Reset registry', 'tag' => 'Reset', 'read_schema' => 'ResetRegistry'),
 		'/aihtml/v1/ai/reset/execute' => array('summary' => 'Execute Smart Reset', 'tag' => 'Reset', 'read_schema' => 'ResetResult', 'write_schema' => 'ResetRequest'),
-		'/aihtml/v1/ai/author-profile' => array('summary' => 'Author profile preferences', 'tag' => 'Authors', 'read_schema' => 'GenericObject', 'write_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/reset/snapshots/{token}' => array('summary' => 'Read a private Smart Reset snapshot', 'tag' => 'Reset', 'read_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/author-profile' => array('summary' => 'Author profile preferences', 'tag' => 'Authors', 'read_schema' => 'GenericObject', 'write_schema' => 'AuthorProfileRequest'),
+		'/aihtml/v1/ai/pages/{id}/background' => array('summary' => 'Read, update or remove per-page background', 'tag' => 'Pages', 'read_schema' => 'PageBackground', 'write_schema' => 'PageBackground'),
+		'/aihtml/v1/ai/content/{id}/presentation' => array('summary' => 'Read or update theme presentation metadata for content', 'tag' => 'Pages', 'read_schema' => 'ContentPresentation', 'write_schema' => 'ContentPresentation'),
+		'/aihtml/v1/ai/page-background/patterns' => array('summary' => 'List available page background patterns', 'tag' => 'Pages', 'read_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/code-slots' => array('summary' => 'List or save AI Code Slots', 'tag' => 'Canvas', 'read_schema' => 'GenericObject', 'write_schema' => 'CodeSlot'),
+		'/aihtml/v1/ai/code-slots/{slot_id}' => array('summary' => 'Read, update or delete an AI Code Slot', 'tag' => 'Canvas', 'read_schema' => 'CodeSlot', 'write_schema' => 'CodeSlot'),
+		'/aihtml/v1/ai/code-slots/{slot_id}/toggle' => array('summary' => 'Enable or disable an AI Code Slot', 'tag' => 'Canvas', 'read_schema' => 'GenericObject', 'write_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/code-slots/{slot_id}/rollback' => array('summary' => 'Rollback an AI Code Slot revision', 'tag' => 'Canvas', 'read_schema' => 'GenericObject', 'write_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/code-slots/import' => array('summary' => 'Import AI Code Slots', 'tag' => 'Canvas', 'read_schema' => 'GenericObject', 'write_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/code-slots/export' => array('summary' => 'Export AI Code Slots', 'tag' => 'Canvas', 'read_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/code-slots/hooks' => array('summary' => 'List AI Code Slot hook points', 'tag' => 'Canvas', 'read_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/introspection' => array('summary' => 'Inspect the complete AI-HTML runtime state', 'tag' => 'Management', 'read_schema' => 'GenericObject'),
+		'/aihtml/v1/ai/capabilities' => array('summary' => 'AI agent onboarding and capability discovery', 'tag' => 'Management', 'read_schema' => 'GenericObject'),
 	);
 }
 
@@ -574,14 +601,16 @@ function aihl_ai_openapi_payload(): array {
 						'401' => array('description' => 'Authentication required'),
 						'403' => array('description' => 'Insufficient permissions'),
 					),
-					'security' => array(array('wpNonce' => array()), array('smartAiKey' => array()), array('applicationPassword' => array())),
+					'security' => ($is_write && isset($route_meta['write_security']))
+						? $route_meta['write_security']
+						: array(array('wpNonce' => array()), array('smartAiKey' => array()), array('applicationPassword' => array())),
 				);
 				$path_parameters = aihl_ai_openapi_path_parameters((string) $route, (array) $handler);
 				if (!empty($path_parameters)) {
 					$operation['parameters'] = $path_parameters;
 				}
 
-				if ($is_write) {
+				if ($is_write && 'DELETE' !== $method) {
 					$operation['requestBody'] = array(
 						'required' => in_array($method, array('POST', 'PUT', 'PATCH'), true),
 						'content' => array(
@@ -611,8 +640,11 @@ function aihl_ai_openapi_payload(): array {
 			array('name' => 'Menus'),
 			array('name' => 'Pages'),
 			array('name' => 'Site'),
+			array('name' => 'Management'),
+			array('name' => 'Canvas'),
 			array('name' => 'Deploy'),
 			array('name' => 'Reset'),
+			array('name' => 'Updates'),
 			array('name' => 'Authors'),
 			array('name' => 'Integration'),
 			array('name' => 'Documentation'),
@@ -636,6 +668,7 @@ function aihl_ai_openapi_payload(): array {
 						'read' => array('type' => 'boolean'),
 						'write' => array('type' => 'boolean'),
 						'publish' => array('type' => 'boolean'),
+						'update_themes' => array('type' => 'boolean'),
 					),
 				),
 				'DeployResult' => aihl_ai_openapi_generic_object_schema(),
@@ -688,6 +721,7 @@ function aihl_ai_openapi_payload(): array {
 					'properties' => array(
 						'title' => array('type' => 'string'),
 						'slug' => array('type' => 'string'),
+						'content' => array('type' => 'string'),
 						'status' => array('type' => 'string', 'enum' => array('draft', 'pending', 'private', 'publish')),
 						'template' => array('type' => 'string'),
 					),
@@ -706,6 +740,97 @@ function aihl_ai_openapi_payload(): array {
 					'properties' => array(
 						'components' => array('type' => 'array', 'items' => array('type' => 'string')),
 						'dry_run' => array('type' => 'boolean'),
+					),
+				),
+				'SiteSettings' => array(
+					'type' => 'object',
+					'additionalProperties' => false,
+					'properties' => array(
+						'blogname' => array('type' => 'string'),
+						'blogdescription' => array('type' => 'string'),
+						'blog_public' => array('type' => 'boolean'),
+						'show_on_front' => array('type' => 'string', 'enum' => array('posts', 'page')),
+						'page_on_front' => array('type' => 'integer', 'minimum' => 0),
+						'page_for_posts' => array('type' => 'integer', 'minimum' => 0),
+						'permalink_structure' => array('type' => 'string'),
+					),
+				),
+				'CanvasRequest' => array(
+					'type' => 'object',
+					'additionalProperties' => false,
+					'properties' => array(
+						'header' => array('$ref' => '#/components/schemas/CanvasArea'),
+						'footer' => array('$ref' => '#/components/schemas/CanvasArea'),
+					),
+				),
+				'CanvasArea' => array(
+					'type' => 'object',
+					'additionalProperties' => false,
+					'properties' => array(
+						'mode' => array('type' => 'string', 'enum' => array('native', 'canvas')),
+						'slot_id' => array('type' => 'string'),
+					),
+				),
+				'RuntimeComponentRequest' => array(
+					'type' => 'object',
+					'required' => array('name'),
+					'additionalProperties' => false,
+					'properties' => array(
+						'name' => array('type' => 'string', 'enum' => array('smart-logo', 'smart-menu', 'smart-social', 'smart-contact', 'smart-addon')),
+						'attributes' => array('type' => 'object', 'additionalProperties' => true),
+					),
+				),
+				'ThemeUpdateRequest' => array(
+					'type' => 'object',
+					'required' => array('action'),
+					'additionalProperties' => false,
+					'properties' => array('action' => array('type' => 'string', 'enum' => array('check', 'upgrade'))),
+				),
+				'AuthorProfileRequest' => array(
+					'type' => 'object',
+					'required' => array('style'),
+					'additionalProperties' => false,
+					'properties' => array(
+						'user_id' => array('type' => 'integer', 'minimum' => 1),
+						'style' => array('type' => 'string', 'enum' => array('simple', 'compact', 'card', 'banner', 'editorial', 'enterprise', 'impact', 'signature', 'none')),
+					),
+				),
+				'PageBackground' => array(
+					'type' => 'object',
+					'additionalProperties' => false,
+					'properties' => array(
+						'type' => array('type' => 'string', 'enum' => array('default', 'color', 'image', 'pattern')),
+						'color' => array('type' => 'string'),
+						'image' => array('type' => 'string', 'format' => 'uri'),
+						'image_opacity' => array('type' => 'number', 'minimum' => 0, 'maximum' => 1),
+						'image_size' => array('type' => 'string', 'enum' => array('cover', 'contain', 'auto')),
+						'pattern' => array('type' => 'string'),
+						'overlay_color' => array('type' => 'string'),
+						'overlay_opacity' => array('type' => 'number', 'minimum' => 0, 'maximum' => 1),
+					),
+				),
+				'ContentPresentation' => array(
+					'type' => 'object',
+					'additionalProperties' => false,
+					'properties' => array(
+						'post_id' => array('type' => 'integer', 'minimum' => 1, 'readOnly' => true),
+						'subtitle' => array('type' => 'string'),
+					),
+				),
+				'CodeSlot' => array(
+					'type' => 'object',
+					'required' => array('hook'),
+					'properties' => array(
+						'id' => array('type' => 'string'),
+						'label' => array('type' => 'string'),
+						'hook' => array('type' => 'string'),
+						'type' => array('type' => 'string', 'enum' => array('html', 'css', 'js', 'mixed')),
+						'code' => array('type' => 'string'),
+						'css' => array('type' => 'string'),
+						'js' => array('type' => 'string'),
+						'context' => array('oneOf' => array(array('type' => 'string'), array('type' => 'array', 'items' => array('type' => 'string')))),
+						'priority' => array('type' => 'integer', 'minimum' => 1, 'maximum' => 999),
+						'active' => array('type' => 'boolean'),
 					),
 				),
 			),
@@ -842,7 +967,7 @@ function aihl_ai_rest_update_page(WP_REST_Request $request) {
 	if (!is_array($body)) {
 		$body = array();
 	}
-	$allowed_fields = array('title', 'slug', 'status', 'template');
+	$allowed_fields = array('title', 'slug', 'content', 'status', 'template');
 	$unknown_fields = array_diff(array_keys($body), $allowed_fields);
 	if ($unknown_fields) {
 		return new WP_Error('unsupported_page_fields', 'La richiesta contiene campi pagina non supportati.', array('status' => 422));
@@ -880,6 +1005,9 @@ function aihl_ai_rest_update_page(WP_REST_Request $request) {
 	if (array_key_exists('slug', $body)) {
 		$update['post_name'] = sanitize_title((string) $body['slug']);
 	}
+	if (array_key_exists('content', $body)) {
+		$update['post_content'] = wp_kses_post((string) $body['content']);
+	}
 	if (array_key_exists('status', $body)) {
 		$update['post_status'] = $requested_status;
 	}
@@ -903,6 +1031,7 @@ function aihl_ai_rest_update_page(WP_REST_Request $request) {
 		'slug'     => (string) get_post_field('post_name', $page_id),
 		'status'   => (string) get_post_status($page_id),
 		'template' => get_page_template_slug($page_id) ?: 'default',
+		'content'  => (string) get_post_field('post_content', $page_id),
 		'url'      => get_permalink($page_id),
 	));
 }

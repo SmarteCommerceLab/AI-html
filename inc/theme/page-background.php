@@ -266,8 +266,8 @@ add_action('rest_api_init', function () {
 				}
 				return new WP_REST_Response(aihl_get_page_background_meta($post_id));
 			},
-			'permission_callback' => function () {
-				return function_exists('smart_ai_can_read') ? smart_ai_can_read() : current_user_can('manage_options');
+			'permission_callback' => function (WP_REST_Request $request) {
+				return function_exists('aihl_ai_can_read') ? aihl_ai_can_read($request) : current_user_can('manage_options');
 			},
 		),
 		array(
@@ -285,8 +285,8 @@ add_action('rest_api_init', function () {
 				update_post_meta($post_id, '_aihl_page_background', $sanitized);
 				return new WP_REST_Response(array('updated' => true, 'background' => $sanitized));
 			},
-			'permission_callback' => function () {
-				return function_exists('smart_ai_can_write') ? smart_ai_can_write() : current_user_can('manage_options');
+			'permission_callback' => function (WP_REST_Request $request) {
+				return function_exists('aihl_ai_can_write') ? aihl_ai_can_write($request) : current_user_can('manage_options');
 			},
 		),
 		array(
@@ -296,8 +296,8 @@ add_action('rest_api_init', function () {
 				delete_post_meta($post_id, '_aihl_page_background');
 				return new WP_REST_Response(array('deleted' => true));
 			},
-			'permission_callback' => function () {
-				return function_exists('smart_ai_can_write') ? smart_ai_can_write() : current_user_can('manage_options');
+			'permission_callback' => function (WP_REST_Request $request) {
+				return function_exists('aihl_ai_can_write') ? aihl_ai_can_write($request) : current_user_can('manage_options');
 			},
 		),
 	));
@@ -307,8 +307,8 @@ add_action('rest_api_init', function () {
 		'callback'            => function () {
 			return new WP_REST_Response(aihl_page_background_patterns());
 		},
-		'permission_callback' => function () {
-			return function_exists('smart_ai_can_read') ? smart_ai_can_read() : current_user_can('manage_options');
+		'permission_callback' => function (WP_REST_Request $request) {
+			return function_exists('aihl_ai_can_read') ? aihl_ai_can_read($request) : current_user_can('manage_options');
 		},
 	));
 });
