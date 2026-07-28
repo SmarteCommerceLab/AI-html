@@ -10,13 +10,11 @@ $PRX = 'AIHL';
 <?php /* CONSTANT - OPTION - GROUP					*/
 define('AIHL'.'_'.'OPTION', array(
 	array('option_group' => AIHL_OPTION_BASE.'_'.'general'   ,'option_base' => 'general','option_text' => 'General'			),
-	array('option_group' => AIHL_OPTION_BASE.'_'.'reset'	 ,'option_base' => 'reset'	,'option_text' => 'Reset'			),
 ));
 ?>
 <?php /* CONSTANT - OPTION - DEFAULT				*/
 define('AIHL'.'_'.'OPTION_DEFAULT', array(
 	AIHL_OPTION_BASE.'_'.'general'  => array(),
-	AIHL_OPTION_BASE.'_'.'reset'	=> array(),
 ));
 ?>
 <?php /* CONSTANT - OPTION - SMART_SITE				*/

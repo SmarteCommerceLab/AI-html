@@ -1,7 +1,7 @@
 # AI-HTML Theme — Architettura tecnica
 
-Versione: 1.5.1  
-Ultimo aggiornamento: 22 giugno 2026
+Versione: 1.11.0
+Ultimo aggiornamento: 28 luglio 2026
 
 ---
 
@@ -32,13 +32,14 @@ functions.php
   └── inc/core/bootstrap.php
         └── inc/core/loader.php (aihl_require_files)
               ├── inc/option.php
+              ├── inc/theme-option-registry.php
               ├── inc/activation.php
               ├── inc/resource.php
               ├── inc/required-plugins.php
               ├── inc/admin/admin-hub.php
               ├── inc/customizer/panel.php
               ├── inc/customizer/section.php
-              ├── inc/customizer/reset.php
+              ├── inc/smart-reset.php
               ├── inc/theme/support.php
               ├── inc/theme/menu.php
               ├── inc/theme/menu-fields.php
@@ -65,7 +66,7 @@ functions.php
 | `inc/core/` | Boot e orchestrazione caricamento file |
 | `inc/admin/` | Admin Hub: menu top-level AI-HTML, dashboard, template e stile unificati per tutte le pagine admin |
 | `inc/` | Runtime WordPress: option system, activation, resource enqueue, required plugins |
-| `inc/customizer/` | Customizer: panel, sections (header/footer/sito/articoli/contatti/mailchimp), reset, sanitizzazione |
+| `inc/customizer/` | Customizer gerarchico: pannello radice, pannelli annidati, sezioni e controlli |
 | `inc/theme/` | Comportamento tema: theme support, menu system (walker/fields/help/json), utilities, image sizes, post helpers |
 | `inc/integrations/` | Bridge verso plugin: Smart Bootstrap Manager, SEO, Google Compliance 2026, AI Auth, AI API |
 | `template-parts/` | Blocchi riusabili: card-post (3 layout), post-meta (3 stili), author-box, share-buttons (3 stili), related-posts |

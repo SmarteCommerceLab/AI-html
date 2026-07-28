@@ -1,0 +1,13 @@
+.aihl-current-panel-parent {
+	visibility: visible !important;
+	height: auto !important;
+	overflow: visible !important;
+}
+
+.control-panel-aihl_nested_panel > .accordion-section-title::after {
+	content: "\f345";
+	font: normal 20px/1 dashicons;
+	position: absolute;
+	right: 10px;
+	top: 12px;
+}

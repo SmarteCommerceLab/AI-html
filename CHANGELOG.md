@@ -5,6 +5,23 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.11.0] - 2026-07-28
+
+### Aggiunto
+- Customizer gerarchico con pannelli annidati per struttura, contenuti, identita e integrazioni.
+- Registro canonico delle opzioni condiviso da Customizer, sanitizzazione e API REST.
+- Selezione esplicita o automatica dello slot AI Canvas per header e footer.
+
+### Modificato
+- Smart Reset disponibile esclusivamente nell'Admin Hub, con selezione componenti, conferma e snapshot.
+- Rollback dei Code Slot esteso all'intera revisione: HTML, CSS, JavaScript, hook, contesto e priorita.
+
+### Corretto
+- Un solo override Canvas completo viene renderizzato per header o footer.
+- Hook `after_content` e `before_footer` eseguiti nella posizione prevista.
+- Sezione sfondo pagina ricondotta al pannello corretto, sanitizzazione URL/colori/enum e refresh selettivo.
+- Customizer utilizzabile anche senza i controlli avanzati di Smart Customizer Frameworks.
+
 ## [1.10.9] - 2026-07-27
 
 ### Ottimizzato

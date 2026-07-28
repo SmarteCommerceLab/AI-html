@@ -4,12 +4,11 @@
 
 `customizer/` contiene file wrapper per retrocompatibilita. L'implementazione attiva risiede in:
 
-- `inc/customizer/panel.php` — panel principale
-- `inc/customizer/section.php` — sezioni e controlli (50+ controlli: header, footer, sito, articoli, contatti, mailchimp)
-- `inc/customizer/reset.php` — reset opzioni
+- `inc/customizer/panel.php` - pannello principale e pannelli annidati
+- `inc/customizer/section.php` - sezioni e controlli per struttura, contenuti, stile e integrazioni
+
+Il reset non fa parte del Customizer. E disponibile nell'Admin Hub del tema con selezione dei componenti, conferma esplicita e snapshot preventivo.
 
 Per nuova logica Customizer lavorare solo in `inc/customizer/`.
 
-Questi wrapper saranno rimossi in una major version futura dopo audit delle dipendenze esterne.
-
-Ultimo aggiornamento: v1.4.0 — 9 giugno 2026
+Ultimo aggiornamento: v1.11.0 - 28 luglio 2026

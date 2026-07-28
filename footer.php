@@ -1,4 +1,27 @@
 <?php
+$aihl_header_structure = (string) aihtml_option_value('header_structure', 'standard');
+if ($aihl_header_structure === 'sidebar') :
+?>
+</div><!-- .aihl-sidebar-content-wrap -->
+<?php
+endif;
+
+$aihl_slot_context = array(
+	'theme' => 'ai-html',
+	'screen' => 'footer',
+	'entity_id' => (int) get_queried_object_id(),
+);
+if (function_exists('aihl_render_code_slot')) {
+	aihl_render_code_slot('after_content');
+}
+do_action('sdc/smart-builder-site/slot/slot.content.after', $aihl_slot_context);
+do_action('sdc/smart-builder-site/slot/slot.footer.tools', $aihl_slot_context);
+do_action('sdc/smart-site-builder/slot/slot.content.after', $aihl_slot_context);
+do_action('sdc/smart-site-builder/slot/slot.footer.tools', $aihl_slot_context);
+if (function_exists('aihl_render_code_slot')) {
+	aihl_render_code_slot('before_footer');
+}
+
 $aihl_site_name = get_bloginfo('name');
 $aihl_site_tagline = get_bloginfo('description');
 $aihl_site_description = aihl_register_class::get_text('sito_descrizione');
@@ -78,13 +101,6 @@ $aihl_footer_classes = array(
 	'aihl-footer--' . ($aihl_footer_variant === 'cta-footer' ? 'enterprise' : $aihl_footer_variant),
 	'aihl-footer-surface-' . $aihl_footer_surface,
 );
-$aihl_slot_context = array(
-	'theme' => 'ai-html',
-	'screen' => 'footer',
-	'entity_id' => (int) get_queried_object_id(),
-);
-
-$aihl_header_structure = (string) aihtml_option_value('header_structure', 'standard');
 ?>
 
 <?php if (
@@ -358,18 +374,6 @@ $aihl_header_structure = (string) aihtml_option_value('header_structure', 'stand
 
 <?php endif; // end footer_full override check ?>
 
-<?php if ($aihl_header_structure === 'sidebar') : ?>
-</div><!-- .aihl-sidebar-content-wrap -->
-<?php endif; ?>
-
-<?php
-if (function_exists('aihl_render_code_slot')) { aihl_render_code_slot('after_content'); }
-do_action('sdc/smart-builder-site/slot/slot.content.after', $aihl_slot_context);
-do_action('sdc/smart-builder-site/slot/slot.footer.tools', $aihl_slot_context);
-do_action('sdc/smart-site-builder/slot/slot.content.after', $aihl_slot_context);
-do_action('sdc/smart-site-builder/slot/slot.footer.tools', $aihl_slot_context);
-if (function_exists('aihl_render_code_slot')) { aihl_render_code_slot('before_footer'); }
-?>
 <?php
 // Footer template rendering happens between these hooks
 if (function_exists('aihl_render_code_slot')) { aihl_render_code_slot('after_footer'); }

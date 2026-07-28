@@ -117,4 +117,51 @@ assert_true(str_contains($output, 'data-aihl-slot="test-header-css"'), 'CSS Mixe
 assert_true(str_contains($output, '<header data-test-slot>'), 'HTML Mixed renderizzato');
 assert_true(str_contains($output, 'data-aihl-slot="test-header-js"'), 'JS Mixed renderizzato');
 
-echo "OK AI-HTML Code Slots: sorgente nativa/Canvas, override, contesti e Mixed verificati\n";
+$second = aihl_code_slots_save(array(
+	'id' => 'priority-header',
+	'label' => 'Priority Header',
+	'hook' => 'header_full',
+	'type' => 'html',
+	'context' => 'global',
+	'priority' => 5,
+	'active' => true,
+	'code' => '<header data-priority-slot>Priority</header>',
+));
+assert_true(!is_wp_error($second), 'secondo override salvato');
+
+$GLOBALS['aihl_test_options'][AIHL_OPTION_BASE . '_general']['header_render_mode'] = 'canvas';
+ob_start();
+aihl_render_code_slot('header_full');
+$output = ob_get_clean();
+assert_true(str_contains($output, 'data-priority-slot'), 'automatico seleziona priorita maggiore');
+assert_true(!str_contains($output, 'data-test-slot'), 'un solo override completo viene renderizzato');
+
+$GLOBALS['aihl_test_options'][AIHL_OPTION_BASE . '_general']['header_canvas_slot_id'] = 'test-header';
+ob_start();
+aihl_render_code_slot('header_full');
+$output = ob_get_clean();
+assert_true(str_contains($output, 'data-test-slot'), 'selezione esplicita ha precedenza');
+assert_true(!str_contains($output, 'data-priority-slot'), 'selezione esplicita resta unica');
+
+$updated = aihl_code_slots_save(array(
+	'id' => 'test-header',
+	'label' => 'Test Header Updated',
+	'hook' => 'footer_full',
+	'type' => 'mixed',
+	'context' => 'front_page',
+	'priority' => 99,
+	'active' => true,
+	'code' => '<footer>Updated</footer>',
+	'css' => '.updated{display:none}',
+	'js' => 'window.updated=true;',
+));
+assert_true(!is_wp_error($updated), 'aggiornamento slot per rollback');
+$rolled_back = aihl_code_slots_rollback('test-header');
+assert_true(!is_wp_error($rolled_back), 'rollback disponibile');
+assert_true($rolled_back['hook'] === 'header_full', 'rollback ripristina hook');
+assert_true($rolled_back['context'] === 'global', 'rollback ripristina contesto');
+assert_true((int) $rolled_back['priority'] === 10, 'rollback ripristina priorita');
+assert_true($rolled_back['css'] === '.test{display:block}', 'rollback ripristina CSS');
+assert_true($rolled_back['js'] === 'window.testSlot=true;', 'rollback ripristina JS');
+
+echo "OK AI-HTML Code Slots: vincitore unico, selezione, rollback, contesti e Mixed verificati\n";

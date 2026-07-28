@@ -197,82 +197,12 @@ function aihl_ai_rest_auth_capabilities(WP_REST_Request $request) {
  * Schema opzioni tema: whitelist dei campi modificabili via API
  * ============================================================================ */
 
+if (!function_exists('aihl_theme_option_registry')) {
+	require_once dirname(__DIR__) . '/theme-option-registry.php';
+}
+
 function aihl_ai_options_whitelist(): array {
-	return array(
-		// Identita e media
-		'sito_descrizione'          => array('type' => 'text', 'group' => 'sito'),
-		'site_logo_url'             => array('type' => 'url', 'group' => 'media'),
-		'site_logo_transparent_url' => array('type' => 'url', 'group' => 'media'),
-		'site_logo_light_url'       => array('type' => 'url', 'group' => 'media'),
-		'footer_logo_url'           => array('type' => 'url', 'group' => 'media'),
-		// Header
-		'header_render_mode'      => array('type' => 'enum', 'values' => array('native', 'canvas'), 'group' => 'header'),
-		'header_structure'        => array('type' => 'enum', 'values' => array('standard', 'dualbar', 'centered', 'topbar-nav', 'mega-centered', 'sidebar', 'triple-row', 'stacked-centered'), 'group' => 'header'),
-		'header_nav_layout'       => array('type' => 'enum', 'values' => array('clean', 'pills', 'underline', 'compact'), 'group' => 'header'),
-		'header_nav_text_variant' => array('type' => 'enum', 'values' => array('normal', 'uppercase', 'lowercase', 'italic', 'uppercase-italic', 'lowercase-italic'), 'group' => 'header'),
-		'header_nav_font_weight'  => array('type' => 'enum', 'values' => array('300', '400', '500', '600', '700', '800'), 'group' => 'header'),
-		'header_nav_letter_spacing' => array('type' => 'float', 'min' => 0, 'max' => 0.2, 'group' => 'header'),
-		'header_overlay_mode'      => array('type' => 'enum', 'values' => array('auto', 'always', 'never'), 'group' => 'header'),
-		'header_overlay_opacity'   => array('type' => 'float', 'min' => 0, 'max' => 1, 'group' => 'header'),
-		'header_overlay_blur'      => array('type' => 'int', 'min' => 0, 'max' => 24, 'group' => 'header'),
-		'header_sticky_style'     => array('type' => 'enum', 'values' => array('solid', 'blur', 'transparent', 'gradient-fade'), 'group' => 'header'),
-		'header_search_style'     => array('type' => 'enum', 'values' => array('none', 'icon-dropdown', 'icon-fullscreen', 'inline'), 'group' => 'header'),
-		'header_topbar_scroll_behavior' => array('type' => 'enum', 'values' => array('scroll-away', 'sticky'), 'group' => 'header'),
-		'header_show_logo'        => array('type' => 'bool', 'group' => 'header'),
-		'header_show_cta'         => array('type' => 'bool', 'group' => 'header'),
-		'menu_dropdown_indicator' => array('type' => 'bool', 'group' => 'header'),
-		'header_show_login'       => array('type' => 'bool', 'group' => 'header'),
-		'header_cta_label'        => array('type' => 'text', 'group' => 'header'),
-		'header_cta_url'          => array('type' => 'url', 'group' => 'header'),
-		'header_login_label'      => array('type' => 'text', 'group' => 'header'),
-		'header_login_url'        => array('type' => 'url', 'group' => 'header'),
-		// Page background defaults
-		'page_bg_type'            => array('type' => 'enum', 'values' => array('default', 'color', 'image', 'pattern'), 'group' => 'page_background'),
-		'page_bg_color'           => array('type' => 'text', 'group' => 'page_background'),
-		'page_bg_image'           => array('type' => 'url', 'group' => 'page_background'),
-		'page_bg_image_opacity'   => array('type' => 'float', 'min' => 0, 'max' => 1, 'group' => 'page_background'),
-		'page_bg_image_size'      => array('type' => 'enum', 'values' => array('cover', 'contain', 'auto'), 'group' => 'page_background'),
-		'page_bg_pattern'         => array('type' => 'enum', 'values' => array('none', 'dots', 'grid', 'diagonal', 'cross'), 'group' => 'page_background'),
-		'page_bg_overlay_color'   => array('type' => 'text', 'group' => 'page_background'),
-		'page_bg_overlay_opacity' => array('type' => 'float', 'min' => 0, 'max' => 1, 'group' => 'page_background'),
-		// Mobile nav
-		'mobile_nav_style'        => array('type' => 'enum', 'values' => array('rail', 'bottom-bar', 'none'), 'group' => 'mobile'),
-		'mobile_rail_enable'      => array('type' => 'bool', 'group' => 'mobile'),
-		'mobile_rail_position'    => array('type' => 'enum', 'values' => array('left', 'right'), 'group' => 'mobile'),
-		'mobile_rail_autohide'    => array('type' => 'bool', 'group' => 'mobile'),
-		// Articoli
-		'article_author_box_style' => array(
-			'type' => 'enum',
-			'values' => array('simple', 'compact', 'card', 'banner', 'editorial', 'enterprise', 'impact', 'signature', 'none'),
-			'group' => 'article',
-		),
-		// Footer
-		'footer_render_mode'       => array('type' => 'enum', 'values' => array('native', 'canvas'), 'group' => 'footer'),
-		'footer_variant'          => array('type' => 'enum', 'values' => array('enterprise', 'futuristic', 'corporate', 'compact', 'mega-footer', 'minimal', 'cta-footer'), 'group' => 'footer'),
-		'footer_columns_count'    => array('type' => 'int', 'min' => 3, 'max' => 5, 'group' => 'footer'),
-		'footer_background_enable' => array('type' => 'bool', 'group' => 'footer'),
-		'footer_background_image' => array('type' => 'url', 'group' => 'footer'),
-		'footer_background_remote_url' => array('type' => 'url', 'group' => 'footer'),
-		'footer_background_opacity' => array('type' => 'float', 'min' => 0, 'max' => 1, 'group' => 'footer'),
-		'footer_background_position' => array('type' => 'enum', 'values' => array('center center', 'center top', 'center bottom', 'left center', 'right center'), 'group' => 'footer'),
-		'footer_background_size'  => array('type' => 'enum', 'values' => array('auto', 'cover', 'contain'), 'group' => 'footer'),
-		'footer_background_repeat' => array('type' => 'enum', 'values' => array('no-repeat', 'repeat', 'repeat-x', 'repeat-y'), 'group' => 'footer'),
-		'footer_overlay_opacity'  => array('type' => 'float', 'min' => 0, 'max' => 1, 'group' => 'footer'),
-		'footer_overlay_tone'     => array('type' => 'enum', 'values' => array('body', 'primary', 'dark', 'light'), 'group' => 'footer'),
-		'footer_cta_title'        => array('type' => 'text', 'group' => 'footer'),
-		'footer_cta_subtitle'     => array('type' => 'text', 'group' => 'footer'),
-		'footer_cta_btn_label'    => array('type' => 'text', 'group' => 'footer'),
-		'footer_cta_btn_url'      => array('type' => 'url', 'group' => 'footer'),
-		'footer_cta_btn2_label'   => array('type' => 'text', 'group' => 'footer'),
-		'footer_cta_btn2_url'     => array('type' => 'url', 'group' => 'footer'),
-		// Contatti
-		'contatti_telefono'       => array('type' => 'text', 'group' => 'contatti'),
-		'contatti_email'          => array('type' => 'email', 'group' => 'contatti'),
-		'contatti_indirizzo'      => array('type' => 'text', 'group' => 'contatti'),
-		'contatti_maps'           => array('type' => 'maps_html', 'group' => 'contatti'),
-		'contactform_contacts'    => array('type' => 'int', 'min' => 0, 'max' => 999999999, 'group' => 'integrazioni'),
-		'mailchip_footer'         => array('type' => 'int', 'min' => 0, 'max' => 999999999, 'group' => 'integrazioni'),
-	);
+	return function_exists('aihl_theme_option_registry') ? aihl_theme_option_registry() : array();
 }
 
 function aihl_ai_rest_options_schema() {
@@ -433,6 +363,13 @@ function aihl_ai_sanitize_option_value($value, array $def) {
 		case 'email':
 			$email = sanitize_email((string) $value);
 			return is_email($email) ? $email : null;
+		case 'key':
+			return sanitize_key((string) $value);
+		case 'textarea':
+			return sanitize_textarea_field((string) $value);
+		case 'color':
+			$color = sanitize_hex_color((string) $value);
+			return $color ?: null;
 		case 'maps_html':
 			if (function_exists('aihtml_kses_embed_html')) {
 				return aihtml_kses_embed_html((string) $value);
@@ -469,6 +406,11 @@ function aihl_ai_openapi_field_schema(array $field): array {
 			break;
 		case 'email':
 			$schema = array('type' => 'string', 'format' => 'email');
+			break;
+		case 'textarea':
+		case 'color':
+		case 'key':
+			$schema = array('type' => 'string');
 			break;
 		case 'maps_html':
 			$schema = array('type' => 'string', 'format' => 'html');

@@ -191,8 +191,13 @@ if (!function_exists('aihl_code_slots_save')) {
 		$css = preg_replace('/<\/?style[^>]*>/i', '', $css);
 		$css = preg_replace('/expression\s*\(/i', '/* blocked */(', $css);
 
-		// Salva storico per rollback (ultima versione)
-		$previous_code = $existing['code'] ?? '';
+		// Conserva una revisione completa: un rollback deve ripristinare anche
+		// hook, contesto, priorita e asset CSS/JS.
+		$previous_revision = null;
+		if (is_array($existing)) {
+			$previous_revision = $existing;
+			unset($previous_revision['previous_revision'], $previous_revision['previous_code']);
+		}
 
 		$clean = array(
 			'id'            => $id,
@@ -207,7 +212,8 @@ if (!function_exists('aihl_code_slots_save')) {
 			'label'         => sanitize_text_field($slot['label'] ?? $id),
 			'author'        => sanitize_text_field($slot['author'] ?? (wp_get_current_user()->user_login ?: 'system')),
 			'version'       => $version,
-			'previous_code' => $previous_code,
+			'previous_revision' => $previous_revision,
+			'previous_code' => $existing['code'] ?? '', // Compatibilita con export precedenti.
 			'created'       => $existing['created'] ?? current_time('mysql'),
 			'updated'       => current_time('mysql'),
 		);
@@ -252,13 +258,26 @@ if (!function_exists('aihl_code_slots_rollback')) {
 			return new WP_Error('not_found', __('Slot non trovato.', AIHL_TEXT_DOMAIN));
 		}
 		$slot = $slots[$id];
-		if (empty($slot['previous_code'])) {
+		$previous = isset($slot['previous_revision']) && is_array($slot['previous_revision'])
+			? $slot['previous_revision']
+			: null;
+		if (!$previous && !empty($slot['previous_code'])) {
+			$previous = $slot;
+			$previous['code'] = $slot['previous_code'];
+			$previous['previous_code'] = $slot['code'] ?? '';
+			unset($previous['previous_revision']);
+		}
+		if (!$previous) {
 			return new WP_Error('no_previous', __('Nessuna versione precedente disponibile.', AIHL_TEXT_DOMAIN));
 		}
-		$slots[$id]['code'] = $slot['previous_code'];
-		$slots[$id]['previous_code'] = $slot['code'];
-		$slots[$id]['version'] = (int) ($slot['version'] ?? 0) + 1;
-		$slots[$id]['updated'] = current_time('mysql');
+		$current = $slot;
+		unset($current['previous_revision'], $current['previous_code']);
+		$previous['id'] = $id;
+		$previous['previous_revision'] = $current;
+		$previous['previous_code'] = $current['code'] ?? '';
+		$previous['version'] = (int) ($slot['version'] ?? 0) + 1;
+		$previous['updated'] = current_time('mysql');
+		$slots[$id] = $previous;
 		update_option(AIHL_CODE_SLOTS_OPTION, $slots, false);
 		return $slots[$id];
 	}
@@ -267,6 +286,49 @@ if (!function_exists('aihl_code_slots_rollback')) {
 /* ============================================================================
  * 3b. Override check — verifica se un hook override ha slot attivi
  * ============================================================================ */
+
+if (!function_exists('aihl_get_canvas_override_slot')) {
+	/**
+	 * Restituisce l'unico slot Canvas vincitore per l'area corrente.
+	 * Una selezione esplicita ha precedenza; altrimenti vince priorita + ID.
+	 */
+	function aihl_get_canvas_override_slot(string $area): ?array {
+		$area = in_array($area, array('header', 'footer'), true) ? $area : 'header';
+		$hook = $area . '_full';
+		$options = get_option(AIHL_OPTION_BASE . '_general', array());
+		$selected_id = is_array($options) ? sanitize_key((string) ($options[$area . '_canvas_slot_id'] ?? '')) : '';
+		$matches = array();
+
+		foreach (aihl_code_slots_get_all() as $id => $slot) {
+			if (($slot['hook'] ?? '') !== $hook || empty($slot['active'])) {
+				continue;
+			}
+			if (!aihl_code_slot_context_matches($slot['context'] ?? 'global')) {
+				continue;
+			}
+			$slot['id'] = (string) ($slot['id'] ?? $id);
+			$matches[] = $slot;
+		}
+		if (!$matches) {
+			return null;
+		}
+
+		if ($selected_id !== '') {
+			foreach ($matches as $slot) {
+				if ($slot['id'] === $selected_id) {
+					return $slot;
+				}
+			}
+			return null;
+		}
+
+		usort($matches, static function (array $a, array $b): int {
+			$priority = ((int) ($a['priority'] ?? 10)) <=> ((int) ($b['priority'] ?? 10));
+			return $priority !== 0 ? $priority : strcmp((string) $a['id'], (string) $b['id']);
+		});
+		return $matches[0];
+	}
+}
 
 if (!function_exists('aihl_code_slot_has_override')) {
 	/**
@@ -279,18 +341,8 @@ if (!function_exists('aihl_code_slot_has_override')) {
 	 * @return bool True se l'override è attivo e va renderizzato.
 	 */
 	function aihl_code_slot_has_override(string $hook) {
-		$slots = aihl_code_slots_get_all();
-		if (empty($slots)) {
-			return false;
-		}
-		foreach ($slots as $slot) {
-			if ($slot['hook'] === $hook && !empty($slot['active'])) {
-				if (aihl_code_slot_context_matches($slot['context'] ?? 'global')) {
-					return true;
-				}
-			}
-		}
-		return false;
+		$area = 'header_full' === $hook ? 'header' : ('footer_full' === $hook ? 'footer' : '');
+		return $area !== '' && null !== aihl_get_canvas_override_slot($area);
 	}
 }
 
@@ -358,7 +410,13 @@ if (!function_exists('aihl_render_code_slot')) {
 			return;
 		}
 
-		// Filtra slot per questo hook, attivi e con context match
+		// Gli override completi devono produrre una sola struttura DOM.
+		if (in_array($hook, array('header_full', 'footer_full'), true)) {
+			$winner = aihl_get_canvas_override_slot('header_full' === $hook ? 'header' : 'footer');
+			$slots = $winner ? array($winner['id'] => $winner) : array();
+		}
+
+		// Filtra slot per questo hook, attivi e con context match.
 		$active = array();
 		foreach ($slots as $slot) {
 			if ($slot['hook'] !== $hook || empty($slot['active'])) {
@@ -376,7 +434,8 @@ if (!function_exists('aihl_render_code_slot')) {
 
 		// Ordina per priorità
 		usort($active, function ($a, $b) {
-			return ($a['priority'] ?? 10) - ($b['priority'] ?? 10);
+			$priority = ((int) ($a['priority'] ?? 10)) <=> ((int) ($b['priority'] ?? 10));
+			return $priority !== 0 ? $priority : strcmp((string) ($a['id'] ?? ''), (string) ($b['id'] ?? ''));
 		});
 
 		foreach ($active as $slot) {
@@ -600,7 +659,7 @@ add_action('rest_api_init', function () {
 			$slots = aihl_code_slots_get_all();
 			$export = array();
 			foreach ($slots as $slot) {
-				unset($slot['previous_code']); // Non esportare storico
+				unset($slot['previous_code'], $slot['previous_revision']); // Non esportare storico
 				$export[] = $slot;
 			}
 			return rest_ensure_response(array(

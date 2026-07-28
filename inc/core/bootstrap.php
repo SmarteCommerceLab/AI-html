@@ -7,6 +7,7 @@ require_once trailingslashit(get_template_directory()) . 'inc/core/loader.php';
 
 aihl_require_files(array(
 	'inc/option.php',
+	'inc/theme-option-registry.php',
 	'inc/activation.php',
 	'inc/class-aihl-public-theme-updater.php',
 	'inc/resource.php',
@@ -21,7 +22,6 @@ aihl_require_files(array(
 aihl_require_files(array(
 	'inc/customizer/panel.php',
 	'inc/customizer/section.php',
-	'inc/customizer/reset.php',
 ));
 
 aihl_require_files(array(
