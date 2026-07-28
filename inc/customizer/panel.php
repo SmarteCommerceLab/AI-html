@@ -27,10 +27,14 @@ function aihl_register_customizer_panels($wp_customize): void {
 	$wp_customize->register_panel_type('AIHL_Customize_Nested_Panel');
 
 	$root = AIHL_THEME_BASE . '_personalize_panel';
-	$wp_customize->add_panel($root, array(
-		'title'       => AIHL_THEME_NAME,
-		'description' => __('Configura struttura, contenuti, identita e integrazioni del tema.', AIHL_TEXT_DOMAIN),
-		'priority'    => 30,
+	$wp_customize->add_panel(new AIHL_Customize_Nested_Panel(
+		$wp_customize,
+		$root,
+		array(
+			'title'       => AIHL_THEME_NAME,
+			'description' => __('Configura struttura, contenuti, identita e integrazioni del tema.', AIHL_TEXT_DOMAIN),
+			'priority'    => 30,
+		)
 	));
 
 	$panels = array(

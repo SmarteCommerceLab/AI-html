@@ -5,6 +5,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.12.2] - 2026-07-28
+
+### Corretto
+- Ripristinata la visibilita del pannello principale AI-HTML nel Customizer.
+- Il pannello radice ora partecipa alla gerarchia annidata e rileva correttamente i quattro pannelli figli.
+- Rafforzato il test di architettura per impedire regressioni nella registrazione del pannello radice.
+
 ## [1.12.1] - 2026-07-28
 
 ### Corretto

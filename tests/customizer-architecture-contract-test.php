@@ -18,6 +18,10 @@ function contract_assert(bool $condition, string $message): void {
 contract_assert(str_contains($panel, "add_action('customize_register'"), 'pannelli registrati direttamente su customize_register');
 contract_assert(!str_contains($panel, "add_action('init'"), 'nessun wrapper init per i pannelli');
 contract_assert(str_contains($panel, "public \$type = 'aihl_nested_panel'"), 'tipo pannello annidato locale');
+contract_assert(
+	str_contains($panel, "\$wp_customize->add_panel(new AIHL_Customize_Nested_Panel(\n\t\t\$wp_customize,\n\t\t\$root,"),
+	'il pannello radice usa il tipo gerarchico e resta visibile tramite i pannelli figli'
+);
 contract_assert(str_contains($panel, "\$args['panel'] = \$root"), 'pannelli figli collegati al pannello radice');
 contract_assert(str_contains($sections, "_structure_panel"), 'sezioni struttura nel pannello dedicato');
 contract_assert(str_contains($sections, "_content_panel"), 'sezioni contenuto nel pannello dedicato');
