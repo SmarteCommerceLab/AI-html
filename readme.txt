@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.13.0
+Stable tag: 1.13.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,11 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.13.1 =
+* Migra in modo idempotente gli slot legacy al contratto di governance Canvas, senza riscrivere codice, revisioni o timestamp.
+* Sospende gli slot legacy incompatibili con la policy SBM corrente e conserva il contenuto per la correzione, usando il fallback nativo.
+* Espone nelle API e nell'Admin Hub lo stato della migrazione e la diagnostica degli asset Bootstrap e motion osservati a runtime.
 
 = 1.13.0 =
 * Subordina colori, tipografia, spacing, radius, componenti e motion alla governance di Smart Bootstrap Manager.

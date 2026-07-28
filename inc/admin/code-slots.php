@@ -143,6 +143,7 @@ if (!function_exists('aihl_code_slot_context_matches')) {
  * ============================================================================ */
 
 define('AIHL_CODE_SLOTS_OPTION', 'aihl_code_slots');
+define('AIHL_CODE_SLOTS_GOVERNANCE_MIGRATION_OPTION', 'aihl_code_slots_governance_migration_1131');
 
 if (!function_exists('aihl_code_slots_get_all')) {
 	function aihl_code_slots_get_all() {
@@ -157,6 +158,80 @@ if (!function_exists('aihl_code_slots_get')) {
 		return $slots[$id] ?? null;
 	}
 }
+
+if (!function_exists('aihl_code_slots_governance_migration_report')) {
+	function aihl_code_slots_governance_migration_report(): array {
+		$report = get_option(AIHL_CODE_SLOTS_GOVERNANCE_MIGRATION_OPTION, array());
+		return is_array($report) ? $report : array();
+	}
+}
+
+if (!function_exists('aihl_migrate_legacy_code_slot_governance')) {
+	/**
+	 * Adds governance metadata to pre-1.13 Canvas slots without rewriting them.
+	 */
+	function aihl_migrate_legacy_code_slot_governance(): array {
+		$existing_report = aihl_code_slots_governance_migration_report();
+		if (!empty($existing_report['completed'])) {
+			return $existing_report;
+		}
+
+		$slots = get_option(AIHL_CODE_SLOTS_OPTION, array());
+		$slots = is_array($slots) ? $slots : array();
+		$design_mode = function_exists('aihl_sbm_design_mode') ? aihl_sbm_design_mode() : 'autonomous';
+		if (!in_array($design_mode, array('governed', 'adaptive', 'autonomous'), true)) {
+			$design_mode = 'autonomous';
+		}
+
+		$migrated = array();
+		$deactivated = array();
+		$issues = array();
+
+		foreach ($slots as $id => $slot) {
+			if (!is_array($slot)) {
+				continue;
+			}
+			$declared_mode = sanitize_key((string) ($slot['design_mode'] ?? ''));
+			if (in_array($declared_mode, array('governed', 'adaptive', 'autonomous'), true)) {
+				continue;
+			}
+
+			$slot['design_mode'] = $design_mode;
+			$migrated[] = (string) $id;
+
+			if (!empty($slot['active']) && function_exists('aihl_code_slot_governance_report')) {
+				$governance = aihl_code_slot_governance_report($slot);
+				if (empty($governance['valid'])) {
+					$slot['active'] = false;
+					$deactivated[] = (string) $id;
+					$issues[(string) $id] = array_values($governance['issues'] ?? array());
+				}
+			}
+
+			$slots[$id] = $slot;
+		}
+
+		if ($migrated) {
+			update_option(AIHL_CODE_SLOTS_OPTION, $slots, false);
+		}
+
+		$report = array(
+			'completed' => true,
+			'target_version' => '1.13.1',
+			'completed_at' => current_time('mysql'),
+			'design_mode' => $design_mode,
+			'migrated_count' => count($migrated),
+			'migrated_slot_ids' => $migrated,
+			'deactivated_count' => count($deactivated),
+			'deactivated_slot_ids' => $deactivated,
+			'issues' => $issues,
+		);
+		update_option(AIHL_CODE_SLOTS_GOVERNANCE_MIGRATION_OPTION, $report, false);
+
+		return $report;
+	}
+}
+add_action('after_setup_theme', 'aihl_migrate_legacy_code_slot_governance', 60);
 
 if (!function_exists('aihl_code_slots_save')) {
 	/**

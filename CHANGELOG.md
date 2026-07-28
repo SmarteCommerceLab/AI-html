@@ -5,6 +5,18 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.13.1] - 2026-07-28
+
+### Aggiunto
+- Migrazione idempotente degli slot creati prima del contratto `design_mode`.
+- Report persistente della migrazione Canvas nell'Admin Hub e nel payload REST di compliance SBM.
+- Diagnostica della coda frontend per handle SBM, fallback Bootstrap e motion legacy.
+
+### Corretto
+- Gli aggiornamenti da AI-HTML 1.12.4 non lasciano slot Canvas attivi senza governance dichiarata.
+- Gli slot legacy incompatibili con la policy SBM vengono sospesi senza modificare codice, revisioni, versione o timestamp.
+- Le richieste admin e REST che non eseguono `wp_enqueue_scripts` non producono falsi errori sugli asset runtime.
+
 ## [1.13.0] - 2026-07-28
 
 ### Aggiunto

@@ -4,9 +4,13 @@ declare(strict_types=1);
 define('ABSPATH', __DIR__);
 define('AIHL_TEXT_DOMAIN', 'ai_html');
 define('AIHL_OPTION_BASE', 'ai_html');
-define('AIHL_VERSION', '1.13.0');
+define('AIHL_VERSION', '1.13.1');
 define('AIHL_UPDATE_ENDPOINT', 'https://repository.example.test/theme.json');
 define('SBIN_VERSION', '1.8.4');
+
+$GLOBALS['aihl_runtime_enqueue_observed'] = false;
+$GLOBALS['aihl_runtime_styles'] = array();
+$GLOBALS['aihl_runtime_scripts'] = array();
 
 class WP_REST_Request {}
 class WP_REST_Server {
@@ -17,6 +21,15 @@ class WP_REST_Server {
 
 function add_filter($hook, $callback, $priority = 10, $accepted_args = 1): void {}
 function add_action($hook, $callback, $priority = 10, $accepted_args = 1): void {}
+function did_action($hook): int {
+	return 'wp_enqueue_scripts' === $hook && $GLOBALS['aihl_runtime_enqueue_observed'] ? 1 : 0;
+}
+function wp_style_is($handle, $state = 'enqueued'): bool {
+	return !empty($GLOBALS['aihl_runtime_styles'][$handle][$state]);
+}
+function wp_script_is($handle, $state = 'enqueued'): bool {
+	return !empty($GLOBALS['aihl_runtime_scripts'][$handle][$state]);
+}
 function sanitize_key($value): string {
 	return preg_replace('/[^a-z0-9_-]/', '', strtolower((string) $value)) ?? '';
 }
@@ -69,6 +82,19 @@ function sbm_compliance_runtime_assert(bool $condition, string $message): void {
 sbm_compliance_runtime_assert(aihl_sbm_contract_compatibility_report()['ok'], 'contratto SBM nativo non riconosciuto');
 sbm_compliance_runtime_assert(aihl_sbm_bootstrap_ownership_report()['ok'], 'ownership Bootstrap non verificata');
 sbm_compliance_runtime_assert(array() === aihl_sbm_static_visual_check(), 'violazioni visuali residue');
+$runtime = aihl_sbm_runtime_diagnostics();
+sbm_compliance_runtime_assert('not_observed' === $runtime['status'], 'richiesta non frontend interpretata come errore');
+
+$GLOBALS['aihl_runtime_enqueue_observed'] = true;
+$GLOBALS['aihl_runtime_styles']['smart-bootstrap']['enqueued'] = true;
+$GLOBALS['aihl_runtime_scripts']['smart-bootstrap']['enqueued'] = true;
+$runtime = aihl_sbm_runtime_diagnostics();
+sbm_compliance_runtime_assert('ok' === $runtime['status'], 'coda SBM valida non riconosciuta');
+
+$GLOBALS['aihl_runtime_styles']['aihl-bootstrap-fallback']['enqueued'] = true;
+$runtime = aihl_sbm_runtime_diagnostics();
+sbm_compliance_runtime_assert('error' === $runtime['status'], 'duplicazione Bootstrap non rilevata');
+sbm_compliance_runtime_assert($runtime['duplicate_bootstrap']['css'], 'duplicazione CSS non esposta');
 
 $matrix = aihl_sbm_option_compliance_matrix();
 sbm_compliance_runtime_assert(71 === count($matrix), 'registro opzioni incompleto');

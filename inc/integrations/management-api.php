@@ -373,6 +373,62 @@ function aihl_sbm_bootstrap_ownership_report(): array {
 	);
 }
 
+function aihl_sbm_runtime_diagnostics(): array {
+	$contract = function_exists('aihl_sbm_consumer_contract') ? aihl_sbm_consumer_contract() : array();
+	$css_handle = (string) ($contract['bootstrap']['css_handle'] ?? 'smart-bootstrap');
+	$js_handle = (string) ($contract['bootstrap']['js_handle'] ?? 'smart-bootstrap');
+	$observed = function_exists('did_action') && did_action('wp_enqueue_scripts') > 0;
+	$style_state = static function(string $handle): array {
+		return array(
+			'registered' => function_exists('wp_style_is') && wp_style_is($handle, 'registered'),
+			'enqueued' => function_exists('wp_style_is') && wp_style_is($handle, 'enqueued'),
+		);
+	};
+	$script_state = static function(string $handle): array {
+		return array(
+			'registered' => function_exists('wp_script_is') && wp_script_is($handle, 'registered'),
+			'enqueued' => function_exists('wp_script_is') && wp_script_is($handle, 'enqueued'),
+		);
+	};
+
+	$provider_css = $style_state($css_handle);
+	$provider_js = $script_state($js_handle);
+	$fallback_css = $style_state('aihl-bootstrap-fallback');
+	$fallback_js = $script_state('aihl-bootstrap-fallback');
+	$legacy_motion = array(
+		'wow' => $script_state('ai-html-wow'),
+		'owl' => $script_state('ai-html-owl-carousel'),
+	);
+	$duplicate_css = $provider_css['enqueued'] && $fallback_css['enqueued'];
+	$duplicate_js = $provider_js['enqueued'] && $fallback_js['enqueued'];
+	$legacy_motion_active = $legacy_motion['wow']['enqueued'] || $legacy_motion['owl']['enqueued'];
+	$migration = function_exists('aihl_code_slots_governance_migration_report')
+		? aihl_code_slots_governance_migration_report()
+		: array();
+
+	return array(
+		'observed_after_enqueue' => $observed,
+		'status' => !$observed ? 'not_observed' : (($duplicate_css || $duplicate_js || $legacy_motion_active) ? 'error' : 'ok'),
+		'provider' => array(
+			'css_handle' => $css_handle,
+			'css' => $provider_css,
+			'js_handle' => $js_handle,
+			'js' => $provider_js,
+		),
+		'theme_fallback' => array(
+			'css' => $fallback_css,
+			'js' => $fallback_js,
+		),
+		'duplicate_bootstrap' => array(
+			'css' => $duplicate_css,
+			'js' => $duplicate_js,
+		),
+		'legacy_motion' => $legacy_motion,
+		'legacy_motion_active' => $legacy_motion_active,
+		'canvas_migration' => $migration,
+	);
+}
+
 function aihl_sbm_static_namespace_check(): array {
 	$theme_root = trailingslashit(get_template_directory());
 	$files = array(
@@ -400,6 +456,7 @@ function aihl_sbm_compliance_payload(): array {
 	$visual_violations = aihl_sbm_static_visual_check();
 	$contract_report = aihl_sbm_contract_compatibility_report();
 	$bootstrap_report = aihl_sbm_bootstrap_ownership_report();
+	$runtime_report = aihl_sbm_runtime_diagnostics();
 	$unclassified_options = array_keys(array_filter($matrix, static function(array $option): bool {
 		return 'unclassified' === ($option['classification'] ?? '');
 	}));
@@ -422,6 +479,13 @@ function aihl_sbm_compliance_payload(): array {
 		array('code' => 'canvas_governance', 'ok' => $canvas_ok, 'details' => 'Active Canvas overrides declare a valid design mode and pass token validation.'),
 		array('code' => 'motion_ownership', 'ok' => function_exists('aihl_should_load_animation_assets') && !aihl_should_load_animation_assets(), 'details' => 'Theme-owned motion libraries are disabled while SBM is active.'),
 		array('code' => 'bootstrap_ownership', 'ok' => !empty($bootstrap_report['ok']), 'details' => 'Theme Bootstrap assets are fallback-only when the SBM handles are unavailable.'),
+		array(
+			'code' => 'runtime_asset_ownership',
+			'ok' => 'error' !== ($runtime_report['status'] ?? 'not_observed'),
+			'details' => !empty($runtime_report['observed_after_enqueue'])
+				? 'The observed frontend queue contains no duplicate Bootstrap or legacy motion runtime.'
+				: 'The current request did not run the frontend enqueue lifecycle; static ownership checks remain authoritative.',
+		),
 	);
 	$passed = count(array_filter($checks, static fn(array $check): bool => !empty($check['ok'])));
 
@@ -438,6 +502,7 @@ function aihl_sbm_compliance_payload(): array {
 		'checks' => $checks,
 		'contract' => $contract_report,
 		'bootstrap' => $bootstrap_report,
+		'runtime' => $runtime_report,
 		'namespace_violations' => $namespace_violations,
 		'visual_violations' => $visual_violations,
 		'unclassified_options' => $unclassified_options,

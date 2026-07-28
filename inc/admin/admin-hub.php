@@ -293,6 +293,10 @@ if (!function_exists('aihl_render_admin_dashboard')) {
 if (!function_exists('aihl_render_dashboard_content')) {
 	function aihl_render_dashboard_content() {
 		$subpages = aihl_admin_get_subpages();
+		$runtime = function_exists('aihl_sbm_runtime_diagnostics') ? aihl_sbm_runtime_diagnostics() : array();
+		$migration = isset($runtime['canvas_migration']) && is_array($runtime['canvas_migration'])
+			? $runtime['canvas_migration']
+			: array();
 
 		if (function_exists('aihl_render_plugin_dependency_summary')) {
 			aihl_render_plugin_dependency_summary();
@@ -304,6 +308,13 @@ if (!function_exists('aihl_render_dashboard_content')) {
 			array('label' => __('Sorgente Header', AIHL_TEXT_DOMAIN), 'value' => function_exists('aihl_get_structure_render_mode') ? aihl_get_structure_render_mode('header') : 'native', 'icon' => 'fa-solid fa-window-maximize'),
 			array('label' => __('Sorgente Footer', AIHL_TEXT_DOMAIN), 'value' => function_exists('aihl_get_structure_render_mode') ? aihl_get_structure_render_mode('footer') : 'native', 'icon' => 'fa-solid fa-window-minimize'),
 			array('label' => __('Smart Bootstrap', AIHL_TEXT_DOMAIN), 'value' => (function_exists('aihl_is_bootstrap_manager_active') && aihl_is_bootstrap_manager_active()) ? 'Active' : 'Inactive', 'icon' => 'fa-solid fa-palette'),
+			array(
+				'label' => __('Migrazione Canvas', AIHL_TEXT_DOMAIN),
+				'value' => !empty($migration['completed'])
+					? sprintf(__('%1$d migrati, %2$d sospesi', AIHL_TEXT_DOMAIN), (int) ($migration['migrated_count'] ?? 0), (int) ($migration['deactivated_count'] ?? 0))
+					: __('In attesa', AIHL_TEXT_DOMAIN),
+				'icon' => 'fa-solid fa-shield-halved',
+			),
 			array('label' => __('Smart Builder Site', AIHL_TEXT_DOMAIN), 'value' => aihtml_is_site_builder_active() ? 'Active' : 'Inactive', 'icon' => 'fa-solid fa-cubes'),
 			array('label' => __('Search Style', AIHL_TEXT_DOMAIN), 'value' => aihtml_option_value('header_search_style', 'icon-dropdown'), 'icon' => 'fa-solid fa-search'),
 		);

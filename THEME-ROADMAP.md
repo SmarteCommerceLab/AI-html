@@ -1,6 +1,6 @@
 # AI-HTML Theme - Roadmap di sviluppo
 
-Versione di riferimento: 1.12.4
+Versione di riferimento: 1.13.1
 Ultimo aggiornamento: 28 luglio 2026
 
 ## Ruolo del tema
@@ -21,9 +21,9 @@ CPT applicativi, autenticazione, area membri e regole di accesso non devono
 essere implementati nel tema. AI-HTML puo fornire esclusivamente template e
 integrazioni per plugin proprietari di tali domini.
 
-## 1.12.4 - Stabilizzazione Canvas
+## Completato in 1.12.4 - Stabilizzazione Canvas
 
-Stato: in rilascio.
+Stato: completato.
 
 - Editor amministrativo dedicato per Canvas Header e Footer.
 - Editor HTML, CSS e JavaScript a schede con CodeMirror.
@@ -42,25 +42,31 @@ Criteri di uscita:
 - pacchetto privo di test, strumenti e file di sviluppo;
 - fallback nativo sempre disponibile per Canvas non valido.
 
-## 1.13.0 - Customizer modulare
+## Completato in 1.13.0 - Customizer e governance SBM
 
 - Conservare i pannelli incapsulati e la gerarchia corrente.
 - Separare il file sezioni per dominio: Header, Footer, Blog, Identita e Integrazioni.
 - Usare il registro opzioni come sorgente unica per sanitizzazione, Customizer e API.
 - Definire un contratto condiviso per pannelli nidificati con SCF.
 - Conservare un adapter interno per il funzionamento standalone.
-- Aggiungere test browser per apertura pannelli, salvataggio e anteprima.
+- Subordinare token, asset, motion e opzioni visuali alla governance SBM.
+- Esporre la matrice di compliance delle opzioni via API.
 
-Criterio di uscita: nessuna sezione piatta fuori dal pannello AI-HTML e nessuna
-divergenza tra opzioni Customizer e API.
+## Completato in 1.13.1 - Aggiornamento e diagnostica
+
+- Migrare gli slot Canvas legacy senza alterare il contenuto salvato.
+- Sospendere gli slot incompatibili lasciando disponibile il fallback nativo.
+- Rendere la migrazione idempotente e verificabile dall'Admin Hub.
+- Diagnosticare ownership Bootstrap e motion dalla coda frontend osservata.
+- Evitare falsi errori nelle richieste REST e amministrative.
+- Coprire l'aggiornamento 1.12.4 -> 1.13.x con test runtime.
 
 ## 1.14.0 - Canvas Governance
 
 - Versionare lo schema dei Canvas.
 - Validare componenti runtime, menu, logo e dipendenze prima dell'attivazione.
 - Aggiungere anteprima isolata, snapshot e rollback.
-- Applicare le modalita SBM `governed`, `adaptive` e `autonomous`.
-- Impedire l'attivazione di un Canvas strutturalmente invalido.
+- Aggiungere un flusso assistito per correggere gli slot sospesi dalla governance.
 - Aggiungere test visuali per header e footer su desktop e mobile.
 
 Criterio di uscita: un Canvas invalido non puo sostituire la struttura nativa.

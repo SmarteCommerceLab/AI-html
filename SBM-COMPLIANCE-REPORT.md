@@ -1,6 +1,6 @@
 # AI-HTML / Smart Bootstrap Manager - Compliance Report
 
-Versione tema: 1.13.0
+Versione tema: 1.13.1
 
 Provider verificato: Smart Bootstrap Manager 1.8.4
 
@@ -74,6 +74,10 @@ Il validatore blocca:
 
 Gli slot non conformi sono conservati ma disattivati. Diagnostica e motivazioni sono disponibili nell'Admin Hub, nelle API Code Slots e nel payload Canvas.
 
+Durante l'aggiornamento, gli slot legacy senza `design_mode` ricevono la modalita globale corrente. La migrazione non modifica markup, CSS, JavaScript, revisioni o timestamp. Se il contenuto non rispetta la policy risultante, lo slot viene sospeso e il tema usa la struttura nativa; il report persistente indica gli ID interessati.
+
+Il payload SBM include inoltre `runtime`, che distingue una coda frontend effettivamente osservata da una richiesta admin o REST. Quando osservabile, segnala duplicazioni tra gli handle `smart-bootstrap` e `aihl-bootstrap-fallback` e l'eventuale caricamento di WOW/Owl legacy.
+
 ## Verifiche bloccanti
 
 - Nessuna dichiarazione `--sbin-*` nei sorgenti frontend del tema.
@@ -85,3 +89,4 @@ Gli slot non conformi sono conservati ma disattivati. Diagnostica e motivazioni 
 - Larghezza articolo subordinata a `--sbin-container-max-width`.
 - Colori menu e background subordinati alla palette SBM.
 - Test contrattuali PHP per governance opzioni e Canvas.
+- Test di aggiornamento 1.12.4 -> 1.13.x con conservazione dei dati e idempotenza.
