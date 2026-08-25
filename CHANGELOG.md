@@ -5,6 +5,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.14.7] - 2026-08-25
+
+### Fixed
+- Corretto l'errore critico nel renderer del pannello Sfondo Pagina.
+- Ripristinata la sanitizzazione delle opacita facoltative prima del salvataggio.
+
 ## [1.14.6] - 2026-08-25
 
 ### Changed

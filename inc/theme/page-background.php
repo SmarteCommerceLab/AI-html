@@ -116,7 +116,7 @@ add_action('save_post', function ($post_id) {
 // ── Data helpers ──
 
 function aihl_page_background_patterns(): array {
-	$sanitized = array(
+	return array(
 		'none'     => __('Nessuno', AIHL_TEXT_DOMAIN),
 		'dots'     => __('Puntini (dot grid)', AIHL_TEXT_DOMAIN),
 		'grid'     => __('Griglia', AIHL_TEXT_DOMAIN),
@@ -152,7 +152,7 @@ function aihl_sanitize_page_background(array $input): array {
 	$valid_patterns = array_keys(aihl_page_background_patterns());
 	$valid_sizes = array('cover', 'contain', 'auto');
 
-	return array(
+	$sanitized = array(
 		'type'            => in_array($input['type'] ?? '', $valid_types, true) ? $input['type'] : 'default',
 		'color'           => sanitize_hex_color($input['color'] ?? '') ?: '',
 		'image'           => esc_url_raw($input['image'] ?? ''),
