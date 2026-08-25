@@ -5,6 +5,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.14.2] - 2026-08-25
+
+### Changed
+- Ridisegnata l'introduzione al Manifest come flusso compatto `Configurazione JSON -> Manifest live`.
+- L'endpoint protetto non viene piu aperto direttamente: la pagina ne consente la copia e chiarisce il requisito di autenticazione REST.
+- Rimossi snapshot, cronologia, ripristino ed eliminazione delle versioni del manifest.
+
 ## [1.14.1] - 2026-08-25
 
 ### Fixed
@@ -17,9 +24,6 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ### Aggiunto
 - Pagina amministrativa `Manifest JSON` per consultare e copiare il contratto live generato dal sito.
-- Cronologia fino a 20 snapshot contenenti manifest e configurazione sorgente.
-- Ripristino governato della configurazione con backup automatico preventivo ed eliminazione esplicita delle versioni.
-- Test del contratto di versionamento, limite cronologia e identificativi univoci.
 
 ### Modificato
 - `Opzioni JSON` diventa `Configurazione JSON` con editor a tutta larghezza e altezza operativa.
@@ -28,7 +32,6 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ### Sicurezza
 - Il manifest derivato resta in sola lettura: le modifiche operano esclusivamente sulle configurazioni sorgente governate dal tema.
-- Ogni ripristino salva lo stato corrente prima di applicare una versione precedente.
 
 ## [1.13.2] - 2026-07-28
 
