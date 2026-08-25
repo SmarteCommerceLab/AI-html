@@ -108,7 +108,7 @@ add_action('all_admin_notices', function () {
 
 if (!function_exists('aihl_admin_get_subpages')) {
 	function aihl_admin_get_subpages() {
-		return array(
+		$pages = array(
 			array(
 				'slug'        => 'aihl-manifest-json',
 				'page_title'  => __('Manifest JSON', AIHL_TEXT_DOMAIN),
@@ -209,6 +209,28 @@ if (!function_exists('aihl_admin_get_subpages')) {
 				'description' => __('Consulta la specifica OpenAPI generata automaticamente dalle route REST del tema.', AIHL_TEXT_DOMAIN),
 			),
 		);
+
+		$navigation = array(
+			'aihl-options-json' => array('section' => __('Configurazione', AIHL_TEXT_DOMAIN), 'order' => 10),
+			'aihl-manifest-json' => array('section' => __('Configurazione', AIHL_TEXT_DOMAIN), 'order' => 20),
+			'aihl-menu-json' => array('section' => __('Contenuti e menu', AIHL_TEXT_DOMAIN), 'order' => 30),
+			'aihl-menu-help' => array('section' => __('Contenuti e menu', AIHL_TEXT_DOMAIN), 'order' => 40),
+			'aihl-plugins' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 50),
+			'aihl-api-keys' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 60),
+			'aihl-api-docs' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 70),
+			'aihl-code-slots' => array('section' => __('Strumenti avanzati', AIHL_TEXT_DOMAIN), 'order' => 80),
+			'aihl-deploy' => array('section' => __('Strumenti avanzati', AIHL_TEXT_DOMAIN), 'order' => 90),
+			'aihl-compliance' => array('section' => __('Governance', AIHL_TEXT_DOMAIN), 'order' => 100),
+			'aihl-smart-reset' => array('section' => __('Governance', AIHL_TEXT_DOMAIN), 'order' => 110),
+		);
+
+		foreach ($pages as &$page) {
+			$page = array_merge($page, $navigation[$page['slug']] ?? array('section' => __('Altro', AIHL_TEXT_DOMAIN), 'order' => 999));
+		}
+		unset($page);
+		usort($pages, static fn(array $left, array $right): int => $left['order'] <=> $right['order']);
+
+		return $pages;
 	}
 }
 
@@ -229,6 +251,7 @@ if (!function_exists('aihl_admin_page_template')) {
 			'menu_title' => __('Dashboard', AIHL_TEXT_DOMAIN),
 			'description' => __('Stato del tema e accessi rapidi.', AIHL_TEXT_DOMAIN),
 			'icon' => 'fa-solid fa-gauge-high',
+			'section' => __('Panoramica', AIHL_TEXT_DOMAIN),
 		)), $subpages);
 
 		$header_bg = '#1d2327';
@@ -255,9 +278,11 @@ if (!function_exists('aihl_admin_page_template')) {
 
 			<div class="smart-admin-shell">
 				<aside class="smart-admin-sidebar" aria-label="<?php esc_attr_e('Navigazione AI-HTML', AIHL_TEXT_DOMAIN); ?>">
-					<div class="smart-admin-sidebar-title"><?php esc_html_e('Pannello', AIHL_TEXT_DOMAIN); ?></div>
 					<nav class="smart-admin-nav">
-						<?php foreach ($all_pages as $sp) : ?>
+						<?php $active_section = ''; foreach ($all_pages as $sp) : ?>
+							<?php if (($sp['section'] ?? '') !== $active_section) : $active_section = (string) ($sp['section'] ?? ''); ?>
+								<div class="smart-admin-nav-section"><?php echo esc_html($active_section); ?></div>
+							<?php endif; ?>
 							<a href="<?php echo esc_url(admin_url('admin.php?page=' . $sp['slug'])); ?>" class="smart-admin-nav-item<?php echo $current_slug === $sp['slug'] ? ' smart-admin-nav-item-active' : ''; ?>">
 								<span class="smart-admin-nav-icon"><i class="<?php echo esc_attr($sp['icon']); ?>" aria-hidden="true"></i></span>
 								<span class="smart-admin-nav-copy"><strong><?php echo esc_html($sp['menu_title']); ?></strong><small><?php echo esc_html($sp['description']); ?></small></span>
@@ -311,10 +336,6 @@ if (!function_exists('aihl_render_dashboard_content')) {
 			: array();
 		$suspended_count = max(0, (int) ($migration['deactivated_count'] ?? 0) - (int) ($repair['restored_count'] ?? 0));
 
-		if (function_exists('aihl_render_plugin_dependency_summary')) {
-			aihl_render_plugin_dependency_summary();
-		}
-
 		// Info cards
 		$info = array(
 			array('label' => __('Versione', AIHL_TEXT_DOMAIN), 'value' => AIHL_VERSION, 'icon' => 'fa-solid fa-code-branch'),
@@ -343,6 +364,10 @@ if (!function_exists('aihl_render_dashboard_content')) {
 				</div>
 			<?php endforeach; ?>
 		</div>
+
+		<?php if (function_exists('aihl_render_plugin_dependency_summary')) : ?>
+			<?php aihl_render_plugin_dependency_summary(); ?>
+		<?php endif; ?>
 
 		<?php if (function_exists('aihl_canvas_health_report')) : ?>
 			<section class="aihl-canvas-health" aria-labelledby="aihl-canvas-health-title">
@@ -477,7 +502,7 @@ function aihl_admin_wrap_options_json() {
 function aihl_admin_wrap_manifest_json() {
 	aihl_admin_page_template(
 		__('Manifest JSON', AIHL_TEXT_DOMAIN),
-		__('Consulta il manifest live e gestisci snapshot versionati della configurazione sorgente.', AIHL_TEXT_DOMAIN),
+		__('Consulta il manifest live generato da configurazione, menu e integrazioni attive.', AIHL_TEXT_DOMAIN),
 		function () {
 			if (function_exists('aihl_render_manifest_json_page')) {
 				aihl_render_manifest_json_page();
@@ -670,7 +695,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .smart-admin-logo strong{display:block}.smart-admin-logo small{display:block;margin-top:1px;color:rgba(255,255,255,.68);font-size:11px;text-transform:uppercase}
 .smart-admin-logo-img{max-height:28px;width:auto;flex-shrink:0}
 .smart-admin-header-actions{display:flex;align-items:center;gap:10px}.smart-admin-top-action{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid rgba(255,255,255,.24);border-radius:4px;color:#fff;text-decoration:none;font-size:12.5px;font-weight:600;background:rgba(255,255,255,.08)}.smart-admin-top-action:hover{color:#fff;background:rgba(255,255,255,.14)}.smart-admin-version{font-size:11px;color:rgba(255,255,255,.72);background:rgba(255,255,255,.1);padding:3px 8px;border-radius:4px}
-.smart-admin-shell{display:grid;grid-template-columns:260px minmax(0,1fr);background:#f3f5f7;border:1px solid #dcdcde;border-top:0;min-height:520px}.smart-admin-sidebar{background:#fff;border-right:1px solid #dcdcde;padding:16px 0}.smart-admin-sidebar-title{padding:0 18px 10px;color:#646970;font-size:11px;font-weight:700;text-transform:uppercase}.smart-admin-nav{display:flex;flex-direction:column}.smart-admin-nav-item{display:flex;gap:11px;padding:11px 14px 11px 18px;border-left:3px solid transparent;color:#1d2327;text-decoration:none}.smart-admin-nav-item:hover{background:#f6f7f7;color:#135e96}.smart-admin-nav-item-active{background:#eef6fc;border-left-color:#2271b1;color:#135e96}.smart-admin-nav-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:4px;background:#f0f0f1;color:#646970;flex-shrink:0}.smart-admin-nav-item-active .smart-admin-nav-icon{background:#2271b1;color:#fff}.smart-admin-nav-copy{display:flex;min-width:0;flex-direction:column;gap:2px}.smart-admin-nav-copy strong{font-size:13px}.smart-admin-nav-copy small{color:#646970;font-size:11.5px;line-height:1.35}.smart-admin-main{min-width:0;padding:18px}.smart-admin-pathbar{display:flex;align-items:center;gap:8px;margin:0 0 10px;color:#646970;font-size:12px}.smart-admin-pathbar a{color:#2271b1;text-decoration:none}.smart-admin-pathbar i{font-size:10px;color:#8c8f94}.smart-admin-body{background:#fff;border:1px solid #dcdcde;padding:24px 28px 30px;min-height:400px}
+.smart-admin-shell{display:grid;grid-template-columns:260px minmax(0,1fr);background:#f3f5f7;border:1px solid #dcdcde;border-top:0;min-height:520px}.smart-admin-sidebar{background:#fff;border-right:1px solid #dcdcde;padding:8px 0 18px}.smart-admin-nav{display:flex;flex-direction:column}.smart-admin-nav-section{margin-top:12px;padding:8px 18px 5px;color:#646970;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}.smart-admin-nav-section:first-child{margin-top:0}.smart-admin-nav-item{display:flex;gap:11px;padding:9px 14px 9px 18px;border-left:3px solid transparent;color:#1d2327;text-decoration:none}.smart-admin-nav-item:hover{background:#f6f7f7;color:#135e96}.smart-admin-nav-item-active{background:#eef6fc;border-left-color:#2271b1;color:#135e96}.smart-admin-nav-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:4px;background:#f0f0f1;color:#646970;flex-shrink:0}.smart-admin-nav-item-active .smart-admin-nav-icon{background:#2271b1;color:#fff}.smart-admin-nav-copy{display:flex;min-width:0;flex-direction:column;gap:2px}.smart-admin-nav-copy strong{font-size:13px}.smart-admin-nav-copy small{color:#646970;font-size:11.5px;line-height:1.35}.smart-admin-main{min-width:0;padding:18px}.smart-admin-pathbar{display:flex;align-items:center;gap:8px;margin:0 0 10px;color:#646970;font-size:12px}.smart-admin-pathbar a{color:#2271b1;text-decoration:none}.smart-admin-pathbar i{font-size:10px;color:#8c8f94}.smart-admin-body{background:#fff;border:1px solid #dcdcde;padding:24px 28px 30px;min-height:400px}
 .smart-admin-page-header{margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #f0f0f1}
 .smart-admin-page-header h1{font-size:22px;font-weight:600;margin:0 0 4px;color:#1d2327}
 .smart-admin-page-desc{color:#646970;margin:0;font-size:14px}

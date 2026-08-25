@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.14.3
+Stable tag: 1.14.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,11 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.14.4 =
+* Porta i KPI in apertura Dashboard e dispone a seguire integrazioni, diagnostica Canvas e strumenti.
+* Raggruppa la sidebar per Configurazione, Contenuti e menu, Integrazioni, Strumenti avanzati e Governance.
+* Migliora la guida Configurazione JSON con conteggio campi e gerarchia visiva più leggibile.
 
 = 1.14.3 =
 * Dispone i gruppi dei campi Configurazione JSON in sequenza verticale a tutta larghezza.

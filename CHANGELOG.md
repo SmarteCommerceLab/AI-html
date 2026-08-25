@@ -5,6 +5,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.14.4] - 2026-08-25
+
+### Changed
+- La Dashboard apre con i KPI e prosegue con integrazioni da verificare, diagnostica Canvas e strumenti.
+- La navigazione laterale segue gruppi funzionali ordinati: Configurazione, Contenuti e menu, Integrazioni, Strumenti avanzati e Governance.
+- I gruppi della Configurazione JSON mostrano il numero di campi e una gerarchia visiva più chiara.
+
 ## [1.14.3] - 2026-08-25
 
 ### Fixed

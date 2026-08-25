@@ -158,6 +158,8 @@ function aihl_render_options_json_page() {
 			.aihl-oj-field-group{padding:18px 20px;border:0;border-bottom:1px solid #c3c4c7;background:#fff}
 			.aihl-oj-field-group:last-child{border-bottom:0}
 			.aihl-oj-field-group h3{font-size:18px!important;margin:0 0 12px!important}
+			.aihl-oj-field-group h3{display:flex;align-items:center;justify-content:space-between;gap:12px}
+			.aihl-oj-field-count{display:inline-grid;min-width:28px;height:28px;place-items:center;border-radius:4px;background:#f0f6fc;color:#135e96;font-size:12px;font-weight:700}
 			.aihl-oj-field-group td{padding:10px 12px;font-size:14px;line-height:1.5;vertical-align:top;overflow-wrap:anywhere}
 			.aihl-oj-field-group td:first-child{width:38%}
 			.aihl-oj-field-group td:last-child{width:62%;color:#50575e}
@@ -185,7 +187,7 @@ function aihl_render_options_json_page() {
 				<p><?php esc_html_e('Solo questi campi vengono accettati. Gli altri vengono ignorati.', AIHL_TEXT_DOMAIN); ?></p>
 				<div class="aihl-oj-field-groups">
 				<?php foreach ($groups as $group_name => $fields) : ?>
-					<section class="aihl-oj-field-group"><h3 style="text-transform:capitalize;margin:0 0 8px;"><?php echo esc_html($group_name); ?></h3>
+					<section class="aihl-oj-field-group"><h3 style="text-transform:capitalize;"><span><?php echo esc_html($group_name); ?></span><span class="aihl-oj-field-count" title="<?php esc_attr_e('Campi disponibili', AIHL_TEXT_DOMAIN); ?>"><?php echo esc_html((string) count($fields)); ?></span></h3>
 					<table class="widefat striped">
 						<tbody>
 						<?php foreach ($fields as $row) :
