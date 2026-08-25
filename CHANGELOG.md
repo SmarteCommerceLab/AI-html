@@ -5,6 +5,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.14.6] - 2026-08-25
+
+### Changed
+- Il pannello Sfondo Pagina occupa ora l'area principale dell'editor WordPress.
+- Le opacita di immagine e overlay sono facoltative e, se vuote, ereditano i valori globali del tema.
+
 ## [1.14.5] - 2026-08-25
 
 ### Changed

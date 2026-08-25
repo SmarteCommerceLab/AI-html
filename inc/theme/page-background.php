@@ -20,7 +20,7 @@ add_action('add_meta_boxes', function () {
 			__('Sfondo Pagina', AIHL_TEXT_DOMAIN),
 			'aihl_page_background_metabox_render',
 			$pt,
-			'side',
+			'normal',
 			'default'
 		);
 	}
@@ -29,6 +29,10 @@ add_action('add_meta_boxes', function () {
 function aihl_page_background_metabox_render($post) {
 	wp_nonce_field('aihl_page_bg_nonce', '_aihl_page_bg_nonce');
 	$meta = aihl_get_page_background_meta($post->ID);
+	$stored_meta = get_post_meta($post->ID, '_aihl_page_background', true);
+	$stored_meta = is_array($stored_meta) ? $stored_meta : array();
+	$image_opacity = array_key_exists('image_opacity', $stored_meta) ? $stored_meta['image_opacity'] : '';
+	$overlay_opacity = array_key_exists('overlay_opacity', $stored_meta) ? $stored_meta['overlay_opacity'] : '';
 	$bg_types = array(
 		'default' => __('Default (da Customizer)', AIHL_TEXT_DOMAIN),
 		'color'   => __('Colore', AIHL_TEXT_DOMAIN),
@@ -37,6 +41,7 @@ function aihl_page_background_metabox_render($post) {
 	);
 	$patterns = aihl_page_background_patterns();
 	?>
+	<div class="aihl-page-bg-fields">
 	<p>
 		<label for="aihl_bg_type"><strong><?php esc_html_e('Tipo sfondo', AIHL_TEXT_DOMAIN); ?></strong></label><br>
 		<select id="aihl_bg_type" name="aihl_bg[type]" style="width:100%">
@@ -54,8 +59,9 @@ function aihl_page_background_metabox_render($post) {
 		<input type="url" id="aihl_bg_image" name="aihl_bg[image]" value="<?php echo esc_url($meta['image']); ?>" class="widefat" placeholder="https://...">
 	</p>
 	<p>
-		<label for="aihl_bg_image_opacity"><strong><?php esc_html_e('Opacità immagine (0-1)', AIHL_TEXT_DOMAIN); ?></strong></label><br>
-		<input type="number" id="aihl_bg_image_opacity" name="aihl_bg[image_opacity]" value="<?php echo esc_attr($meta['image_opacity']); ?>" min="0" max="1" step="0.05" class="widefat">
+		<label for="aihl_bg_image_opacity"><strong><?php esc_html_e('Opacità immagine', AIHL_TEXT_DOMAIN); ?></strong></label><br>
+		<input type="number" id="aihl_bg_image_opacity" name="aihl_bg[image_opacity]" value="<?php echo esc_attr($image_opacity); ?>" min="0" max="1" step="0.05" class="widefat" placeholder="<?php esc_attr_e('Predefinita', AIHL_TEXT_DOMAIN); ?>">
+		<small><?php esc_html_e('Facoltativa. Vuoto usa il valore globale.', AIHL_TEXT_DOMAIN); ?></small>
 	</p>
 	<p>
 		<label for="aihl_bg_image_size"><strong><?php esc_html_e('Dimensione immagine', AIHL_TEXT_DOMAIN); ?></strong></label><br>
@@ -78,9 +84,12 @@ function aihl_page_background_metabox_render($post) {
 		<input type="text" id="aihl_bg_overlay_color" name="aihl_bg[overlay_color]" value="<?php echo esc_attr($meta['overlay_color']); ?>" class="widefat" placeholder="#1a3a5c">
 	</p>
 	<p>
-		<label for="aihl_bg_overlay_opacity"><strong><?php esc_html_e('Overlay opacità (0-1)', AIHL_TEXT_DOMAIN); ?></strong></label><br>
-		<input type="number" id="aihl_bg_overlay_opacity" name="aihl_bg[overlay_opacity]" value="<?php echo esc_attr($meta['overlay_opacity']); ?>" min="0" max="1" step="0.05" class="widefat">
+		<label for="aihl_bg_overlay_opacity"><strong><?php esc_html_e('Opacità overlay', AIHL_TEXT_DOMAIN); ?></strong></label><br>
+		<input type="number" id="aihl_bg_overlay_opacity" name="aihl_bg[overlay_opacity]" value="<?php echo esc_attr($overlay_opacity); ?>" min="0" max="1" step="0.05" class="widefat" placeholder="<?php esc_attr_e('Predefinita', AIHL_TEXT_DOMAIN); ?>">
+		<small><?php esc_html_e('Facoltativa. Vuoto usa il valore globale.', AIHL_TEXT_DOMAIN); ?></small>
 	</p>
+	</div>
+	<style>.aihl-page-bg-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 24px;padding:4px 0 10px}.aihl-page-bg-fields p{margin:0}.aihl-page-bg-fields label{display:inline-block;margin-bottom:6px}.aihl-page-bg-fields input,.aihl-page-bg-fields select{min-height:40px}.aihl-page-bg-fields small{display:block;margin-top:5px;color:#646970}@media(max-width:782px){.aihl-page-bg-fields{grid-template-columns:1fr}}</style>
 	<?php
 }
 
@@ -107,7 +116,7 @@ add_action('save_post', function ($post_id) {
 // ── Data helpers ──
 
 function aihl_page_background_patterns(): array {
-	return array(
+	$sanitized = array(
 		'none'     => __('Nessuno', AIHL_TEXT_DOMAIN),
 		'dots'     => __('Puntini (dot grid)', AIHL_TEXT_DOMAIN),
 		'grid'     => __('Griglia', AIHL_TEXT_DOMAIN),
@@ -153,6 +162,13 @@ function aihl_sanitize_page_background(array $input): array {
 		'overlay_color'   => sanitize_hex_color($input['overlay_color'] ?? '') ?: '',
 		'overlay_opacity' => max(0, min(1, (float) ($input['overlay_opacity'] ?? 0.18))),
 	);
+	if (!isset($input['image_opacity']) || $input['image_opacity'] === '') {
+		unset($sanitized['image_opacity']);
+	}
+	if (!isset($input['overlay_opacity']) || $input['overlay_opacity'] === '') {
+		unset($sanitized['overlay_opacity']);
+	}
+	return $sanitized;
 }
 
 // ── Frontend rendering ──
@@ -308,10 +324,11 @@ add_action('rest_api_init', function () {
 				}
 				$sanitized = aihl_sanitize_page_background($input);
 				update_post_meta($post_id, '_aihl_page_background', $sanitized);
+				$requested = aihl_get_page_background_meta($post_id);
 				return new WP_REST_Response(array(
 					'updated' => true,
-					'requested' => $sanitized,
-					'effective' => aihl_resolve_page_background($sanitized),
+					'requested' => $requested,
+					'effective' => aihl_resolve_page_background($requested),
 					'design_governance' => function_exists('aihl_sbm_design_governance') ? aihl_sbm_design_governance() : array(),
 				));
 			},
