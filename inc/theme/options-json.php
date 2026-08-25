@@ -152,10 +152,15 @@ function aihl_render_options_json_page() {
 			.aihl-oj-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;width:100%;margin-top:16px}
 			.aihl-oj-editor{width:100%;min-height:68vh;font-family:Consolas,Monaco,monospace;font-size:14px;line-height:1.55;border:1px solid #c3c4c7;border-radius:4px;padding:18px;background:#111827;color:#dbeafe;box-sizing:border-box;resize:vertical}
 			.aihl-oj-help{margin:0}
-			.aihl-oj-help table{width:100%}
-			.aihl-oj-help code{font-size:12px;background:#f0f6fc;color:#135e96;padding:2px 6px}
-			.aihl-oj-field-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
-			.aihl-oj-field-group{border:1px solid #dcdcde;border-radius:4px;padding:14px;background:#fff}
+			.aihl-oj-help table{width:100%;table-layout:fixed;border-collapse:collapse}
+			.aihl-oj-help code{font-size:14px;background:#f0f6fc;color:#135e96;padding:3px 7px;overflow-wrap:anywhere}
+			.aihl-oj-field-groups{display:flex;flex-direction:column;gap:0;border:1px solid #c3c4c7;background:#fff}
+			.aihl-oj-field-group{padding:18px 20px;border:0;border-bottom:1px solid #c3c4c7;background:#fff}
+			.aihl-oj-field-group:last-child{border-bottom:0}
+			.aihl-oj-field-group h3{font-size:18px!important;margin:0 0 12px!important}
+			.aihl-oj-field-group td{padding:10px 12px;font-size:14px;line-height:1.5;vertical-align:top;overflow-wrap:anywhere}
+			.aihl-oj-field-group td:first-child{width:38%}
+			.aihl-oj-field-group td:last-child{width:62%;color:#50575e}
 			.aihl-oj-actions{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:12px 0;background:#fff;border-top:1px solid #dcdcde}
 			@media(max-width:900px){.aihl-oj-explainer{grid-template-columns:1fr;align-items:start}}
 		</style>
@@ -194,7 +199,7 @@ function aihl_render_options_json_page() {
 							?>
 							<tr>
 								<td><code><?php echo esc_html($row['field']); ?></code></td>
-								<td style="font-size:12px;color:#646970;"><?php echo esc_html($hint); ?></td>
+								<td><?php echo esc_html($hint); ?></td>
 							</tr>
 						<?php endforeach; ?>
 						</tbody>

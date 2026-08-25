@@ -5,6 +5,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.14.3] - 2026-08-25
+
+### Fixed
+- I gruppi dei campi disponibili nella Configurazione JSON sono ora disposti verticalmente a tutta larghezza, senza colonne compresse o spazi vuoti.
+- Nomi, tipi e valori ammessi usano dimensioni e spaziature leggibili.
+
 ## [1.14.2] - 2026-08-25
 
 ### Changed
