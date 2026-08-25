@@ -146,6 +146,10 @@ if (!function_exists('smart_ai_render_keys_page_content')) {
         $has_sbs       = function_exists('sbs_get_widget_registry');
         $has_theme_api = function_exists('aihl_ai_register_rest_routes');
         ?>
+		<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:18px 20px;margin-bottom:20px;border:1px solid #c3c4c7;border-left:4px solid #2271b1;background:#f0f6fc;">
+			<div><h2 style="margin:0 0 6px;font-size:18px;">Accesso degli agenti al sito</h2><p style="margin:0;max-width:780px;font-size:14px;line-height:1.55;color:#3c434a;">Queste chiavi autorizzano Smart AI Studio o un connettore esterno a usare le API WordPress di AI-HTML e Smart Builder Site. Non sono chiavi OpenAI, Claude o Gemini.</p></div>
+			<a class="button" href="<?php echo esc_url(admin_url('admin.php?page=aihl-api-docs')); ?>">Consulta API</a>
+		</div>
 
         <div class="smart-dash-stats" style="margin-bottom:24px;">
             <div class="smart-dash-stat-card">
@@ -169,7 +173,7 @@ if (!function_exists('smart_ai_render_keys_page_content')) {
             <div class="smart-dash-stat-card">
                 <div class="smart-dash-stat-icon"><i class="fa-solid fa-key"></i></div>
                 <div class="smart-dash-stat-text">
-                    <span class="smart-dash-stat-label">Chiavi attive</span>
+                    <span class="smart-dash-stat-label">Agenti autorizzati</span>
                     <span class="smart-dash-stat-value"><?php echo count($keys); ?></span>
                 </div>
             </div>
@@ -200,15 +204,16 @@ if (!function_exists('smart_ai_render_keys_page_content')) {
             </div>
         <?php endif; ?>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr);gap:20px;">
             <div style="background:#f6f7f7;border:1px solid #dcdcde;border-radius:8px;padding:20px;">
-                <h3 style="font-size:15px;font-weight:600;margin:0 0 16px;color:#1d2327;">Genera nuova chiave</h3>
+				<h3 style="font-size:17px;font-weight:600;margin:0 0 5px;color:#1d2327;">Autorizza un nuovo agente</h3>
+				<p style="margin:0 0 18px;color:#646970;">Assegna solo i permessi necessari. La chiave completa sarà mostrata una sola volta.</p>
                 <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                     <input type="hidden" name="action" value="smart_ai_generate_key">
                     <?php wp_nonce_field('smart_ai_generate_key'); ?>
                     <p style="margin:0 0 14px;">
-                        <label style="font-size:13px;font-weight:600;color:#1d2327;display:block;margin-bottom:4px;">Nome agente</label>
-                        <input type="text" name="key_label" value="Claude Agent" class="regular-text" style="border-radius:6px;border:1px solid #dcdcde;padding:8px 12px;width:100%;box-sizing:border-box;">
+						<label style="font-size:14px;font-weight:600;color:#1d2327;display:block;margin-bottom:6px;">Nome agente o integrazione</label>
+						<input type="text" name="key_label" value="Smart AI Studio" class="regular-text" style="border-radius:4px;border:1px solid #8c8f94;padding:9px 12px;width:100%;box-sizing:border-box;">
                     </p>
                     <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#1d2327;">Permessi</p>
                     <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
@@ -264,10 +269,10 @@ if (!function_exists('smart_ai_render_keys_page_content')) {
         </div>
 
         <div style="margin-top:24px;padding:16px 20px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;">
-            <h4 style="margin:0 0 8px;font-size:14px;color:#1e40af;">Come usare le API Keys</h4>
+			<h4 style="margin:0 0 8px;font-size:16px;color:#1e40af;">Collegamento tecnico</h4>
             <p style="margin:0;font-size:13px;color:#1e40af;line-height:1.6;">
                 Passa la chiave nell'header <code style="background:rgba(0,0,0,.06);padding:2px 6px;border-radius:4px;">X-Smart-AI-Key</code> di ogni richiesta REST.
-                Le chiavi funzionano con tutti gli endpoint Smart attivi sul sito.
+				READ consulta stato e contenuti, WRITE modifica dati e configurazioni, PUBLISH abilita la pubblicazione. Non inserire la chiave nei prompt della chat.
             </p>
         </div>
         <?php

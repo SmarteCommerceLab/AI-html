@@ -1774,6 +1774,7 @@ if (!function_exists('aihl_render_code_slots_page')) {
 
 		<?php else : ?>
 			<!-- Lista slot -->
+			<div class="aihl-slots-overview"><div><strong><?php echo esc_html((string) count($slots)); ?></strong><span><?php esc_html_e('Slot configurati', AIHL_TEXT_DOMAIN); ?></span></div><div><strong><?php echo esc_html((string) count(array_filter($slots, function($slot){ return !empty($slot['active']); }))); ?></strong><span><?php esc_html_e('Slot attivi', AIHL_TEXT_DOMAIN); ?></span></div><div><strong>2</strong><span><?php esc_html_e('Aree Canvas principali', AIHL_TEXT_DOMAIN); ?></span></div></div>
 			<div class="aihl-canvas-manager">
 				<div class="aihl-canvas-manager-head">
 					<h3><?php esc_html_e('AI Canvas Header e Footer', AIHL_TEXT_DOMAIN); ?></h3>
@@ -1804,7 +1805,7 @@ if (!function_exists('aihl_render_code_slots_page')) {
 				</div>
 			</div>
 
-			<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+			<div class="aihl-slots-toolbar">
 				<a href="<?php echo esc_url(admin_url('admin.php?page=aihl-code-slots&new=1')); ?>" class="button button-primary">
 					<i class="fa-solid fa-plus"></i> <?php esc_html_e('Nuovo Slot', AIHL_TEXT_DOMAIN); ?>
 				</a>
@@ -1874,7 +1875,7 @@ if (!function_exists('aihl_render_code_slots_page')) {
 			<?php endif; ?>
 
 			<!-- API Reference -->
-			<h3 style="margin-top:28px;"><?php esc_html_e('API Code Slots', AIHL_TEXT_DOMAIN); ?></h3>
+			<details class="aihl-slots-api"><summary><strong><?php esc_html_e('Riferimento API Code Slots', AIHL_TEXT_DOMAIN); ?></strong></summary>
 			<table class="form-table aihl-api-ref">
 				<tr><th>GET</th><td><code>/aihtml/v1/ai/code-slots</code> — <?php esc_html_e('Lista tutti gli slot', AIHL_TEXT_DOMAIN); ?></td></tr>
 				<tr><th>POST</th><td><code>/aihtml/v1/ai/code-slots</code> — <?php esc_html_e('Crea/aggiorna slot', AIHL_TEXT_DOMAIN); ?></td></tr>
@@ -1890,6 +1891,7 @@ if (!function_exists('aihl_render_code_slots_page')) {
 				<tr><th>GET</th><td><code>/aihtml/v1/ai/integration-manifest</code> — <?php esc_html_e('Risorse runtime per tema, SBS, SBM e motori AI', AIHL_TEXT_DOMAIN); ?></td></tr>
 				<tr><th>GET</th><td><code>/aihtml/v1/ai/addons</code> — <?php esc_html_e('Add-on e risorse integrabili', AIHL_TEXT_DOMAIN); ?></td></tr>
 			</table>
+			</details>
 		<?php endif; ?>
 		<?php
 	}
@@ -1919,6 +1921,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
 	}
 	$css = <<<'CSS'
 .aihl-slots-empty{text-align:center;padding:60px 20px;background:#f6f7f7;border:1px dashed #dcdcde;border-radius:8px}
+.aihl-slots-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid #dcdcde;margin-bottom:18px}.aihl-slots-overview>div{display:flex;flex-direction:column;gap:3px;padding:14px 16px;border-right:1px solid #dcdcde}.aihl-slots-overview>div:last-child{border-right:0}.aihl-slots-overview strong{font-size:20px}.aihl-slots-overview span{color:#646970}.aihl-slots-toolbar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;padding:12px 0;border-bottom:1px solid #dcdcde}.aihl-slots-api{margin-top:24px;padding:16px;border:1px solid #dcdcde;background:#fff}.aihl-slots-api summary{cursor:pointer;font-size:14px}
 .aihl-slots-empty p{margin:4px 0;color:#646970}
 .aihl-canvas-manager{border:1px solid #dcdcde;background:#fff;border-radius:6px;margin:0 0 18px}
 .aihl-canvas-manager-head{padding:14px 16px;border-bottom:1px solid #f0f0f1}

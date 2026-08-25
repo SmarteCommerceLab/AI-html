@@ -68,15 +68,18 @@ if (!function_exists('aihl_render_menu_json_page')) {
 		$presets = function_exists('aihl_menu_json_presets') ? aihl_menu_json_presets() : array();
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e('AIHL Menu JSON', AIHL_TEXT_DOMAIN); ?></h1>
+			<h1><?php esc_html_e('Menu JSON', AIHL_TEXT_DOMAIN); ?></h1>
 			<p><?php esc_html_e('Esporta e importa menu WordPress con tutte le impostazioni AIHL (icon, badge, subtitle, image, rich mode, ecc.).', AIHL_TEXT_DOMAIN); ?></p>
 			<style>
-				.aihl-json-help code{font-size:12px}
+				.aihl-menu-flow{display:flex;align-items:center;gap:14px;padding:16px 18px;margin:12px 0 20px;border:1px solid #c3c4c7;border-left:4px solid #2271b1;background:#f0f6fc}.aihl-menu-flow span{display:flex;align-items:center;gap:9px;font-size:14px}.aihl-menu-flow b{display:grid;place-items:center;width:28px;height:28px;background:#2271b1;color:#fff;border-radius:4px}.aihl-menu-flow i{color:#8c8f94}
+				.aihl-json-help code{font-size:13px}
 				.aihl-json-help pre{background:#f6f7f7;border:1px solid #dcdcde;padding:12px;overflow:auto;max-height:260px}
-				.aihl-json-grid{display:grid;grid-template-columns:minmax(320px,1fr) minmax(320px,1fr);gap:24px;max-width:1200px}
+				.aihl-json-grid{display:flex;flex-direction:column;gap:20px;width:100%}
+				.aihl-json-grid .postbox,.aihl-json-help{padding:20px!important;margin:0!important;box-sizing:border-box}.aihl-json-grid select{min-width:min(420px,100%);min-height:40px}.aihl-json-grid textarea{min-height:420px;padding:16px;font-size:14px;line-height:1.55;background:#111827;color:#dbeafe}.aihl-menu-import-row{display:flex;align-items:end;gap:12px;flex-wrap:wrap}
 				.aihl-json-grid .button{height:auto;line-height:1.2;padding:8px 10px}
-				@media (max-width:980px){.aihl-json-grid{grid-template-columns:1fr}}
+				@media (max-width:780px){.aihl-menu-flow{align-items:flex-start;flex-direction:column}.aihl-menu-flow i{transform:rotate(90deg);margin-left:8px}}
 			</style>
+			<div class="aihl-menu-flow" role="note"><span><b>1</b><?php esc_html_e('Esporta un menu esistente', AIHL_TEXT_DOMAIN); ?></span><i class="fa-solid fa-arrow-right"></i><span><b>2</b><?php esc_html_e('Modifica o genera il JSON', AIHL_TEXT_DOMAIN); ?></span><i class="fa-solid fa-arrow-right"></i><span><b>3</b><?php esc_html_e('Importa e verifica in WordPress', AIHL_TEXT_DOMAIN); ?></span></div>
 
 			<?php if ($import_notice !== '') : ?>
 				<div class="notice notice-success is-dismissible"><p><?php echo esc_html($import_notice); ?></p></div>
@@ -85,7 +88,8 @@ if (!function_exists('aihl_render_menu_json_page')) {
 				<div class="notice notice-error"><p><?php echo esc_html($import_error); ?></p></div>
 			<?php endif; ?>
 
-			<div class="postbox aihl-json-help" style="padding:16px;max-width:1200px;margin-bottom:18px;">
+			<details class="postbox aihl-json-help">
+				<summary><strong><?php esc_html_e('Formato e campi supportati', AIHL_TEXT_DOMAIN); ?></strong></summary>
 				<h2><?php esc_html_e('Guida rapida JSON', AIHL_TEXT_DOMAIN); ?></h2>
 				<p><?php esc_html_e('Flusso consigliato: 1) Esporta un menu esistente, 2) modifica il JSON, 3) importa con sostituzione attiva.', AIHL_TEXT_DOMAIN); ?></p>
 				<table class="widefat striped" style="max-width:100%;">
@@ -118,10 +122,10 @@ if (!function_exists('aihl_render_menu_json_page')) {
   }
 }</pre>
 				</details>
-			</div>
+			</details>
 
 			<div class="aihl-json-grid">
-				<div class="postbox" style="padding:16px;">
+				<section class="postbox">
 					<h2><?php esc_html_e('Esporta JSON', AIHL_TEXT_DOMAIN); ?></h2>
 					<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
 						<?php wp_nonce_field('aihl_menu_json_export'); ?>
@@ -139,9 +143,9 @@ if (!function_exists('aihl_render_menu_json_page')) {
 							<button type="submit" class="button button-small button-primary"><?php esc_html_e('Scarica JSON', AIHL_TEXT_DOMAIN); ?></button>
 						</p>
 					</form>
-				</div>
+				</section>
 
-				<div class="postbox" style="padding:16px;">
+				<section class="postbox">
 					<h2><?php esc_html_e('Importa JSON', AIHL_TEXT_DOMAIN); ?></h2>
 					<?php if (!empty($presets)) : ?>
 					<p>
@@ -176,7 +180,7 @@ if (!function_exists('aihl_render_menu_json_page')) {
 							<button type="submit" name="aihl_menu_json_import_submit" value="1" class="button button-small button-primary"><?php esc_html_e('Importa JSON', AIHL_TEXT_DOMAIN); ?></button>
 						</p>
 					</form>
-				</div>
+				</section>
 			</div>
 			<?php if (!empty($presets)) : ?>
 				<script>

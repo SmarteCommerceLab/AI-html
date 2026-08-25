@@ -5,6 +5,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.14.5] - 2026-08-25
+
+### Changed
+- Uniformata la UX di Configurazione JSON e Menu JSON con flussi guidati e sezioni verticali leggibili.
+- Chiarito lo scopo di Accesso API e distinta l'autenticazione del sito dalle chiavi dei provider AI.
+- Migliorati Swagger/OpenAPI, Code Slots e Smart Reset con ricerca, riepiloghi, dettagli progressivi e conferme protette.
+
 ## [1.14.4] - 2026-08-25
 
 ### Changed

@@ -401,7 +401,7 @@ function aihl_render_smart_reset_page(): void {
 	}
 	?>
 	<div class="aihl-reset-console">
-		<p><?php esc_html_e('Seleziona solo i blocchi da azzerare. Il sistema crea sempre uno snapshot JSON delle opzioni prima di eseguire un reset reale.', AIHL_TEXT_DOMAIN); ?></p>
+		<div class="aihl-reset-intro"><span class="aihl-reset-intro-icon"><i class="fa-solid fa-shield-halved"></i></span><div><h2><?php esc_html_e('Ripristino selettivo protetto', AIHL_TEXT_DOMAIN); ?></h2><p><?php esc_html_e('Seleziona solo le aree da ripristinare. Prima di ogni operazione viene creato automaticamente uno snapshot JSON.', AIHL_TEXT_DOMAIN); ?></p></div></div>
 		<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
 			<input type="hidden" name="action" value="aihl_smart_reset_execute">
 			<?php wp_nonce_field('aihl_smart_reset_execute', 'aihl_smart_reset_nonce'); ?>
@@ -419,26 +419,26 @@ function aihl_render_smart_reset_page(): void {
 				<?php endforeach; ?>
 			</div>
 			<div class="aihl-reset-confirm">
-				<label for="aihl-reset-confirm"><strong><?php esc_html_e('Conferma', AIHL_TEXT_DOMAIN); ?></strong></label>
+				<div><strong><?php esc_html_e('Conferma operazione', AIHL_TEXT_DOMAIN); ?></strong><small><?php esc_html_e('Scrivi RESET per abilitare il pulsante.', AIHL_TEXT_DOMAIN); ?></small></div>
 				<input id="aihl-reset-confirm" type="text" name="aihl_reset_confirm" placeholder="RESET" autocomplete="off">
-				<button type="submit" class="button button-primary button-large"><?php esc_html_e('Esegui reset selettivo', AIHL_TEXT_DOMAIN); ?></button>
+				<button type="submit" id="aihl-reset-submit" class="button button-primary button-large" disabled><?php esc_html_e('Esegui reset selettivo', AIHL_TEXT_DOMAIN); ?></button>
 			</div>
 		</form>
 	</div>
 	<style>
-		.aihl-reset-console{max-width:1180px}
-		.aihl-reset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin:20px 0}
-		.aihl-reset-card{display:flex;gap:14px;align-items:flex-start;border:1px solid #dcdcde;border-radius:14px;background:#fff;padding:16px;cursor:pointer;box-shadow:0 10px 30px rgba(29,35,39,.04)}
+		.aihl-reset-console{width:100%}.aihl-reset-intro{display:flex;align-items:center;gap:14px;padding:18px 20px;border:1px solid #b8dfc4;border-left:4px solid #00a32a;background:#f3fbf5}.aihl-reset-intro-icon{display:grid;place-items:center;width:38px;height:38px;background:#dff3e5;color:#008a20;border-radius:4px}.aihl-reset-intro h2{margin:0 0 4px;font-size:18px}.aihl-reset-intro p{margin:0;color:#50575e}.aihl-reset-grid{display:flex;flex-direction:column;gap:0;margin:20px 0;border:1px solid #dcdcde}
+		.aihl-reset-card{display:grid;grid-template-columns:auto 40px minmax(0,1fr);gap:14px;align-items:center;border:0;border-bottom:1px solid #dcdcde;background:#fff;padding:16px;cursor:pointer}.aihl-reset-card:last-child{border-bottom:0}
 		.aihl-reset-card:hover{border-color:#2271b1}
 		.aihl-reset-card.is-danger{border-color:#f0b8bd}
-		.aihl-reset-card input{margin-top:8px}
+		.aihl-reset-card input{margin:0}
 		.aihl-reset-icon{display:inline-flex;width:38px;height:38px;align-items:center;justify-content:center;border-radius:12px;background:#f0f6fc;color:#2271b1;flex:0 0 auto}
 		.aihl-reset-copy{display:flex;flex-direction:column;gap:4px}
 		.aihl-reset-copy strong{font-size:14px;color:#1d2327}
 		.aihl-reset-copy em{font-style:normal;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#646970;font-weight:700}
 		.aihl-reset-copy small{font-size:12px;color:#50575e;line-height:1.45}
-		.aihl-reset-confirm{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:22px;padding:18px;border:1px solid #dcdcde;border-radius:14px;background:#f6f7f7}
+		.aihl-reset-confirm{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:flex-end;margin-top:22px;padding:18px;border:1px solid #dcdcde;background:#f6f7f7}.aihl-reset-confirm>div{display:flex;flex-direction:column;margin-right:auto}.aihl-reset-confirm small{color:#646970;margin-top:3px}
 		.aihl-reset-confirm input{min-width:220px;min-height:38px}
 	</style>
+	<script>(function(){var input=document.getElementById('aihl-reset-confirm'),button=document.getElementById('aihl-reset-submit');if(!input||!button)return;input.addEventListener('input',function(){button.disabled=input.value.trim()!=='RESET';});})();</script>
 	<?php
 }

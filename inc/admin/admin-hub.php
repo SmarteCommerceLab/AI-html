@@ -192,12 +192,12 @@ if (!function_exists('aihl_admin_get_subpages')) {
 			),
 			array(
 				'slug'        => 'aihl-api-keys',
-				'page_title'  => __('API Keys', AIHL_TEXT_DOMAIN),
-				'menu_title'  => __('API Keys', AIHL_TEXT_DOMAIN),
+				'page_title'  => __('Accesso API', AIHL_TEXT_DOMAIN),
+				'menu_title'  => __('Accesso API', AIHL_TEXT_DOMAIN),
 				'capability'  => 'manage_options',
 				'callback'    => 'aihl_admin_wrap_api_keys',
 				'icon'        => 'fa-solid fa-key',
-				'description' => __('Gestione chiavi API per agenti AI (Claude, GPT, custom).', AIHL_TEXT_DOMAIN),
+				'description' => __('Autorizza Studio e gli agenti esterni ad accedere al sito.', AIHL_TEXT_DOMAIN),
 			),
 			array(
 				'slug'        => 'aihl-api-docs',
@@ -561,8 +561,8 @@ function aihl_admin_wrap_code_slots() {
 
 function aihl_admin_wrap_api_keys() {
 	aihl_admin_page_template(
-		__('API Keys', AIHL_TEXT_DOMAIN),
-		__('Gestione chiavi API per agenti AI. Una sola chiave autentica tutte le API Smart attive sul sito.', AIHL_TEXT_DOMAIN),
+		__('Accesso API', AIHL_TEXT_DOMAIN),
+		__('Autorizza Smart AI Studio e gli agenti esterni ad accedere alle API del sito.', AIHL_TEXT_DOMAIN),
 		function () {
 			if (function_exists('smart_ai_render_keys_page_content')) {
 				smart_ai_render_keys_page_content();
@@ -618,6 +618,7 @@ function aihl_render_api_docs_content() {
 		: array();
 	$paths = isset($openapi['paths']) && is_array($openapi['paths']) ? $openapi['paths'] : array();
 	?>
+	<div class="aihl-api-workflow" role="note"><div><b>1</b><span><strong><?php echo esc_html__('Genera una chiave', AIHL_TEXT_DOMAIN); ?></strong><small><?php echo esc_html__('Autorizza il client in Accesso API.', AIHL_TEXT_DOMAIN); ?></small></span></div><i class="fa-solid fa-arrow-right"></i><div><b>2</b><span><strong><?php echo esc_html__('Esplora gli endpoint', AIHL_TEXT_DOMAIN); ?></strong><small><?php echo esc_html__('Cerca per metodo o percorso.', AIHL_TEXT_DOMAIN); ?></small></span></div><i class="fa-solid fa-arrow-right"></i><div><b>3</b><span><strong><?php echo esc_html__('Scarica OpenAPI', AIHL_TEXT_DOMAIN); ?></strong><small><?php echo esc_html__('Importala nel client scelto.', AIHL_TEXT_DOMAIN); ?></small></span></div></div>
 	<div class="aihl-api-docs-grid">
 		<section class="aihl-json-panel aihl-api-docs-summary">
 			<h2><?php echo esc_html__('Specifica generata', AIHL_TEXT_DOMAIN); ?></h2>
@@ -652,7 +653,7 @@ function aihl_render_api_docs_content() {
 		</section>
 
 		<section class="aihl-json-panel">
-			<h2><?php echo esc_html__('Endpoint rilevati', AIHL_TEXT_DOMAIN); ?></h2>
+			<div class="aihl-api-list-head"><h2><?php echo esc_html__('Endpoint rilevati', AIHL_TEXT_DOMAIN); ?></h2><input type="search" id="aihl-api-filter" placeholder="<?php echo esc_attr__('Cerca endpoint...', AIHL_TEXT_DOMAIN); ?>"></div>
 			<table class="widefat striped">
 				<thead>
 					<tr>
@@ -663,7 +664,7 @@ function aihl_render_api_docs_content() {
 				<tbody>
 					<?php foreach ($paths as $path => $operations) : ?>
 						<?php foreach ($operations as $method => $operation) : ?>
-							<tr>
+							<tr class="aihl-api-route">
 								<td><code><?php echo esc_html(strtoupper((string) $method)); ?></code></td>
 								<td><code><?php echo esc_html((string) $path); ?></code></td>
 							</tr>
@@ -678,6 +679,7 @@ function aihl_render_api_docs_content() {
 			<textarea class="aihl-json-editor aihl-openapi-editor" readonly spellcheck="false"><?php echo esc_textarea((string) $openapi_json); ?></textarea>
 		</section>
 	</div>
+	<script>(function(){var input=document.getElementById('aihl-api-filter');if(!input)return;input.addEventListener('input',function(){var q=input.value.toLowerCase();document.querySelectorAll('.aihl-api-route').forEach(function(row){row.hidden=row.textContent.toLowerCase().indexOf(q)===-1;});});})();</script>
 	<?php
 }
 
@@ -761,6 +763,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .smart-dash-card-body strong{font-size:14px}
 .smart-dash-card-body span{font-size:12px;color:#646970;line-height:1.4}
 .aihl-api-docs-grid{display:grid;grid-template-columns:minmax(0,.75fr) minmax(360px,.25fr);gap:18px}
+.aihl-api-workflow{display:flex;align-items:center;gap:14px;margin:0 0 20px;padding:16px 18px;border:1px solid #c3c4c7;border-left:4px solid #2271b1;background:#f0f6fc}.aihl-api-workflow div{display:flex;align-items:center;gap:9px}.aihl-api-workflow div>span{display:flex;flex-direction:column}.aihl-api-workflow b{display:grid;place-items:center;width:28px;height:28px;border-radius:4px;background:#2271b1;color:#fff}.aihl-api-workflow small{color:#50575e;font-size:12px}.aihl-api-workflow>i{color:#8c8f94}.aihl-api-list-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.aihl-api-list-head input{min-width:240px}
 .aihl-api-docs-summary{grid-column:1/-1}
 .aihl-json-panel{background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:18px}
 .aihl-json-panel-wide{grid-column:1/-1}
@@ -781,7 +784,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .smart-admin-body{padding:16px}
 .aihl-canvas-health-heading{align-items:flex-start;flex-direction:column}.aihl-canvas-health-grid{grid-template-columns:1fr}
 }
-@media(max-width:1100px){.aihl-api-docs-grid{grid-template-columns:1fr}.aihl-json-editor{min-height:360px}}
+@media(max-width:1100px){.aihl-api-docs-grid{grid-template-columns:1fr}.aihl-json-editor{min-height:360px}}@media(max-width:780px){.aihl-api-workflow{align-items:flex-start;flex-direction:column}.aihl-api-workflow>i{transform:rotate(90deg);margin-left:8px}.aihl-api-list-head{align-items:stretch;flex-direction:column}.aihl-api-list-head input{min-width:0;width:100%}}
 CSS;
 
 	wp_add_inline_style('wp-admin', $css);
