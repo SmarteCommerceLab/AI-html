@@ -1,7 +1,9 @@
 # AI-HTML Theme â€” Stato di sviluppo
 
-Versione: 1.12.4
-Ultimo aggiornamento: 28 luglio 2026
+Versione: 1.14.8
+Ultimo aggiornamento: 25 agosto 2026
+
+L'editor Code Slots mostra lo slot realmente persistito dopo la creazione, mantiene la scheda HTML, CSS o JS attiva e sincronizza copia/incolla direttamente con CodeMirror.
 
 I loghi configurati via Customizer/API mantengono proporzioni native con limiti responsive; le varianti principale, overlay, chiara e footer restano governate dal contratto del tema.
 

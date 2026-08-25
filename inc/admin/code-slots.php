@@ -1506,9 +1506,14 @@ if (!function_exists('aihl_render_code_slots_page')) {
 		$hooks = aihl_code_slots_hooks();
 		$edit_slot = null;
 		$save_result = null;
+		$submitted_editor_tab = '';
 
 		// Handle POST save
 		if (isset($_POST['aihl_code_slot_save']) && check_admin_referer('aihl_code_slots_nonce')) {
+			$submitted_editor_tab = sanitize_key(wp_unslash($_POST['slot_editor_tab'] ?? ''));
+			if (!in_array($submitted_editor_tab, array('html', 'css', 'js'), true)) {
+				$submitted_editor_tab = '';
+			}
 			$slot_data = array(
 				'id'       => sanitize_key(wp_unslash($_POST['slot_id'] ?? '')),
 				'label'    => sanitize_text_field(wp_unslash($_POST['slot_label'] ?? '')),
@@ -1532,6 +1537,7 @@ if (!function_exists('aihl_render_code_slots_page')) {
 			$save_result = aihl_code_slots_save($slot_data);
 			if (!is_wp_error($save_result)) {
 				$slots = aihl_code_slots_get_all(); // Refresh
+				$edit_slot = $save_result;
 			}
 		}
 
@@ -1608,11 +1614,18 @@ if (!function_exists('aihl_render_code_slots_page')) {
 				'css' => '',
 				'js' => '',
 			);
+			$initial_editor_tab = $submitted_editor_tab;
+			if ('' === $initial_editor_tab) {
+				$initial_editor_tab = '' !== trim((string) ($s['code'] ?? ''))
+					? 'html'
+					: ('' !== trim((string) ($s['css'] ?? '')) ? 'css' : ('' !== trim((string) ($s['js'] ?? '')) ? 'js' : 'html'));
+			}
 		?>
 			<!-- Editor singolo slot -->
 			<form method="post">
 				<?php wp_nonce_field('aihl_code_slots_nonce'); ?>
 				<input type="hidden" name="slot_id" value="<?php echo esc_attr($s['id']); ?>">
+				<input type="hidden" name="slot_editor_tab" value="<?php echo esc_attr($initial_editor_tab); ?>" data-aihl-editor-tab-input>
 
 				<table class="form-table">
 					<tr>
@@ -1687,11 +1700,11 @@ if (!function_exists('aihl_render_code_slots_page')) {
 						</div>
 					</div>
 					<div class="aihl-code-editor-tabs" role="tablist" aria-label="<?php esc_attr_e('Sezioni codice slot', AIHL_TEXT_DOMAIN); ?>">
-						<button type="button" class="button button-small is-active" data-aihl-editor-tab="html">HTML</button>
+						<button type="button" class="button button-small" data-aihl-editor-tab="html">HTML</button>
 						<button type="button" class="button button-small" data-aihl-editor-tab="css">CSS</button>
 						<button type="button" class="button button-small" data-aihl-editor-tab="js">JS</button>
 					</div>
-					<div class="aihl-code-editor-pane is-active" data-aihl-editor-pane="html">
+					<div class="aihl-code-editor-pane" data-aihl-editor-pane="html">
 						<textarea id="aihl-slot-code" name="slot_code" rows="18" class="large-text code aihl-code-textarea" spellcheck="false"><?php echo esc_textarea($s['code']); ?></textarea>
 					</div>
 					<div class="aihl-code-editor-pane" data-aihl-editor-pane="css">
@@ -1742,19 +1755,23 @@ if (!function_exists('aihl_render_code_slots_page')) {
 				function activateTab(name){
 					document.querySelectorAll('[data-aihl-editor-tab]').forEach(function(tab){tab.classList.toggle('is-active',tab.getAttribute('data-aihl-editor-tab')===name);});
 					document.querySelectorAll('[data-aihl-editor-pane]').forEach(function(pane){pane.classList.toggle('is-active',pane.getAttribute('data-aihl-editor-pane')===name);});
+					var input=document.querySelector('[data-aihl-editor-tab-input]');
+					if(input){input.value=name;}
 					if(window.aihlSlotEditors&&window.aihlSlotEditors[name]){setTimeout(function(){window.aihlSlotEditors[name].refresh();window.aihlSlotEditors[name].focus();},30);}
 				}
 				document.querySelectorAll('[data-aihl-editor-tab]').forEach(function(tab){
 					tab.addEventListener('click',function(){activateTab(tab.getAttribute('data-aihl-editor-tab'));});
 				});
-				function activeTextarea(){
+				function activeSection(){
 					var pane=document.querySelector('[data-aihl-editor-pane].is-active');
-					return pane ? pane.querySelector('textarea') : null;
+					if(!pane){return null;}
+					var name=pane.getAttribute('data-aihl-editor-pane');
+					return {name:name,textarea:pane.querySelector('textarea'),editor:window.aihlSlotEditors&&window.aihlSlotEditors[name]?window.aihlSlotEditors[name]:null};
 				}
 				var copy=document.querySelector('[data-aihl-copy-active]');
 				var paste=document.querySelector('[data-aihl-paste-active]');
-				if(copy&&navigator.clipboard){copy.addEventListener('click',function(){var ta=activeTextarea();if(ta){navigator.clipboard.writeText(ta.value);}});}
-				if(paste&&navigator.clipboard){paste.addEventListener('click',function(){var ta=activeTextarea();if(ta){navigator.clipboard.readText().then(function(text){ta.value=text;ta.dispatchEvent(new Event('change',{bubbles:true}));});}});}
+				if(copy&&navigator.clipboard){copy.addEventListener('click',function(){var section=activeSection();if(section){navigator.clipboard.writeText(section.editor?section.editor.getValue():section.textarea.value);}});}
+				if(paste&&navigator.clipboard){paste.addEventListener('click',function(){var section=activeSection();if(section){navigator.clipboard.readText().then(function(text){if(section.editor){section.editor.setValue(text);section.editor.focus();}else{section.textarea.value=text;section.textarea.dispatchEvent(new Event('change',{bubbles:true}));}});}});}
 				if(window.wp&&wp.codeEditor&&window.aihlCodeEditorSettings){
 					window.aihlSlotEditors=window.aihlSlotEditors||{};
 					[['html','aihl-slot-code'],['css','aihl-slot-css'],['js','aihl-slot-js']].forEach(function(item){
@@ -1768,6 +1785,7 @@ if (!function_exists('aihl_render_code_slots_page')) {
 					if(form){form.addEventListener('submit',function(){Object.keys(window.aihlSlotEditors).forEach(function(key){window.aihlSlotEditors[key].save();});});}
 				}
 				radios.forEach(function(r){r.addEventListener('change',togFields);});
+				activateTab(<?php echo wp_json_encode($initial_editor_tab); ?>);
 				togFields();
 			})();
 			</script>

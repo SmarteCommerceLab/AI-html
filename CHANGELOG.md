@@ -5,6 +5,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.14.8] - 2026-08-25
+
+### Fixed
+- Dopo il primo salvataggio, l'editor Canvas mostra lo slot persistito invece di riproporre un modulo vuoto.
+- La scheda HTML, CSS o JS attiva viene mantenuta dopo il salvataggio.
+- I comandi copia/incolla operano direttamente sull'istanza CodeMirror e non perdono il contenuto al submit.
+
 ## [1.14.7] - 2026-08-25
 
 ### Fixed
