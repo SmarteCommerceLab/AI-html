@@ -5,6 +5,14 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.14.1] - 2026-08-25
+
+### Fixed
+- Ripristinato un contrasto leggibile nel visualizzatore del Manifest JSON, isolandolo dagli stili `readonly` di WordPress.
+
+### Changed
+- Aggiunte indicazioni operative e collegamenti diretti tra Configurazione JSON, che modifica le opzioni, e Manifest JSON, che espone lo stato live generato.
+
 ## [1.14.0] - 2026-08-25
 
 ### Aggiunto

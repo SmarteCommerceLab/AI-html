@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.14.0
+Stable tag: 1.14.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,10 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.14.1 =
+* Corregge il contrasto del visualizzatore Manifest JSON usando un pannello di codice in sola lettura stabile rispetto agli stili WordPress.
+* Chiarisce la differenza e il collegamento operativo tra Configurazione JSON modificabile e Manifest JSON generato.
 
 = 1.14.0 =
 * Aggiunge la pagina Manifest JSON con lettura del contratto live, copia e accesso diretto all'endpoint.

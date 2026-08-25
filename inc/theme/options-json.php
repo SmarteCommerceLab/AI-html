@@ -117,7 +117,11 @@ function aihl_render_options_json_page() {
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e('Configurazione JSON', AIHL_TEXT_DOMAIN); ?></h1>
-		<p><?php esc_html_e('Gestisci le opzioni del tema (header, footer, contatti, CTA) via JSON. Stesso approccio dell\'editor widget di Smart Builder Site. Un AI puo generare questo JSON e applicarlo via API o tu puoi incollarlo qui.', AIHL_TEXT_DOMAIN); ?></p>
+		<div class="aihl-oj-explainer" role="note">
+			<strong><?php esc_html_e('Questa pagina modifica la configurazione sorgente.', AIHL_TEXT_DOMAIN); ?></strong>
+			<span><?php esc_html_e('Qui puoi editare e salvare le opzioni governate del tema: header, footer, contatti e CTA. Dopo il salvataggio WordPress rigenera automaticamente il Manifest JSON live.', AIHL_TEXT_DOMAIN); ?></span>
+			<a class="button" href="<?php echo esc_url(admin_url('admin.php?page=aihl-manifest-json')); ?>"><?php esc_html_e('Vedi Manifest JSON', AIHL_TEXT_DOMAIN); ?></a>
+		</div>
 
 		<?php if ($notice === 'saved') : ?>
 			<div class="notice notice-success is-dismissible"><p><?php
@@ -144,6 +148,7 @@ function aihl_render_options_json_page() {
 		<?php endif; ?>
 
 		<style>
+			.aihl-oj-explainer{display:grid;grid-template-columns:minmax(220px,auto) minmax(320px,1fr) auto;align-items:center;gap:12px;margin:12px 0 20px;padding:14px 16px;border-left:4px solid #00a32a;background:#edfaef;color:#1d2327}.aihl-oj-explainer span{font-size:14px;line-height:1.5}
 			.aihl-oj-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;width:100%;margin-top:16px}
 			.aihl-oj-editor{width:100%;min-height:68vh;font-family:Consolas,Monaco,monospace;font-size:14px;line-height:1.55;border:1px solid #c3c4c7;border-radius:4px;padding:18px;background:#111827;color:#dbeafe;box-sizing:border-box;resize:vertical}
 			.aihl-oj-help{margin:0}
@@ -152,6 +157,7 @@ function aihl_render_options_json_page() {
 			.aihl-oj-field-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
 			.aihl-oj-field-group{border:1px solid #dcdcde;border-radius:4px;padding:14px;background:#fff}
 			.aihl-oj-actions{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:12px 0;background:#fff;border-top:1px solid #dcdcde}
+			@media(max-width:900px){.aihl-oj-explainer{grid-template-columns:1fr;align-items:start}}
 		</style>
 
 		<div class="aihl-oj-grid">
