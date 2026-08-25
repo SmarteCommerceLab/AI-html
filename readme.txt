@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.14.8
+Stable tag: 1.14.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,9 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.14.9 =
+* Mostrate nel pannello Code Slots le singole violazioni che impediscono l'attivazione secondo la governance SBM.
 
 = 1.14.8 =
 * Corretto il ritorno allo slot Canvas appena salvato e mantenuta la scheda editor attiva.

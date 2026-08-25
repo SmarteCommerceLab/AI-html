@@ -390,7 +390,7 @@ if (!function_exists('aihl_code_slots_toggle')) {
 			if (!$governance_report['valid']) {
 				return new WP_Error(
 					'aihl_slot_governance_failed',
-					__('Lo slot non puo essere attivato finche non supera la governance SBM.', AIHL_TEXT_DOMAIN),
+					aihl_code_slot_governance_error_message($governance_report),
 					array('status' => 409, 'governance' => $governance_report)
 				);
 			}
@@ -610,6 +610,20 @@ if (!function_exists('aihl_code_slot_api_payload')) {
 	function aihl_code_slot_api_payload(array $slot): array {
 		$slot['governance'] = aihl_code_slot_governance_report($slot);
 		return $slot;
+	}
+}
+
+if (!function_exists('aihl_code_slot_governance_error_message')) {
+	function aihl_code_slot_governance_error_message(array $report): string {
+		$messages = array();
+		foreach ((array) ($report['issues'] ?? array()) as $issue) {
+			if ('error' === ($issue['severity'] ?? '') && !empty($issue['message'])) {
+				$messages[] = (string) $issue['message'];
+			}
+		}
+
+		$prefix = __('Lo slot non puo essere attivato finche non supera la governance SBM.', AIHL_TEXT_DOMAIN);
+		return $messages ? $prefix . ' ' . implode(' ', array_unique($messages)) : $prefix;
 	}
 }
 
@@ -1588,12 +1602,21 @@ if (!function_exists('aihl_render_code_slots_page')) {
 		$canvas_area = in_array($canvas_area, array('header', 'footer'), true) ? $canvas_area : '';
 
 		?>
+		<?php
+		$saved_governance = is_array($save_result) && aihl_code_slot_is_canvas_override($save_result)
+			? aihl_code_slot_governance_report($save_result)
+			: null;
+		$saved_governance_blocked = is_array($saved_governance) && empty($saved_governance['valid']);
+		?>
 		<?php if ($save_result && !is_wp_error($save_result)) : ?>
-			<div class="notice notice-success"><p>
+			<div class="notice <?php echo $saved_governance_blocked ? 'notice-warning' : 'notice-success'; ?>"><p>
 				<?php if (isset($save_result['imported'])) : ?>
 					<strong><?php printf(esc_html__('%d slot importati.', AIHL_TEXT_DOMAIN), $save_result['imported']); ?></strong>
 				<?php else : ?>
 					<strong><?php printf(esc_html__('Slot "%s" salvato (v%d).', AIHL_TEXT_DOMAIN), esc_html($save_result['label']), $save_result['version']); ?></strong>
+					<?php if ($saved_governance_blocked) : ?>
+						<br><?php echo esc_html(aihl_code_slot_governance_error_message($saved_governance)); ?>
+					<?php endif; ?>
 				<?php endif; ?>
 			</p></div>
 		<?php elseif (is_wp_error($save_result)) : ?>
@@ -1868,6 +1891,19 @@ if (!function_exists('aihl_render_code_slots_page')) {
 							<div class="aihl-slot-card-preview">
 								<code><?php echo esc_html(mb_substr($slot['code'] ?? '', 0, 120)); ?><?php echo mb_strlen($slot['code'] ?? '') > 120 ? '...' : ''; ?></code>
 							</div>
+							<?php if (empty($slot_governance['valid'])) : ?>
+								<div class="aihl-slot-governance-issues" role="alert">
+									<strong><?php esc_html_e('Correzioni richieste dalla governance SBM', AIHL_TEXT_DOMAIN); ?></strong>
+									<ul>
+										<?php foreach ((array) ($slot_governance['issues'] ?? array()) as $issue) : ?>
+											<?php if ('error' === ($issue['severity'] ?? '')) : ?>
+												<li><?php echo esc_html((string) ($issue['message'] ?? '')); ?></li>
+											<?php endif; ?>
+										<?php endforeach; ?>
+									</ul>
+									<p><?php esc_html_e('Correggi il codice usando token semantici oppure modifica la modalita globale in Smart Bootstrap Manager.', AIHL_TEXT_DOMAIN); ?></p>
+								</div>
+							<?php endif; ?>
 							<div class="aihl-slot-card-actions">
 								<form method="post" style="display:inline;">
 									<?php wp_nonce_field('aihl_code_slots_nonce'); ?>
@@ -1965,6 +2001,10 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .aihl-code-editor-pane.is-active{display:block}
 .aihl-code-textarea{width:100%;min-height:420px;border:0;box-shadow:none;font-family:Consolas,Monaco,monospace;font-size:13px;line-height:1.5}
 .aihl-code-editor-shell .CodeMirror{min-height:420px;border:0;font-size:13px;line-height:1.5}
+.aihl-slot-governance-issues{margin:10px 20px;padding:12px 14px;border-left:4px solid #d63638;background:#fcf0f1;color:#3c434a}
+.aihl-slot-governance-issues strong{display:block;margin-bottom:6px}
+.aihl-slot-governance-issues ul{margin:0 0 8px 18px;list-style:disc}
+.aihl-slot-governance-issues p{margin:0}
 .aihl-slots-list{display:flex;flex-direction:column;gap:10px}
 .aihl-slot-card{background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:16px 18px;transition:border-color .15s}
 .aihl-slot-card:hover{border-color:#2271b1}

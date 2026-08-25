@@ -5,6 +5,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.14.9] - 2026-08-25
+
+### Changed
+- Il salvataggio e l'attivazione dei Canvas mostrano tutte le violazioni che impediscono il superamento della governance SBM.
+- Le schede Code Slots non conformi indicano le correzioni richieste e il collegamento concettuale alla modalita globale SBM.
+
 ## [1.14.8] - 2026-08-25
 
 ### Fixed

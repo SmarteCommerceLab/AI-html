@@ -1,6 +1,6 @@
 # AI-HTML Theme â€” Stato di sviluppo
 
-Versione: 1.14.8
+Versione: 1.14.9
 Ultimo aggiornamento: 25 agosto 2026
 
 L'editor Code Slots mostra lo slot realmente persistito dopo la creazione, mantiene la scheda HTML, CSS o JS attiva e sincronizza copia/incolla direttamente con CodeMirror.
