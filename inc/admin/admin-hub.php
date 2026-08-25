@@ -110,13 +110,22 @@ if (!function_exists('aihl_admin_get_subpages')) {
 	function aihl_admin_get_subpages() {
 		return array(
 			array(
+				'slug'        => 'aihl-manifest-json',
+				'page_title'  => __('Manifest JSON', AIHL_TEXT_DOMAIN),
+				'menu_title'  => __('Manifest JSON', AIHL_TEXT_DOMAIN),
+				'capability'  => 'edit_theme_options',
+				'callback'    => 'aihl_admin_wrap_manifest_json',
+				'icon'        => 'fa-solid fa-file-code',
+				'description' => __('Risorse e capability live del sito.', AIHL_TEXT_DOMAIN),
+			),
+			array(
 				'slug'        => 'aihl-plugins',
 				'page_title'  => __('Plugin Dipendenze', AIHL_TEXT_DOMAIN),
 				'menu_title'  => __('Plugin', AIHL_TEXT_DOMAIN),
 				'capability'  => 'manage_options',
 				'callback'    => 'aihl_admin_wrap_plugins',
 				'icon'        => 'fa-solid fa-plug',
-				'description' => __('Stato dei plugin richiesti e raccomandati.', AIHL_TEXT_DOMAIN),
+				'description' => __('Dipendenze e integrazioni attive.', AIHL_TEXT_DOMAIN),
 			),
 			array(
 				'slug'        => 'aihl-menu-json',
@@ -138,12 +147,12 @@ if (!function_exists('aihl_admin_get_subpages')) {
 			),
 			array(
 				'slug'        => 'aihl-options-json',
-				'page_title'  => __('Opzioni JSON', AIHL_TEXT_DOMAIN),
-				'menu_title'  => __('Opzioni JSON', AIHL_TEXT_DOMAIN),
+				'page_title'  => __('Configurazione JSON', AIHL_TEXT_DOMAIN),
+				'menu_title'  => __('Configurazione JSON', AIHL_TEXT_DOMAIN),
 				'capability'  => 'edit_theme_options',
 				'callback'    => 'aihl_admin_wrap_options_json',
 				'icon'        => 'fa-solid fa-sliders',
-				'description' => __('Editor JSON per opzioni tema (header, footer, contatti).', AIHL_TEXT_DOMAIN),
+				'description' => __('Modifica le opzioni governate del tema.', AIHL_TEXT_DOMAIN),
 			),
 			array(
 				'slug'        => 'aihl-smart-reset',
@@ -455,11 +464,23 @@ function aihl_admin_wrap_menu_help() {
 
 function aihl_admin_wrap_options_json() {
 	aihl_admin_page_template(
-		__('Opzioni JSON', AIHL_TEXT_DOMAIN),
-		__('Editor JSON per le opzioni tema.', AIHL_TEXT_DOMAIN),
+		__('Configurazione JSON', AIHL_TEXT_DOMAIN),
+		__('Editor a tutta larghezza per le opzioni governate del tema.', AIHL_TEXT_DOMAIN),
 		function () {
 			if (function_exists('aihl_render_options_json_page')) {
 				aihl_render_options_json_page();
+			}
+		}
+	);
+}
+
+function aihl_admin_wrap_manifest_json() {
+	aihl_admin_page_template(
+		__('Manifest JSON', AIHL_TEXT_DOMAIN),
+		__('Consulta il manifest live e gestisci snapshot versionati della configurazione sorgente.', AIHL_TEXT_DOMAIN),
+		function () {
+			if (function_exists('aihl_render_manifest_json_page')) {
+				aihl_render_manifest_json_page();
 			}
 		}
 	);

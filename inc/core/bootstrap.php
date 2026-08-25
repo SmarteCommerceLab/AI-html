@@ -44,6 +44,7 @@ aihl_require_files(array(
 	'inc/integrations/ai-api.php',
 	'inc/integrations/management-api.php',
 	'inc/theme/options-json.php',
+	'inc/theme/manifest-json.php',
 ));
 
 AIHL_Public_Theme_Updater::register(array(

@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.13.2
+Stable tag: 1.14.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,11 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.14.0 =
+* Aggiunge la pagina Manifest JSON con lettura del contratto live, copia e accesso diretto all'endpoint.
+* Introduce snapshot versionati della configurazione sorgente, eliminazione e ripristino con backup preventivo.
+* Rinomina Opzioni JSON in Configurazione JSON e porta l'editor a tutta larghezza con guida campi non compressa.
 
 = 1.13.2 =
 * Corregge la migrazione governance Canvas: gli slot CSS globali e di supporto restano attivi e renderizzati.

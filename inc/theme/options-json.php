@@ -116,7 +116,7 @@ function aihl_render_options_json_page() {
 	}
 	?>
 	<div class="wrap">
-		<h1><?php esc_html_e('AIHL Opzioni JSON', AIHL_TEXT_DOMAIN); ?></h1>
+		<h1><?php esc_html_e('Configurazione JSON', AIHL_TEXT_DOMAIN); ?></h1>
 		<p><?php esc_html_e('Gestisci le opzioni del tema (header, footer, contatti, CTA) via JSON. Stesso approccio dell\'editor widget di Smart Builder Site. Un AI puo generare questo JSON e applicarlo via API o tu puoi incollarlo qui.', AIHL_TEXT_DOMAIN); ?></p>
 
 		<?php if ($notice === 'saved') : ?>
@@ -144,11 +144,14 @@ function aihl_render_options_json_page() {
 		<?php endif; ?>
 
 		<style>
-			.aihl-oj-grid{display:grid;grid-template-columns:minmax(420px,1.4fr) minmax(320px,1fr);gap:24px;max-width:1300px;margin-top:16px}
-			.aihl-oj-editor{width:100%;min-height:520px;font-family:Consolas,Monaco,monospace;font-size:13px;border:1px solid #dcdcde;padding:14px;background:#111827;color:#dbeafe;box-sizing:border-box}
+			.aihl-oj-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;width:100%;margin-top:16px}
+			.aihl-oj-editor{width:100%;min-height:68vh;font-family:Consolas,Monaco,monospace;font-size:14px;line-height:1.55;border:1px solid #c3c4c7;border-radius:4px;padding:18px;background:#111827;color:#dbeafe;box-sizing:border-box;resize:vertical}
+			.aihl-oj-help{margin:0}
 			.aihl-oj-help table{width:100%}
 			.aihl-oj-help code{font-size:12px;background:#f0f6fc;color:#135e96;padding:2px 6px}
-			@media(max-width:980px){.aihl-oj-grid{grid-template-columns:1fr}}
+			.aihl-oj-field-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+			.aihl-oj-field-group{border:1px solid #dcdcde;border-radius:4px;padding:14px;background:#fff}
+			.aihl-oj-actions{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:12px 0;background:#fff;border-top:1px solid #dcdcde}
 		</style>
 
 		<div class="aihl-oj-grid">
@@ -158,7 +161,7 @@ function aihl_render_options_json_page() {
 					<input type="hidden" name="action" value="aihl_options_json_save">
 					<?php wp_nonce_field('aihl_options_json_save'); ?>
 					<textarea class="aihl-oj-editor" name="aihl_options_json" id="aihl-options-json"><?php echo esc_textarea($current_json); ?></textarea>
-					<p style="margin-top:12px;">
+					<p class="aihl-oj-actions">
 						<button type="submit" class="button button-primary"><?php esc_html_e('Salva opzioni', AIHL_TEXT_DOMAIN); ?></button>
 						<button type="button" class="button" id="aihl-oj-format"><?php esc_html_e('Formatta JSON', AIHL_TEXT_DOMAIN); ?></button>
 						<button type="button" class="button" id="aihl-oj-reset"><?php esc_html_e('Ripristina JSON corrente', AIHL_TEXT_DOMAIN); ?></button>
@@ -169,8 +172,9 @@ function aihl_render_options_json_page() {
 			<div class="postbox aihl-oj-help" style="padding:16px;">
 				<h2><?php esc_html_e('Campi disponibili', AIHL_TEXT_DOMAIN); ?></h2>
 				<p><?php esc_html_e('Solo questi campi vengono accettati. Gli altri vengono ignorati.', AIHL_TEXT_DOMAIN); ?></p>
+				<div class="aihl-oj-field-groups">
 				<?php foreach ($groups as $group_name => $fields) : ?>
-					<h3 style="text-transform:capitalize;margin:14px 0 6px;"><?php echo esc_html($group_name); ?></h3>
+					<section class="aihl-oj-field-group"><h3 style="text-transform:capitalize;margin:0 0 8px;"><?php echo esc_html($group_name); ?></h3>
 					<table class="widefat striped">
 						<tbody>
 						<?php foreach ($fields as $row) :
@@ -188,8 +192,9 @@ function aihl_render_options_json_page() {
 							</tr>
 						<?php endforeach; ?>
 						</tbody>
-					</table>
+					</table></section>
 				<?php endforeach; ?>
+				</div>
 
 				<h3><?php esc_html_e('Endpoint API', AIHL_TEXT_DOMAIN); ?></h3>
 				<p style="font-size:12px;">
