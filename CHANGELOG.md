@@ -5,6 +5,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.15.3] - 2026-08-26
+
+### Added
+- Aggiunto il Prompt 1 per leggere, riepilogare e vincolare il contesto prima di generare codice.
+- Estesa la libreria a tredici casi per siti, pagine, eCommerce, magazine, contenuti e diagnostica.
+
 ## [1.15.2] - 2026-08-26
 
 ### Added

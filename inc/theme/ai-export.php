@@ -59,6 +59,13 @@ if (!function_exists('aihl_ai_export_prompt_templates')) {
 		$foundation = 'Leggi il file di contesto allegato come fonte autorevole del sito. Non inventare menu, pagine, URL, immagini, widget, token o integrazioni assenti. Usa le risorse dinamiche WordPress e rispetta la governance SBM. Prima di generare codice, fammi solo le domande indispensabili sui dati mancanti. Restituisci una breve sintesi delle scelte e poi gli artefatti separati, completi e pronti da copiare nei rispettivi editor, con una checklist finale di verifica.';
 
 		return array(
+			'start_session' => array(
+				'id' => 'start_session',
+				'title' => '1. Avvia e comprendi il sito',
+				'description' => 'Primo messaggio obbligatorio in una nuova chat.',
+				'icon' => 'fa-graduation-cap',
+				'prompt' => 'Leggi integralmente il file smart-ecommerce-ai-context allegato e usalo come fonte autorevole per tutta questa conversazione. In questa fase non generare codice e non proporre ancora modifiche. Non chiedermi di interpretare endpoint, ID, menu location, hook, token, widget o capability. Non inventare risorse assenti. Rispondi soltanto con: 1) identita e obiettivo del sito che hai compreso; 2) prodotti Smart eCommerce attivi e loro ruolo; 3) menu, pagine, risorse e integrazioni disponibili; 4) vincoli AI-HTML, SBS e SBM da rispettare; 5) operazioni che puoi progettare in questa chat e operazioni che non puoi applicare direttamente; 6) massimo cinque informazioni commerciali realmente mancanti. Chiudi chiedendomi quale risultato voglio ottenere. Considera questo riepilogo il contratto operativo della sessione e attendi la mia conferma prima di continuare.',
+			),
 			'complete_site' => array(
 				'id' => 'complete_site',
 				'title' => 'Crea un sito completo',
@@ -100,6 +107,48 @@ if (!function_exists('aihl_ai_export_prompt_templates')) {
 				'description' => 'Problemi responsive, accessibilita e runtime.',
 				'icon' => 'fa-stethoscope',
 				'prompt' => $foundation . ' Analizza il problema che descrivero o mostrero con uno screenshot. Distingui errore di contenuto, layout, responsive, accessibilita, runtime WordPress o governance SBM. Proponi prima diagnosi e correzione minima; genera codice soltanto dopo la mia conferma e indica esattamente quale Code Slot o Canvas sostituire.',
+			),
+			'site_audit' => array(
+				'id' => 'site_audit',
+				'title' => 'Valuta il sito esistente',
+				'description' => 'Priorita, lacune, coerenza e prossimi interventi.',
+				'icon' => 'fa-clipboard-check',
+				'prompt' => $foundation . ' Valuta lo stato attuale del sito usando il contesto e gli eventuali URL o screenshot che alleghero. Ordina i rilievi per impatto su chiarezza, conversione, mobile, accessibilita, prestazioni e coerenza con i prodotti Smart eCommerce. Non generare codice: restituisci una roadmap breve con priorita, dipendenze e criterio di completamento.',
+			),
+			'service_page' => array(
+				'id' => 'service_page',
+				'title' => 'Crea una pagina servizio',
+				'description' => 'Problema, soluzione, benefici, processo e CTA.',
+				'icon' => 'fa-briefcase',
+				'prompt' => $foundation . ' Crea una pagina dedicata al servizio [NOME SERVIZIO] per [PUBBLICO]. Organizzala per chiarire problema, soluzione, benefici, processo, prove, domande frequenti e CTA. Non inventare prezzi, recensioni o certificazioni. Proponi prima outline e contenuti mancanti; dopo la conferma restituisci il Canvas SBS compatibile.',
+			),
+			'product_catalog' => array(
+				'id' => 'product_catalog',
+				'title' => 'Progetta catalogo eCommerce',
+				'description' => 'Categorie, filtri, schede e percorso di acquisto.',
+				'icon' => 'fa-store',
+				'prompt' => $foundation . ' Progetta l esperienza catalogo per i prodotti descritti nel contesto o nel file che alleghero. Definisci tassonomia, categorie, filtri, ordinamento, informazioni nelle card e percorso verso la scheda prodotto. Usa WooCommerce o le integrazioni eCommerce soltanto se risultano disponibili. Prima restituisci il modello informativo; dopo la conferma genera i Canvas compatibili necessari.',
+			),
+			'product_page' => array(
+				'id' => 'product_page',
+				'title' => 'Crea una scheda prodotto',
+				'description' => 'Contenuti, media, fiducia e conversione.',
+				'icon' => 'fa-box-open',
+				'prompt' => $foundation . ' Progetta una scheda per [NOME PRODOTTO] destinata a [PUBBLICO]. Usa soltanto dati prodotto verificati e segnala quelli mancanti. Organizza media, proposta di valore, varianti, benefici, specifiche, fiducia, spedizione, FAQ e CTA secondo le capability eCommerce disponibili. Proponi prima struttura e campi richiesti; genera il Canvas solo dopo conferma.',
+			),
+			'magazine_blog' => array(
+				'id' => 'magazine_blog',
+				'title' => 'Progetta blog o magazine',
+				'description' => 'Categorie, formati editoriali e navigazione.',
+				'icon' => 'fa-newspaper',
+				'prompt' => $foundation . ' Progetta l area editoriale del sito. Definisci categorie, rubriche, formati, pagina archivio, card articolo, pagina articolo e collegamenti verso prodotti o servizi. Riusa categorie, autori e contenuti WordPress presenti; non inventare articoli gia pubblicati. Restituisci prima architettura e piano editoriale iniziale, poi i Canvas richiesti dopo conferma.',
+			),
+			'content_plan' => array(
+				'id' => 'content_plan',
+				'title' => 'Crea un piano contenuti',
+				'description' => 'Argomenti, formati, calendario e obiettivi.',
+				'icon' => 'fa-calendar-days',
+				'prompt' => $foundation . ' Crea un piano contenuti per [PERIODO] orientato a [OBIETTIVO]. Parti da pubblico, offerta, categorie e pagine reali del sito. Per ogni contenuto indica intento, formato, titolo di lavoro, CTA, pagina o prodotto collegato e dati necessari. Non generare affermazioni non verificabili. Restituisci il piano prima di scrivere i singoli contenuti.',
 			),
 		);
 	}
@@ -216,7 +265,7 @@ if (!function_exists('aihl_render_ai_export_page')) {
 			'aihl_download_ai_context'
 		);
 		$prompt_templates = aihl_ai_export_prompt_templates();
-		$default_prompt = $prompt_templates['complete_site']['prompt'];
+		$default_prompt = $prompt_templates['start_session']['prompt'];
 		?>
 		<div class="aihl-ai-export">
 			<section class="aihl-ai-export-hero" aria-labelledby="aihl-ai-export-title">
@@ -237,7 +286,7 @@ if (!function_exists('aihl_render_ai_export_page')) {
 			</section>
 
 			<section id="aihl-prompt-library" class="aihl-ai-prompt-library" aria-labelledby="aihl-prompt-library-title">
-				<div class="aihl-ai-export-section-head"><span><?php esc_html_e('Prompt di avvio', AIHL_TEXT_DOMAIN); ?></span><h2 id="aihl-prompt-library-title"><?php esc_html_e('Cosa vuoi chiedere alla AI?', AIHL_TEXT_DOMAIN); ?></h2><p><?php esc_html_e('Scegli un obiettivo. Il prompt usera automaticamente manifest, menu, widget e regole presenti nel file esportato.', AIHL_TEXT_DOMAIN); ?></p></div>
+				<div class="aihl-ai-export-section-head"><span><?php esc_html_e('Prompt guidati', AIHL_TEXT_DOMAIN); ?></span><h2 id="aihl-prompt-library-title"><?php esc_html_e('Inizia sempre dal punto 1', AIHL_TEXT_DOMAIN); ?></h2><p><?php esc_html_e('Prima fai comprendere il sito alla AI. Dopo la sua conferma torna qui e scegli il lavoro specifico.', AIHL_TEXT_DOMAIN); ?></p></div>
 				<div class="aihl-ai-prompt-grid" role="list">
 					<?php foreach ($prompt_templates as $index => $template) : ?>
 						<div role="listitem"><button type="button" class="aihl-ai-prompt-choice<?php echo 0 === $index ? ' is-selected' : ''; ?>" data-prompt="<?php echo esc_attr($template['prompt']); ?>" aria-pressed="<?php echo 0 === $index ? 'true' : 'false'; ?>">

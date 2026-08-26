@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.15.2
+Stable tag: 1.15.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,6 +36,10 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.15.3 =
+* Introduce il prompt iniziale obbligatorio per comprendere e vincolare la sessione AI prima della generazione.
+* Estende la libreria a tredici casi per siti, pagine, eCommerce, magazine, contenuti e diagnostica.
 
 = 1.15.2 =
 * Aggiunge sei prompt guidati per sito completo, header, footer, landing page, restyling e diagnosi.
