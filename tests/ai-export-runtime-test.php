@@ -54,5 +54,9 @@ ai_export_assert(false === strpos($json, 'private_token'), 'Il token sensibile n
 ai_export_assert(isset($payload['knowledge_entry_points']['chat_classic']), 'Ingresso KB chat classica assente.');
 ai_export_assert(isset($payload['knowledge_entry_points']['smart_ai_studio']), 'Ingresso KB Studio assente.');
 ai_export_assert(isset($payload['knowledge_entry_points']['standalone']), 'Ingresso KB standalone assente.');
+ai_export_assert(isset($payload['knowledge_entry_points']['prompt_library']), 'Ingresso KB prompt assente.');
+ai_export_assert(6 === count($payload['prompt_templates']), 'Catalogo prompt incompleto.');
+ai_export_assert('complete_site' === $payload['prompt_templates'][0]['id'], 'Prompt sito completo assente.');
+ai_export_assert(false !== strpos($payload['prompt_templates'][1]['prompt'], 'header_full'), 'Prompt header non dichiara lo slot atteso.');
 
 echo "AI export runtime contract OK\n";

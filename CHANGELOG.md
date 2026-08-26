@@ -5,6 +5,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.15.2] - 2026-08-26
+
+### Added
+- Aggiunta una libreria di sei prompt guidati nella pagina Esporta per AI.
+- I prompt sono inclusi nel file `smart-ecommerce-ai-context` e collegati ai casi di studio della KB.
+- L utente puo selezionare l obiettivo, leggere il prompt completo e copiarlo senza conoscere contratti tecnici.
+
 ## [1.15.1] - 2026-08-26
 
 ### Changed
