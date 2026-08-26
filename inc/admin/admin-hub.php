@@ -200,6 +200,15 @@ if (!function_exists('aihl_admin_get_subpages')) {
 				'description' => __('Autorizza Studio e gli agenti esterni ad accedere al sito.', AIHL_TEXT_DOMAIN),
 			),
 			array(
+				'slug'        => 'aihl-ai-export',
+				'page_title'  => __('Esporta per AI', AIHL_TEXT_DOMAIN),
+				'menu_title'  => __('Esporta per AI', AIHL_TEXT_DOMAIN),
+				'capability'  => 'manage_options',
+				'callback'    => 'aihl_admin_wrap_ai_export',
+				'icon'        => 'fa-solid fa-file-export',
+				'description' => __('Prepara il contesto del sito per ChatGPT, Claude e Gemini.', AIHL_TEXT_DOMAIN),
+			),
+			array(
 				'slug'        => 'aihl-api-docs',
 				'page_title'  => __('Swagger/OpenAPI', AIHL_TEXT_DOMAIN),
 				'menu_title'  => __('Swagger', AIHL_TEXT_DOMAIN),
@@ -216,12 +225,13 @@ if (!function_exists('aihl_admin_get_subpages')) {
 			'aihl-menu-json' => array('section' => __('Contenuti e menu', AIHL_TEXT_DOMAIN), 'order' => 30),
 			'aihl-menu-help' => array('section' => __('Contenuti e menu', AIHL_TEXT_DOMAIN), 'order' => 40),
 			'aihl-plugins' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 50),
-			'aihl-api-keys' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 60),
-			'aihl-api-docs' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 70),
-			'aihl-code-slots' => array('section' => __('Strumenti avanzati', AIHL_TEXT_DOMAIN), 'order' => 80),
-			'aihl-deploy' => array('section' => __('Strumenti avanzati', AIHL_TEXT_DOMAIN), 'order' => 90),
-			'aihl-compliance' => array('section' => __('Governance', AIHL_TEXT_DOMAIN), 'order' => 100),
-			'aihl-smart-reset' => array('section' => __('Governance', AIHL_TEXT_DOMAIN), 'order' => 110),
+			'aihl-ai-export' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 60),
+			'aihl-api-keys' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 70),
+			'aihl-api-docs' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 80),
+			'aihl-code-slots' => array('section' => __('Strumenti avanzati', AIHL_TEXT_DOMAIN), 'order' => 90),
+			'aihl-deploy' => array('section' => __('Strumenti avanzati', AIHL_TEXT_DOMAIN), 'order' => 100),
+			'aihl-compliance' => array('section' => __('Governance', AIHL_TEXT_DOMAIN), 'order' => 110),
+			'aihl-smart-reset' => array('section' => __('Governance', AIHL_TEXT_DOMAIN), 'order' => 120),
 		);
 
 		foreach ($pages as &$page) {
@@ -566,6 +576,18 @@ function aihl_admin_wrap_api_keys() {
 		function () {
 			if (function_exists('smart_ai_render_keys_page_content')) {
 				smart_ai_render_keys_page_content();
+			}
+		}
+	);
+}
+
+function aihl_admin_wrap_ai_export() {
+	aihl_admin_page_template(
+		__('Esporta per AI', AIHL_TEXT_DOMAIN),
+		__('Un solo file per portare struttura, risorse e regole del sito in una chat AI.', AIHL_TEXT_DOMAIN),
+		function () {
+			if (function_exists('aihl_render_ai_export_page')) {
+				aihl_render_ai_export_page();
 			}
 		}
 	);

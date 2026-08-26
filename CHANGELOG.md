@@ -5,6 +5,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.15.0] - 2026-08-26
+
+### Added
+- Aggiunta la pagina Integrazioni > Esporta per AI con un percorso visuale in tre passaggi per le chat commerciali.
+- Aggiunto il formato read-only `smart-ecommerce-ai-context` che aggrega Manifest AI-HTML, contratto SBM, registry SBS, hook Code Slots e ingressi KB.
+- L export rimuove ricorsivamente chiavi, token, nonce, credenziali e dati di sessione e viene generato senza persistenza nel database.
+
 ## [1.14.9] - 2026-08-25
 
 ### Changed

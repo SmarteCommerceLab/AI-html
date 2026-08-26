@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.14.9
+Stable tag: 1.15.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,6 +20,7 @@ AI-HTML fornisce la shell WordPress dello Smart eCommerce Stack:
 * integrazione con Smart Bootstrap Manager e Smart Builder Site;
 * opzioni leggibili e aggiornabili tramite REST API e JSON;
 * preset Author Box globali e personali per ogni autore.
+* export sicuro del contesto AI-HTML, SBM e SBS per ChatGPT, Claude e Gemini.
 
 == Installation ==
 

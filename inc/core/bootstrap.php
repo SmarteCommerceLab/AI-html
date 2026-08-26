@@ -36,6 +36,7 @@ aihl_require_files(array(
 	'inc/theme/page-background.php',
 	'inc/theme/utilities.php',
 	'inc/theme/integration-contract.php',
+	'inc/theme/ai-export.php',
 	'inc/theme/mobile-navigation.php',
 	'inc/integrations/smart-bootstrap-manager.php',
 	'inc/integrations/google-compliance-2026.php',
