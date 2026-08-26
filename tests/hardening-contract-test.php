@@ -39,6 +39,13 @@ foreach ($required as $file => $needles) {
 	}
 }
 
+if (substr_count($files['openapi'], "'permission_callback' => '__return_true'") !== 2) {
+	throw new RuntimeException('Only the two OpenAPI discovery routes must be public.');
+}
+if (strpos($files['openapi'], "'/ai/integration-manifest', array(\n\t\t'methods'             => WP_REST_Server::READABLE,\n\t\t'permission_callback' => 'aihl_ai_can_read'") === false) {
+	throw new RuntimeException('The integration manifest must remain protected.');
+}
+
 if (strpos($files['auth'], "get_param('api_key')") !== false) {
 	throw new RuntimeException('API keys must not be accepted from request parameters.');
 }

@@ -5,6 +5,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.15.1] - 2026-08-26
+
+### Changed
+- Esposta pubblicamente la specifica OpenAPI per consentire la discovery dei contratti AI.
+- Manifest, configurazione, contesti e operazioni restano protetti da autenticazione.
+
 ## [1.15.0] - 2026-08-26
 
 ### Added

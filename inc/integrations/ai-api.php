@@ -128,7 +128,7 @@ function aihl_ai_register_rest_routes() {
 
 	register_rest_route('aihtml/v1', '/ai/openapi', array(
 		'methods'             => WP_REST_Server::READABLE,
-		'permission_callback' => 'aihl_ai_can_read',
+		'permission_callback' => '__return_true',
 		'callback'            => function () {
 			return rest_ensure_response(aihl_ai_openapi_payload());
 		},
@@ -136,7 +136,7 @@ function aihl_ai_register_rest_routes() {
 
 	register_rest_route('aihtml/v1', '/openapi', array(
 		'methods'             => WP_REST_Server::READABLE,
-		'permission_callback' => 'aihl_ai_can_read',
+		'permission_callback' => '__return_true',
 		'callback'            => function () {
 			return rest_ensure_response(aihl_ai_openapi_payload());
 		},
