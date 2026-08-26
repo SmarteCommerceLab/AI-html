@@ -166,8 +166,15 @@ jobs:
               icons: []
             }' > "${SLUG}.json"
 
+      - name: Require repository deployment credentials
+        shell: bash
+        run: |
+          if [ -z "${REPOSITORY_FTP_USER}" ] || [ -z "${REPOSITORY_FTP_PASSWORD}" ]; then
+            echo "Repository FTP credentials are not configured. The release cannot be marked successful without public deployment."
+            exit 1
+          fi
+
       - name: Deploy package and manifest to repository server
-        if: ${{ env.REPOSITORY_FTP_USER != '' && env.REPOSITORY_FTP_PASSWORD != '' }}
         shell: bash
         run: |
           VERSION="${{ steps.version.outputs.version }}"
@@ -191,7 +198,6 @@ jobs:
             "ftp://${REPOSITORY_FTP_HOST}${REPOSITORY_FTP_UPDATES_PATH}/${SLUG}.json"
 
       - name: Verify public deployment
-        if: ${{ env.REPOSITORY_FTP_USER != '' && env.REPOSITORY_FTP_PASSWORD != '' }}
         shell: bash
         run: |
           VERSION="${{ steps.version.outputs.version }}"
