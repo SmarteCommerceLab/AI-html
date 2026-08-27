@@ -229,11 +229,12 @@ if (!function_exists('aihl_ai_export_payload')) {
 	}
 }
 
-add_action('admin_post_aihl_download_ai_context', function () {
+if (!function_exists('aihl_serve_context_file')) {
+	function aihl_serve_context_file() {
 	if (!current_user_can('manage_options')) {
 		wp_die(esc_html__('Non hai i permessi per esportare il contesto AI.', AIHL_TEXT_DOMAIN));
 	}
-	check_admin_referer('aihl_download_ai_context');
+	check_admin_referer('aihl_context_file');
 
 	$json = wp_json_encode(aihl_ai_export_payload(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 	if (!is_string($json)) {
@@ -250,7 +251,9 @@ add_action('admin_post_aihl_download_ai_context', function () {
 	header('X-Content-Type-Options: nosniff');
 	echo $json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON download.
 	exit;
-});
+	}
+}
+add_action('admin_post_aihl_context_file', 'aihl_serve_context_file');
 
 if (!function_exists('aihl_render_ai_export_page')) {
 	function aihl_render_ai_export_page() {
@@ -261,8 +264,8 @@ if (!function_exists('aihl_render_ai_export_page')) {
 		$products = aihl_ai_export_product_versions();
 		$ready = !empty($products['smart-bootstrap-manager']['active']) && !empty($products['smart-builder-site']['active']);
 		$download_url = wp_nonce_url(
-			admin_url('admin-post.php?action=aihl_download_ai_context'),
-			'aihl_download_ai_context'
+			admin_url('admin-post.php?action=aihl_context_file'),
+			'aihl_context_file'
 		);
 		$prompt_templates = aihl_ai_export_prompt_templates();
 		$default_prompt = $prompt_templates['start_session']['prompt'];
@@ -343,7 +346,7 @@ if (!function_exists('aihl_render_ai_export_page')) {
 }
 
 add_action('admin_enqueue_scripts', function ($hook) {
-	if (false === strpos((string) $hook, 'aihl-ai-export')) {
+	if (false === strpos((string) $hook, 'aihl-chat-context')) {
 		return;
 	}
 

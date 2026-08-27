@@ -5,6 +5,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.15.5] - 2026-08-27
+
+### Fixed
+- Sostituiti gli identificatori URL di Esporta per AI che potevano essere bloccati dalle estensioni di Chrome.
+
 ## [1.15.4] - 2026-08-27
 
 ### Changed

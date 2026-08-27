@@ -200,7 +200,7 @@ if (!function_exists('aihl_admin_get_subpages')) {
 				'description' => __('Autorizza Studio e gli agenti esterni ad accedere al sito.', AIHL_TEXT_DOMAIN),
 			),
 			array(
-				'slug'        => 'aihl-ai-export',
+				'slug'        => 'aihl-chat-context',
 				'page_title'  => __('Esporta per AI', AIHL_TEXT_DOMAIN),
 				'menu_title'  => __('Esporta per AI', AIHL_TEXT_DOMAIN),
 				'capability'  => 'manage_options',
@@ -225,7 +225,7 @@ if (!function_exists('aihl_admin_get_subpages')) {
 			'aihl-menu-json' => array('section' => __('Contenuti e menu', AIHL_TEXT_DOMAIN), 'order' => 30),
 			'aihl-menu-help' => array('section' => __('Contenuti e menu', AIHL_TEXT_DOMAIN), 'order' => 40),
 			'aihl-plugins' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 50),
-			'aihl-ai-export' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 60),
+			'aihl-chat-context' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 60),
 			'aihl-api-keys' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 70),
 			'aihl-api-docs' => array('section' => __('Integrazioni', AIHL_TEXT_DOMAIN), 'order' => 80),
 			'aihl-code-slots' => array('section' => __('Strumenti avanzati', AIHL_TEXT_DOMAIN), 'order' => 90),
