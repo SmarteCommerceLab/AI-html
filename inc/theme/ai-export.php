@@ -56,7 +56,7 @@ if (!function_exists('aihl_ai_export_product_versions')) {
 
 if (!function_exists('aihl_ai_export_prompt_templates')) {
 	function aihl_ai_export_prompt_templates() {
-		$foundation = 'Leggi il file di contesto allegato come fonte autorevole del sito. Prima di rispondere consulta i documenti pubblici indicati in required_knowledge e knowledge_entry_points. Dichiara quali documenti KB hai consultato e la versione del Knowledge Pack; se non puoi aprirli, dichiaralo e usa soltanto il knowledge_snapshot incorporato, senza fingere di averli letti. Non inventare menu, pagine, URL, immagini, widget, token o integrazioni assenti. Usa le risorse dinamiche WordPress e rispetta la governance SBM. Prima di generare codice, fammi solo le domande indispensabili sui dati mancanti. Restituisci una breve sintesi delle scelte e poi gli artefatti separati, completi e pronti da copiare nei rispettivi editor, con una checklist finale di verifica.';
+		$foundation = 'Leggi il file di contesto allegato come fonte autorevole del sito. Prima di rispondere consulta i documenti pubblici indicati in required_knowledge e knowledge_entry_points. Dichiara quali documenti KB hai consultato e la versione del Knowledge Pack; se non puoi aprirli, dichiaralo e usa soltanto il knowledge_snapshot incorporato, senza fingere di averli letti. Non inventare menu, pagine, URL, immagini, widget, token o integrazioni assenti. Usa le risorse dinamiche WordPress e rispetta la governance SBM dichiarata in contracts.sbm_consumer_contract.design_governance. Se la modalita effettiva e governed, usa classi Bootstrap e soltanto i token elencati in semantic_tokens e css_variables.required: non scrivere colori HEX/RGB/HSL, font-family, spacing, radius o scale tipografiche visuali dirette. Non inizializzare Bootstrap, GSAP, ScrollTrigger, WOW o carousel nel codice. Prima di generare codice, fammi solo le domande indispensabili sui dati mancanti. Prima di restituire gli artefatti esegui una verifica dichiarazione per dichiarazione e segnala che il CSS e pronto per Analizza codice. Restituisci una breve sintesi delle scelte e poi gli artefatti separati, completi e pronti da copiare nei rispettivi editor, con una checklist finale di verifica.';
 
 		return array(
 			'start_session' => array(
@@ -78,14 +78,14 @@ if (!function_exists('aihl_ai_export_prompt_templates')) {
 				'title' => 'Crea o migliora l header',
 				'description' => 'Navigazione, top bar, logo, social e CTA.',
 				'icon' => 'fa-window-maximize',
-				'prompt' => $foundation . ' Crea o migliora l header del sito. Usa logo, top bar, menu WordPress, social, ricerca e CTA soltanto quando risultano disponibili nel manifest. Il menu deve restare dinamico tramite i componenti runtime AI-HTML. Restituisci lo slot header_full con HTML, CSS e JS separati e indica come provarlo senza attivarlo subito.',
+				'prompt' => $foundation . ' Crea o migliora l header del sito. Usa logo, top bar, menu WordPress, social, ricerca e CTA soltanto quando risultano disponibili nel manifest. Il menu deve restare dinamico tramite i componenti runtime AI-HTML. Imposta design_mode uguale alla modalita SBM globale esportata. Restituisci lo slot header_full con HTML, CSS e JS separati e indica come provarlo con Analizza codice senza attivarlo subito.',
 			),
 			'footer' => array(
 				'id' => 'footer',
 				'title' => 'Crea o migliora il footer',
 				'description' => 'Link, contatti, social, note legali e CTA.',
 				'icon' => 'fa-table-columns',
-				'prompt' => $foundation . ' Crea o migliora il footer del sito usando soltanto identita, menu, contatti, social, pagine e integrazioni presenti nel contesto. Mantieni dinamici i dati gestiti da WordPress. Restituisci lo slot footer_full con HTML, CSS e JS separati e una verifica per desktop e mobile.',
+				'prompt' => $foundation . ' Crea o migliora il footer del sito usando soltanto identita, menu, contatti, social, pagine e integrazioni presenti nel contesto. Mantieni dinamici i dati gestiti da WordPress. Imposta design_mode uguale alla modalita SBM globale esportata. Restituisci lo slot footer_full con HTML, CSS e JS separati, una verifica per desktop e mobile e la conferma che non contiene valori visuali diretti.',
 			),
 			'landing_page' => array(
 				'id' => 'landing_page',
@@ -162,6 +162,9 @@ if (!function_exists('aihl_ai_export_payload')) {
 		$sbm = function_exists('aihl_sbm_consumer_contract')
 			? aihl_sbm_consumer_contract()
 			: array();
+		$sbm_governance = isset($sbm['design_governance']) && is_array($sbm['design_governance'])
+			? $sbm['design_governance']
+			: array();
 		$sbs = function_exists('sbs_get_widget_registry')
 			? sbs_get_widget_registry()
 			: array();
@@ -184,6 +187,12 @@ if (!function_exists('aihl_ai_export_payload')) {
 			'contracts' => array(
 				'ai_html_manifest' => $manifest,
 				'sbm_consumer_contract' => $sbm,
+				'sbm_authoring_contract' => array(
+					'global_mode' => $sbm_governance['options']['smart_bootstrap_option_design_mode'] ?? (function_exists('aihl_sbm_design_mode') ? aihl_sbm_design_mode() : 'autonomous'),
+					'semantic_tokens' => $sbm_governance['semantic_tokens'] ?? array(),
+					'required_tokens' => $sbm['css_variables']['required'] ?? array(),
+					'forbidden_raw_values' => array('hex/rgb/hsl colors', 'font-family', 'spacing in px/rem/em', 'border-radius', 'font-size', 'line-height', 'letter-spacing'),
+				),
 				'sbs_widget_registry' => $sbs,
 				'code_slot_hooks' => $hooks,
 			),
@@ -215,7 +224,7 @@ if (!function_exists('aihl_ai_export_payload')) {
 			),
 			'knowledge_pack' => array(
 				'id' => 'ai-html-contracts',
-				'version' => '1.6.1',
+				'version' => '1.6.2',
 				'index_url' => 'https://kb.smartecommerce.it/v1/packs.json',
 			),
 			'required_knowledge' => array(
@@ -223,6 +232,7 @@ if (!function_exists('aihl_ai_export_payload')) {
 				'https://kb.smartecommerce.it/guide/ai-commerciali-chat-classica/',
 				'https://kb.smartecommerce.it/api/ai-html-code-slots/',
 				'https://kb.smartecommerce.it/guide/authoring-ai-canvas/',
+				'https://kb.smartecommerce.it/api/smart-bootstrap-manager-ai-api/',
 			),
 			'knowledge_snapshot' => array(
 				'Use the exported manifest and registries as the source of truth for this site.',
@@ -230,6 +240,8 @@ if (!function_exists('aihl_ai_export_payload')) {
 				'Do not enqueue Bootstrap or GSAP: Smart Bootstrap Manager owns shared libraries.',
 				'Use WordPress runtime components for menus, identity, contacts and configured integrations.',
 				'In governed mode consume semantic --bs-*, --sbin-* and --canvas-* tokens.',
+				'In governed mode never emit raw visual colors, fonts, spacing, radius or type-scale values.',
+				'Use the exported SBM semantic token catalog; do not invent token names.',
 			),
 			'prompt_templates' => array_values(aihl_ai_export_prompt_templates()),
 			'assistant_instructions' => array(
@@ -239,6 +251,7 @@ if (!function_exists('aihl_ai_export_payload')) {
 				'Keep AI-HTML Code Slot code, css and js in separate fields.',
 				'Use WordPress runtime components for identity, menus, contacts, social links and configured add-ons.',
 				'Respect SBM design governance and validate artifacts before activation.',
+				'Set design_mode to the exported global SBM mode unless a stricter mode is explicitly required.',
 				'Return copyable artifacts and short non-technical insertion steps.',
 			),
 		);

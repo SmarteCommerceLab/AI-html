@@ -5,6 +5,16 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.15.8] - 2026-08-27
+
+### Added
+- Analisi preventiva dei Code Slot con diagnostica puntuale di riga, proprieta e valore non conforme.
+- Contratto SBM authoring nell esportazione per chat AI con modalita globale e token disponibili.
+
+### Changed
+- I prompt vietano valori visuali diretti in modalita governed e richiedono la verifica prima dell attivazione.
+- La governance rileva anche fallback visuali hardcoded dentro `var()`.
+
 ## [1.15.7] - 2026-08-27
 
 ### Changed

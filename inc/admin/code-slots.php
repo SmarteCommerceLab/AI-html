@@ -496,6 +496,52 @@ if (!function_exists('aihl_code_slots_get_admin_canvas_slot')) {
 	}
 }
 
+if (!function_exists('aihl_code_slot_visual_violations')) {
+	/**
+	 * Return actionable visual declarations that bypass semantic design tokens.
+	 *
+	 * @return array<int,array{property:string,value:string,line:int}>
+	 */
+	function aihl_code_slot_visual_violations(string $css): array {
+		$violations = array();
+		$pattern = '/(?<property>color|background(?:-color)?|border(?:-[a-z-]+)?-color|fill|stroke|font-family|border-radius|padding(?:-[a-z]+)?|margin(?:-[a-z]+)?|gap|row-gap|column-gap|font-size|line-height|letter-spacing)\s*:\s*(?<value>[^;}{]+)/i';
+		if (!preg_match_all($pattern, $css, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
+			return array();
+		}
+
+		foreach ($matches as $match) {
+			$property = strtolower((string) $match['property'][0]);
+			$value = trim((string) $match['value'][0]);
+			$tokenized = (bool) preg_match('/var\(--(?:bs|sbin|canvas)-/i', $value);
+			$has_token_fallback = (bool) preg_match('/var\([^,]+,\s*[^)]+\)/i', $value);
+			$raw = false;
+
+			if (preg_match('/^(?:color|background|background-color|border(?:-[a-z-]+)?-color|fill|stroke)$/', $property)) {
+				$raw = (bool) preg_match('/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/i', $value);
+			} elseif ('font-family' === $property) {
+				$raw = !$tokenized || $has_token_fallback;
+			} elseif ('border-radius' === $property) {
+				$raw = (!$tokenized || $has_token_fallback) && !preg_match('/^(?:0|50%)$/', $value);
+			} elseif (preg_match('/^(?:padding|margin|gap|row-gap|column-gap)/', $property)) {
+				$raw = (!$tokenized || $has_token_fallback) && (bool) preg_match('/(?:px|rem|em)\b/i', $value);
+			} else {
+				$raw = !$tokenized || $has_token_fallback;
+			}
+
+			if ($raw) {
+				$offset = (int) $match['property'][1];
+				$violations[] = array(
+					'property' => $property,
+					'value' => $value,
+					'line' => substr_count(substr($css, 0, $offset), "\n") + 1,
+				);
+			}
+		}
+
+		return array_slice($violations, 0, 20);
+	}
+}
+
 if (!function_exists('aihl_code_slot_governance_report')) {
 	/**
 	 * Validate a slot against SBM design and motion ownership.
@@ -561,31 +607,23 @@ if (!function_exists('aihl_code_slot_governance_report')) {
 			);
 		}
 
-		$css_without_tokens = preg_replace('/var\([^;{}]+\)/i', 'var(--governed-token)', $style_sources);
-		$css_without_tokens = preg_replace('/url\([^)]*\)/i', 'url(asset)', (string) $css_without_tokens);
-		$has_raw_color = (bool) preg_match(
-			'/(?:^|[;{])\s*(?:color|background(?:-color)?|border(?:-[a-z-]+)?-color|fill|stroke)\s*:\s*(?:#[0-9a-f]{3,8}\b|rgba?\(|hsla?\()/im',
-			(string) $css_without_tokens
-		);
-		$has_raw_font = (bool) preg_match('/font-family\s*:\s*(?!var\()/i', (string) $css_without_tokens);
-		$has_raw_radius = (bool) preg_match('/border-radius\s*:\s*(?!var\(|0\b|50%)[^;}{]+/i', (string) $css_without_tokens);
-		$has_raw_spacing = (bool) preg_match(
-			'/(?:padding|margin|gap|row-gap|column-gap)\s*:\s*(?!var\(|calc\([^;]*var\()[^;}{]*(?:px|rem|em)\b/i',
-			(string) $css_without_tokens
-		);
-		$has_raw_type_scale = (bool) preg_match(
-			'/(?:font-size|line-height|letter-spacing)\s*:\s*(?!var\(|calc\([^;]*var\()[^;}{]+/i',
-			(string) $css_without_tokens
-		);
+		$visual_violations = aihl_code_slot_visual_violations($style_sources);
 		$uses_semantic_tokens = (bool) preg_match('/var\(--(?:bs|sbin|canvas)-/i', $style_sources);
 
-		if ('governed' === $mode && ($has_raw_color || $has_raw_font || $has_raw_radius || $has_raw_spacing || $has_raw_type_scale)) {
-			$issues[] = array(
-				'code' => 'governed_raw_visual_value',
-				'severity' => 'error',
-				'message' => __('Il CSS governed contiene colori, tipografia, spaziature o radius non derivati dai token SBM.', AIHL_TEXT_DOMAIN),
-			);
-		} elseif ('adaptive' === $mode && ($has_raw_color || $has_raw_font || $has_raw_radius || $has_raw_spacing || $has_raw_type_scale)) {
+		if ('governed' === $mode && $visual_violations) {
+			foreach ($visual_violations as $violation) {
+				$issues[] = array(
+					'code' => 'governed_raw_visual_value',
+					'severity' => 'error',
+					'message' => sprintf(
+						__('Riga CSS %1$d: %2$s: %3$s deve usare un token --bs-*, --sbin-* o --canvas-*.', AIHL_TEXT_DOMAIN),
+						(int) $violation['line'],
+						(string) $violation['property'],
+						(string) $violation['value']
+					),
+				);
+			}
+		} elseif ('adaptive' === $mode && $visual_violations) {
 			$issues[] = array(
 				'code' => 'adaptive_raw_visual_value',
 				'severity' => 'warning',
@@ -1538,10 +1576,11 @@ if (!function_exists('aihl_render_code_slots_page')) {
 		$hooks = aihl_code_slots_hooks();
 		$edit_slot = null;
 		$save_result = null;
+		$validation_report = null;
 		$submitted_editor_tab = '';
 
-		// Handle POST save
-		if (isset($_POST['aihl_code_slot_save']) && check_admin_referer('aihl_code_slots_nonce')) {
+		// Handle validation and save through the same server-side contract.
+		if ((isset($_POST['aihl_code_slot_save']) || isset($_POST['aihl_code_slot_validate'])) && check_admin_referer('aihl_code_slots_nonce')) {
 			$submitted_editor_tab = sanitize_key(wp_unslash($_POST['slot_editor_tab'] ?? ''));
 			if (!in_array($submitted_editor_tab, array('html', 'css', 'js'), true)) {
 				$submitted_editor_tab = '';
@@ -1566,10 +1605,15 @@ if (!function_exists('aihl_render_code_slots_page')) {
 			if ('js' === $slot_data['type']) {
 				$slot_data['code'] = $slot_data['js'];
 			}
-			$save_result = aihl_code_slots_save($slot_data);
-			if (!is_wp_error($save_result)) {
-				$slots = aihl_code_slots_get_all(); // Refresh
-				$edit_slot = $save_result;
+			if (isset($_POST['aihl_code_slot_validate'])) {
+				$validation_report = aihl_code_slot_governance_report($slot_data);
+				$edit_slot = $slot_data;
+			} else {
+				$save_result = aihl_code_slots_save($slot_data);
+				if (!is_wp_error($save_result)) {
+					$slots = aihl_code_slots_get_all(); // Refresh
+					$edit_slot = $save_result;
+				}
 			}
 		}
 
@@ -1612,7 +1656,7 @@ if (!function_exists('aihl_render_code_slots_page')) {
 		}
 
 		// Editing mode?
-		if (isset($_GET['edit'])) {
+		if (isset($_GET['edit']) && null === $edit_slot) {
 			$edit_slot = aihl_code_slots_get(sanitize_key($_GET['edit']));
 		}
 		$is_new = isset($_GET['new']);
@@ -1639,6 +1683,18 @@ if (!function_exists('aihl_render_code_slots_page')) {
 			</p></div>
 		<?php elseif (is_wp_error($save_result)) : ?>
 			<div class="notice notice-error"><p><strong><?php echo esc_html($save_result->get_error_message()); ?></strong></p></div>
+		<?php endif; ?>
+		<?php if (is_array($validation_report)) : ?>
+			<div class="notice <?php echo !empty($validation_report['valid']) ? 'notice-success' : 'notice-warning'; ?>">
+				<p><strong><?php echo !empty($validation_report['valid']) ? esc_html__('Analisi superata: il codice rispetta la governance SBM.', AIHL_TEXT_DOMAIN) : esc_html__('Correzioni richieste prima dell attivazione:', AIHL_TEXT_DOMAIN); ?></strong></p>
+				<?php if (empty($validation_report['valid'])) : ?>
+					<ul>
+						<?php foreach ((array) ($validation_report['issues'] ?? array()) as $issue) : ?>
+							<?php if ('error' === ($issue['severity'] ?? '')) : ?><li><?php echo esc_html((string) ($issue['message'] ?? '')); ?></li><?php endif; ?>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
+			</div>
 		<?php endif; ?>
 
 		<?php if ($edit_slot || $is_new) :
@@ -1778,6 +1834,9 @@ if (!function_exists('aihl_render_code_slots_page')) {
 				</div>
 
 				<p>
+					<button type="submit" name="aihl_code_slot_validate" value="1" class="button">
+						<i class="fa-solid fa-shield-halved"></i> <?php esc_html_e('Analizza codice', AIHL_TEXT_DOMAIN); ?>
+					</button>
 					<button type="submit" name="aihl_code_slot_save" value="1" class="button button-primary">
 						<i class="fa-solid fa-floppy-disk"></i> <?php esc_html_e('Salva', AIHL_TEXT_DOMAIN); ?>
 					</button>
@@ -1948,7 +2007,7 @@ if (!function_exists('aihl_render_code_slots_page')) {
 											<?php endif; ?>
 										<?php endforeach; ?>
 									</ul>
-									<p><?php esc_html_e('Correggi il codice usando token semantici oppure modifica la modalita globale in Smart Bootstrap Manager.', AIHL_TEXT_DOMAIN); ?></p>
+									<p><?php esc_html_e('Correggi il codice usando i token semantici elencati nel contratto SBM. La policy globale non va ridotta per aggirare la validazione.', AIHL_TEXT_DOMAIN); ?></p>
 								</div>
 							<?php endif; ?>
 							<div class="aihl-slot-card-actions">

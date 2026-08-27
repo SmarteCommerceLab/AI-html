@@ -20,7 +20,15 @@ function aihl_get_theme_integration_manifest() {
 	);
 }
 function aihl_sbm_consumer_contract() {
-	return array('consumer' => 'ai-html', 'authorization_token' => 'must-not-leak');
+	return array(
+		'consumer' => 'ai-html',
+		'authorization_token' => 'must-not-leak',
+		'css_variables' => array('required' => array('--bs-primary', '--sbin-grid-gap')),
+		'design_governance' => array(
+			'options' => array('smart_bootstrap_option_design_mode' => 'governed'),
+			'semantic_tokens' => array('--canvas-text' => 'var(--bs-body-color)'),
+		),
+	);
 }
 function sbs_get_widget_registry() {
 	return array('canvas' => array('label' => 'AI Canvas'));
@@ -55,15 +63,21 @@ ai_export_assert(isset($payload['knowledge_entry_points']['chat_classic']), 'Ing
 ai_export_assert(isset($payload['knowledge_entry_points']['smart_ai_studio']), 'Ingresso KB Studio assente.');
 ai_export_assert(isset($payload['knowledge_entry_points']['standalone']), 'Ingresso KB standalone assente.');
 ai_export_assert(isset($payload['knowledge_entry_points']['prompt_library']), 'Ingresso KB prompt assente.');
-ai_export_assert('1.6.1' === $payload['knowledge_pack']['version'], 'Versione Knowledge Pack assente.');
-ai_export_assert(4 === count($payload['required_knowledge']), 'Documenti KB obbligatori incompleti.');
+ai_export_assert('1.6.2' === $payload['knowledge_pack']['version'], 'Versione Knowledge Pack assente.');
+ai_export_assert(5 === count($payload['required_knowledge']), 'Documenti KB obbligatori incompleti.');
 ai_export_assert(!empty($payload['knowledge_snapshot']), 'Snapshot KB incorporato assente.');
+ai_export_assert('governed' === $payload['contracts']['sbm_authoring_contract']['global_mode'], 'Modalita SBM authoring assente.');
+ai_export_assert(isset($payload['contracts']['sbm_authoring_contract']['semantic_tokens']['--canvas-text']), 'Token semantici SBM assenti.');
+ai_export_assert(in_array('--sbin-grid-gap', $payload['contracts']['sbm_authoring_contract']['required_tokens'], true), 'Token richiesti SBM assenti.');
 ai_export_assert(13 === count($payload['prompt_templates']), 'Catalogo prompt incompleto.');
 ai_export_assert('start_session' === $payload['prompt_templates'][0]['id'], 'Primo prompt di contesto assente.');
 ai_export_assert(false !== strpos($payload['prompt_templates'][0]['prompt'], 'non generare codice'), 'Il primo prompt non separa comprensione ed esecuzione.');
 ai_export_assert(false !== strpos($payload['prompt_templates'][2]['prompt'], 'header_full'), 'Prompt header non dichiara lo slot atteso.');
 foreach ($payload['prompt_templates'] as $template) {
 	ai_export_assert(false !== strpos($template['prompt'], 'required_knowledge'), 'Un prompt non richiede la consultazione KB: ' . $template['id']);
+	if ('start_session' !== $template['id']) {
+		ai_export_assert(false !== strpos($template['prompt'], 'contracts.sbm_consumer_contract.design_governance'), 'Un prompt operativo non richiede il contratto SBM: ' . $template['id']);
+	}
 }
 
 echo "AI export runtime contract OK\n";
