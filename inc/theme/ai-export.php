@@ -61,7 +61,7 @@ if (!function_exists('aihl_ai_export_prompt_templates')) {
 		return array(
 			'start_session' => array(
 				'id' => 'start_session',
-				'title' => '1. Avvia e comprendi il sito',
+				'title' => 'Avvia e comprendi il sito',
 				'description' => 'Primo messaggio obbligatorio in una nuova chat.',
 				'icon' => 'fa-graduation-cap',
 				'prompt' => 'Leggi integralmente il file smart-ecommerce-ai-context allegato e usalo come fonte autorevole per tutta questa conversazione. In questa fase non generare codice e non proporre ancora modifiche. Non chiedermi di interpretare endpoint, ID, menu location, hook, token, widget o capability. Non inventare risorse assenti. Rispondi soltanto con: 1) identita e obiettivo del sito che hai compreso; 2) prodotti Smart eCommerce attivi e loro ruolo; 3) menu, pagine, risorse e integrazioni disponibili; 4) vincoli AI-HTML, SBS e SBM da rispettare; 5) operazioni che puoi progettare in questa chat e operazioni che non puoi applicare direttamente; 6) massimo cinque informazioni commerciali realmente mancanti. Chiudi chiedendomi quale risultato voglio ottenere. Considera questo riepilogo il contratto operativo della sessione e attendi la mia conferma prima di continuare.',

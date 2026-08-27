@@ -5,6 +5,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.15.4] - 2026-08-27
+
+### Changed
+- Rimosso il numero dal titolo visualizzato del prompt iniziale.
+
 ## [1.15.3] - 2026-08-26
 
 ### Added
