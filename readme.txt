@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.15.5
+Stable tag: 1.15.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,6 +36,10 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.15.6 =
+* Richiede a tutti i prompt una consultazione KB verificabile e aggiunge informazioni per formulare richieste efficaci.
+* Aggiunge importazione Canvas completa con separazione automatica HTML/CSS/JS e stato risorse SBM.
 
 = 1.15.5 =
 * Evita il blocco client di Chrome usando URL neutrali per la pagina Esporta per AI e il file di contesto.

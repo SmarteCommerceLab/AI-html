@@ -288,6 +288,23 @@ if (!function_exists('aihl_repair_non_canvas_slot_governance')) {
 add_action('after_setup_theme', 'aihl_repair_non_canvas_slot_governance', 61);
 
 if (!function_exists('aihl_code_slots_save')) {
+	function aihl_code_slot_split_combined_code(array $slot): array {
+		if (($slot['type'] ?? '') !== 'mixed' || empty($slot['code'])) {
+			return $slot;
+		}
+		$markup = (string) $slot['code'];
+		if (trim((string) ($slot['css'] ?? '')) === '' && preg_match_all('/<style\b[^>]*>(.*?)<\/style>/is', $markup, $matches)) {
+			$slot['css'] = trim(implode("\n\n", $matches[1]));
+		}
+		if (trim((string) ($slot['js'] ?? '')) === '' && preg_match_all('/<script\b(?![^>]*type=["\']application\/ld\+json)[^>]*>(.*?)<\/script>/is', $markup, $matches)) {
+			$slot['js'] = trim(implode("\n\n", $matches[1]));
+		}
+		$markup = preg_replace('/<style\b[^>]*>.*?<\/style>/is', '', $markup);
+		$markup = preg_replace('/<script\b(?![^>]*type=["\']application\/ld\+json)[^>]*>.*?<\/script>/is', '', (string) $markup);
+		$slot['code'] = trim((string) $markup);
+		return $slot;
+	}
+
 	/**
 	 * Salva o aggiorna uno slot.
 	 *
@@ -295,6 +312,7 @@ if (!function_exists('aihl_code_slots_save')) {
 	 * @return array|WP_Error Lo slot salvato con versioning, o errore.
 	 */
 	function aihl_code_slots_save(array $slot) {
+		$slot = aihl_code_slot_split_combined_code($slot);
 		$hooks = aihl_code_slots_hooks();
 
 		// Validazione obbligatori
@@ -1643,6 +1661,10 @@ if (!function_exists('aihl_render_code_slots_page')) {
 					? 'html'
 					: ('' !== trim((string) ($s['css'] ?? '')) ? 'css' : ('' !== trim((string) ($s['js'] ?? '')) ? 'js' : 'html'));
 			}
+			$is_canvas_editor = aihl_code_slot_is_canvas_override($s);
+			$sbm_contract = function_exists('aihl_sbm_consumer_contract') ? aihl_sbm_consumer_contract() : array();
+			$bootstrap_available = !empty($sbm_contract['bootstrap']);
+			$motion_available = !empty($sbm_contract['motion']['available']);
 		?>
 			<!-- Editor singolo slot -->
 			<form method="post">
@@ -1668,13 +1690,16 @@ if (!function_exists('aihl_render_code_slots_page')) {
 							<p class="description" id="aihl-hook-desc"></p>
 						</td>
 					</tr>
-					<tr>
+					<tr <?php echo $is_canvas_editor ? 'hidden' : ''; ?>>
 						<th><?php esc_html_e('Tipo', AIHL_TEXT_DOMAIN); ?></th>
 						<td>
-							<label><input type="radio" name="slot_type" value="html" <?php checked($s['type'], 'html'); ?>> HTML</label>&nbsp;
-							<label><input type="radio" name="slot_type" value="css" <?php checked($s['type'], 'css'); ?>> CSS</label>&nbsp;
-							<label><input type="radio" name="slot_type" value="js" <?php checked($s['type'], 'js'); ?>> JS</label>&nbsp;
-							<label><input type="radio" name="slot_type" value="mixed" <?php checked($s['type'], 'mixed'); ?>> Mixed</label>
+							<?php if ($is_canvas_editor) : ?><input type="hidden" name="slot_type" value="mixed"><?php endif; ?>
+							<span <?php echo $is_canvas_editor ? 'hidden' : ''; ?>>
+							<label><input type="radio" name="slot_type" value="html" <?php checked($s['type'], 'html'); disabled($is_canvas_editor); ?>> HTML</label>&nbsp;
+							<label><input type="radio" name="slot_type" value="css" <?php checked($s['type'], 'css'); disabled($is_canvas_editor); ?>> CSS</label>&nbsp;
+							<label><input type="radio" name="slot_type" value="js" <?php checked($s['type'], 'js'); disabled($is_canvas_editor); ?>> JS</label>&nbsp;
+							<label><input type="radio" name="slot_type" value="mixed" <?php checked($s['type'], 'mixed'); disabled($is_canvas_editor); ?>> Mixed</label>
+							</span>
 						</td>
 					</tr>
 					<tr>
@@ -1711,6 +1736,19 @@ if (!function_exists('aihl_render_code_slots_page')) {
 					</tr>
 				</table>
 
+				<div class="aihl-canvas-runtime-info">
+					<strong><?php esc_html_e('Risorse gestite da Smart Bootstrap Manager', AIHL_TEXT_DOMAIN); ?></strong>
+					<span class="<?php echo $bootstrap_available ? 'is-ready' : 'is-missing'; ?>">Bootstrap <?php echo $bootstrap_available ? esc_html__('disponibile', AIHL_TEXT_DOMAIN) : esc_html__('non rilevato', AIHL_TEXT_DOMAIN); ?></span>
+					<span class="<?php echo $motion_available ? 'is-ready' : 'is-muted'; ?>">GSAP <?php echo $motion_available ? esc_html__('disponibile', AIHL_TEXT_DOMAIN) : esc_html__('non attivo', AIHL_TEXT_DOMAIN); ?></span>
+					<small><?php esc_html_e('Non inserire CDN o copie delle librerie nel Canvas.', AIHL_TEXT_DOMAIN); ?></small>
+				</div>
+
+				<details class="aihl-combined-code-import">
+					<summary><strong><?php esc_html_e('Incolla codice completo', AIHL_TEXT_DOMAIN); ?></strong><span><?php esc_html_e('Il sistema separa automaticamente HTML, CSS e JavaScript.', AIHL_TEXT_DOMAIN); ?></span></summary>
+					<textarea rows="10" class="large-text code" data-aihl-combined-code spellcheck="false" placeholder="<?php esc_attr_e('Incolla qui HTML con eventuali tag style e script...', AIHL_TEXT_DOMAIN); ?>"></textarea>
+					<p><button type="button" class="button button-primary" data-aihl-split-code><?php esc_html_e('Separa nelle schede', AIHL_TEXT_DOMAIN); ?></button></p>
+				</details>
+
 				<div class="aihl-code-editor-shell" data-aihl-code-editor>
 					<div class="aihl-code-editor-head">
 						<div>
@@ -1727,6 +1765,7 @@ if (!function_exists('aihl_render_code_slots_page')) {
 						<button type="button" class="button button-small" data-aihl-editor-tab="css">CSS</button>
 						<button type="button" class="button button-small" data-aihl-editor-tab="js">JS</button>
 					</div>
+					<p class="aihl-code-editor-warning" data-aihl-code-warning hidden><?php esc_html_e('Sono presenti tag style o script nella scheda HTML. Usa "Incolla codice completo" per separarli.', AIHL_TEXT_DOMAIN); ?></p>
 					<div class="aihl-code-editor-pane" data-aihl-editor-pane="html">
 						<textarea id="aihl-slot-code" name="slot_code" rows="18" class="large-text code aihl-code-textarea" spellcheck="false"><?php echo esc_textarea($s['code']); ?></textarea>
 					</div>
@@ -1793,6 +1832,13 @@ if (!function_exists('aihl_render_code_slots_page')) {
 				}
 				var copy=document.querySelector('[data-aihl-copy-active]');
 				var paste=document.querySelector('[data-aihl-paste-active]');
+				var combined=document.querySelector('[data-aihl-combined-code]');
+				var splitButton=document.querySelector('[data-aihl-split-code]');
+				var warning=document.querySelector('[data-aihl-code-warning]');
+				function valueOf(name){var editor=window.aihlSlotEditors&&window.aihlSlotEditors[name];var textarea=document.querySelector('[data-aihl-editor-pane="'+name+'"] textarea');return editor?editor.getValue():(textarea?textarea.value:'');}
+				function setValue(name,value){var editor=window.aihlSlotEditors&&window.aihlSlotEditors[name];var textarea=document.querySelector('[data-aihl-editor-pane="'+name+'"] textarea');if(editor){editor.setValue(value);}else if(textarea){textarea.value=value;}}
+				function checkCombinedTags(){if(warning){warning.hidden=!/<(?:style|script)\b/i.test(valueOf('html'));}}
+				if(splitButton&&combined){splitButton.addEventListener('click',function(){var source=combined.value||'';var css=[];var js=[];source=source.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi,function(all,body){css.push(body.trim());return '';});source=source.replace(/<script\b(?![^>]*type=["']application\/ld\+json)[^>]*>([\s\S]*?)<\/script>/gi,function(all,body){js.push(body.trim());return '';});setValue('html',source.trim());if(css.length){setValue('css',css.join('\n\n'));}if(js.length){setValue('js',js.join('\n\n'));}activateTab('html');checkCombinedTags();combined.value='';});}
 				if(copy&&navigator.clipboard){copy.addEventListener('click',function(){var section=activeSection();if(section){navigator.clipboard.writeText(section.editor?section.editor.getValue():section.textarea.value);}});}
 				if(paste&&navigator.clipboard){paste.addEventListener('click',function(){var section=activeSection();if(section){navigator.clipboard.readText().then(function(text){if(section.editor){section.editor.setValue(text);section.editor.focus();}else{section.textarea.value=text;section.textarea.dispatchEvent(new Event('change',{bubbles:true}));}});}});}
 				if(window.wp&&wp.codeEditor&&window.aihlCodeEditorSettings){
@@ -1810,6 +1856,7 @@ if (!function_exists('aihl_render_code_slots_page')) {
 				radios.forEach(function(r){r.addEventListener('change',togFields);});
 				activateTab(<?php echo wp_json_encode($initial_editor_tab); ?>);
 				togFields();
+				checkCombinedTags();
 			})();
 			</script>
 
@@ -1989,6 +2036,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .aihl-canvas-card span{font-size:11px;color:#646970;text-transform:uppercase;font-weight:600}
 .aihl-canvas-card code{margin-top:5px;font-size:11px;white-space:normal}
 .aihl-code-editor-shell{border:1px solid #dcdcde;background:#fff;border-radius:6px;margin:12px 0 14px;overflow:hidden}
+.aihl-canvas-runtime-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0;padding:12px 14px;border:1px solid #dcdcde;background:#f6f7f7}.aihl-canvas-runtime-info>strong{margin-right:4px}.aihl-canvas-runtime-info>span{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700}.aihl-canvas-runtime-info .is-ready{background:#edfaef;color:#166534}.aihl-canvas-runtime-info .is-missing{background:#fcf0f1;color:#8a2424}.aihl-canvas-runtime-info .is-muted{background:#f0f0f1;color:#646970}.aihl-canvas-runtime-info small{width:100%;color:#646970}.aihl-combined-code-import{margin:12px 0;border:1px solid #c3c4c7;background:#fff}.aihl-combined-code-import summary{display:flex;gap:10px;padding:13px 14px;cursor:pointer}.aihl-combined-code-import summary span{color:#646970}.aihl-combined-code-import textarea{box-sizing:border-box;margin:0 14px;width:calc(100% - 28px);min-height:180px}.aihl-combined-code-import p{margin:10px 14px 14px}.aihl-code-editor-warning{margin:0;padding:10px 12px;border-bottom:1px solid #f0c3c4;background:#fcf0f1;color:#8a2424;font-weight:600}
 .aihl-code-editor-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid #f0f0f1;background:#f6f7f7}
 .aihl-code-editor-head strong,.aihl-code-editor-head span{display:block}
 .aihl-code-editor-head strong{font-size:13px;color:#1d2327}

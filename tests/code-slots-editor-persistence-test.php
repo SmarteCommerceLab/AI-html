@@ -9,6 +9,10 @@ $contracts = array(
 	'section.editor.getValue()' => 'CodeMirror-aware copy',
 	'section.editor.setValue(text)' => 'CodeMirror-aware paste',
 	'activateTab(<?php echo wp_json_encode($initial_editor_tab); ?>)' => 'saved tab restoration',
+	'data-aihl-combined-code' => 'combined code input',
+	'data-aihl-split-code' => 'combined code parser action',
+	'function aihl_code_slot_split_combined_code' => 'server-side legacy code splitter',
+	'Risorse gestite da Smart Bootstrap Manager' => 'runtime library information',
 );
 
 foreach ($contracts as $needle => $label) {

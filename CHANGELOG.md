@@ -5,6 +5,16 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.15.6] - 2026-08-27
+
+### Added
+- Consultazione KB verificabile in tutti i prompt e guida alle informazioni commerciali da fornire.
+- Importazione di codice Canvas completo con separazione automatica HTML, CSS e JavaScript.
+- Stato delle librerie Bootstrap e GSAP gestite da Smart Bootstrap Manager.
+
+### Changed
+- Gli override Canvas mantengono internamente i tre artefatti canonici senza esporre il selettore tipo.
+
 ## [1.15.5] - 2026-08-27
 
 ### Fixed

@@ -56,7 +56,7 @@ if (!function_exists('aihl_ai_export_product_versions')) {
 
 if (!function_exists('aihl_ai_export_prompt_templates')) {
 	function aihl_ai_export_prompt_templates() {
-		$foundation = 'Leggi il file di contesto allegato come fonte autorevole del sito. Non inventare menu, pagine, URL, immagini, widget, token o integrazioni assenti. Usa le risorse dinamiche WordPress e rispetta la governance SBM. Prima di generare codice, fammi solo le domande indispensabili sui dati mancanti. Restituisci una breve sintesi delle scelte e poi gli artefatti separati, completi e pronti da copiare nei rispettivi editor, con una checklist finale di verifica.';
+		$foundation = 'Leggi il file di contesto allegato come fonte autorevole del sito. Prima di rispondere consulta i documenti pubblici indicati in required_knowledge e knowledge_entry_points. Dichiara quali documenti KB hai consultato e la versione del Knowledge Pack; se non puoi aprirli, dichiaralo e usa soltanto il knowledge_snapshot incorporato, senza fingere di averli letti. Non inventare menu, pagine, URL, immagini, widget, token o integrazioni assenti. Usa le risorse dinamiche WordPress e rispetta la governance SBM. Prima di generare codice, fammi solo le domande indispensabili sui dati mancanti. Restituisci una breve sintesi delle scelte e poi gli artefatti separati, completi e pronti da copiare nei rispettivi editor, con una checklist finale di verifica.';
 
 		return array(
 			'start_session' => array(
@@ -64,7 +64,7 @@ if (!function_exists('aihl_ai_export_prompt_templates')) {
 				'title' => 'Avvia e comprendi il sito',
 				'description' => 'Primo messaggio obbligatorio in una nuova chat.',
 				'icon' => 'fa-graduation-cap',
-				'prompt' => 'Leggi integralmente il file smart-ecommerce-ai-context allegato e usalo come fonte autorevole per tutta questa conversazione. In questa fase non generare codice e non proporre ancora modifiche. Non chiedermi di interpretare endpoint, ID, menu location, hook, token, widget o capability. Non inventare risorse assenti. Rispondi soltanto con: 1) identita e obiettivo del sito che hai compreso; 2) prodotti Smart eCommerce attivi e loro ruolo; 3) menu, pagine, risorse e integrazioni disponibili; 4) vincoli AI-HTML, SBS e SBM da rispettare; 5) operazioni che puoi progettare in questa chat e operazioni che non puoi applicare direttamente; 6) massimo cinque informazioni commerciali realmente mancanti. Chiudi chiedendomi quale risultato voglio ottenere. Considera questo riepilogo il contratto operativo della sessione e attendi la mia conferma prima di continuare.',
+				'prompt' => 'Leggi integralmente il file smart-ecommerce-ai-context allegato e usalo come fonte autorevole per tutta questa conversazione. Consulta i documenti pubblici indicati in required_knowledge e knowledge_entry_points. Dichiara i documenti KB consultati e la versione del Knowledge Pack; se non puoi aprirli, dichiaralo e usa soltanto il knowledge_snapshot incorporato, senza fingere di averli letti. In questa fase non generare codice e non proporre ancora modifiche. Non chiedermi di interpretare endpoint, ID, menu location, hook, token, widget o capability. Non inventare risorse assenti. Rispondi con sei sezioni: identita e obiettivo; prodotti attivi; risorse disponibili; vincoli AI-HTML, SBS e SBM; operazioni possibili e non applicabili direttamente; informazioni commerciali mancanti. Nell ultima sezione usa un elenco separato da 1 a 5, senza continuare la numerazione delle sezioni. Chiudi chiedendomi quale risultato voglio ottenere. Considera questo riepilogo il contratto operativo della sessione e attendi la mia conferma prima di continuare.',
 			),
 			'complete_site' => array(
 				'id' => 'complete_site',
@@ -213,6 +213,24 @@ if (!function_exists('aihl_ai_export_payload')) {
 					'url' => 'https://kb.smartecommerce.it/prompt-ai/',
 				),
 			),
+			'knowledge_pack' => array(
+				'id' => 'ai-html-contracts',
+				'version' => '1.6.0',
+				'index_url' => 'https://kb.smartecommerce.it/v1/packs.json',
+			),
+			'required_knowledge' => array(
+				'https://kb.smartecommerce.it/prompt-ai/primo-prompt/',
+				'https://kb.smartecommerce.it/guide/ai-commerciali-chat-classica/',
+				'https://kb.smartecommerce.it/api/ai-html-code-slots/',
+				'https://kb.smartecommerce.it/guide/authoring-ai-canvas/',
+			),
+			'knowledge_snapshot' => array(
+				'Use the exported manifest and registries as the source of truth for this site.',
+				'Keep HTML, CSS and JavaScript as separate Canvas artifacts.',
+				'Do not enqueue Bootstrap or GSAP: Smart Bootstrap Manager owns shared libraries.',
+				'Use WordPress runtime components for menus, identity, contacts and configured integrations.',
+				'In governed mode consume semantic --bs-*, --sbin-* and --canvas-* tokens.',
+			),
 			'prompt_templates' => array_values(aihl_ai_export_prompt_templates()),
 			'assistant_instructions' => array(
 				'Use this document as the source of truth for the current WordPress site.',
@@ -288,6 +306,18 @@ if (!function_exists('aihl_render_ai_export_page')) {
 				</div>
 			</section>
 
+			<section class="aihl-ai-prompt-info" aria-labelledby="aihl-prompt-info-title">
+				<div class="aihl-ai-export-section-head"><span><?php esc_html_e('Informazioni per la richiesta', AIHL_TEXT_DOMAIN); ?></span><h2 id="aihl-prompt-info-title"><?php esc_html_e('Come ottenere un prompt e un risultato migliori', AIHL_TEXT_DOMAIN); ?></h2><p><?php esc_html_e('Il file fornisce i dettagli tecnici. Tu devi aggiungere soltanto le informazioni commerciali e creative che la AI non puo ricavare dal sito.', AIHL_TEXT_DOMAIN); ?></p></div>
+				<div class="aihl-ai-prompt-info-grid">
+					<div><i class="fa-solid fa-bullseye" aria-hidden="true"></i><strong><?php esc_html_e('Obiettivo', AIHL_TEXT_DOMAIN); ?></strong><span><?php esc_html_e('Cosa deve ottenere la pagina o il sito.', AIHL_TEXT_DOMAIN); ?></span></div>
+					<div><i class="fa-solid fa-users" aria-hidden="true"></i><strong><?php esc_html_e('Pubblico', AIHL_TEXT_DOMAIN); ?></strong><span><?php esc_html_e('A chi ti rivolgi e quale problema risolvi.', AIHL_TEXT_DOMAIN); ?></span></div>
+					<div><i class="fa-solid fa-box-open" aria-hidden="true"></i><strong><?php esc_html_e('Offerta', AIHL_TEXT_DOMAIN); ?></strong><span><?php esc_html_e('Prodotti, servizi e priorita reali.', AIHL_TEXT_DOMAIN); ?></span></div>
+					<div><i class="fa-solid fa-pen-nib" aria-hidden="true"></i><strong><?php esc_html_e('Tono', AIHL_TEXT_DOMAIN); ?></strong><span><?php esc_html_e('Stile del brand, riferimenti e vincoli.', AIHL_TEXT_DOMAIN); ?></span></div>
+					<div><i class="fa-solid fa-arrow-pointer" aria-hidden="true"></i><strong><?php esc_html_e('Azione', AIHL_TEXT_DOMAIN); ?></strong><span><?php esc_html_e('Contatto, acquisto, preventivo o altra conversione.', AIHL_TEXT_DOMAIN); ?></span></div>
+				</div>
+				<p class="aihl-ai-prompt-info-example"><strong><?php esc_html_e('Esempio:', AIHL_TEXT_DOMAIN); ?></strong> <?php esc_html_e('Voglio una pagina servizio per responsabili eCommerce, con tono autorevole e una richiesta demo come azione principale.', AIHL_TEXT_DOMAIN); ?></p>
+			</section>
+
 			<section id="aihl-prompt-library" class="aihl-ai-prompt-library" aria-labelledby="aihl-prompt-library-title">
 				<div class="aihl-ai-export-section-head"><span><?php esc_html_e('Prompt guidati', AIHL_TEXT_DOMAIN); ?></span><h2 id="aihl-prompt-library-title"><?php esc_html_e('Inizia sempre dal punto 1', AIHL_TEXT_DOMAIN); ?></h2><p><?php esc_html_e('Prima fai comprendere il sito alla AI. Dopo la sua conferma torna qui e scegli il lavoro specifico.', AIHL_TEXT_DOMAIN); ?></p></div>
 				<div class="aihl-ai-prompt-grid" role="list">
@@ -356,12 +386,13 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .aihl-ai-export-kicker,.aihl-ai-export-section-head>span{display:inline-flex;align-items:center;gap:8px;color:#3157d5;font-size:12px;font-weight:700;text-transform:uppercase}
 .aihl-ai-export-hero h2{max-width:720px;margin:10px 0 10px;font-size:30px;line-height:1.15}.aihl-ai-export-hero p{max-width:760px;margin:0;color:#4b5563;font-size:16px;line-height:1.55}
 .aihl-ai-export-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}.aihl-ai-export-actions .button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:0 18px}.aihl-ai-export-actions .aihl-ai-export-primary{min-height:52px;padding:0 24px;font-size:15px;font-weight:700;background:#3157d5;border-color:#3157d5}
+.aihl-ai-prompt-info{padding:26px;border:1px solid #dcdcde;background:#fff}.aihl-ai-prompt-info-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid #dcdcde}.aihl-ai-prompt-info-grid>div{display:flex;min-width:0;flex-direction:column;gap:6px;padding:18px;border-right:1px solid #dcdcde}.aihl-ai-prompt-info-grid>div:last-child{border-right:0}.aihl-ai-prompt-info-grid i{color:#3157d5;font-size:18px}.aihl-ai-prompt-info-grid strong{font-size:14px}.aihl-ai-prompt-info-grid span{color:#646970;font-size:13px;line-height:1.45}.aihl-ai-prompt-info-example{margin:14px 0 0;padding:14px 16px;border-left:4px solid #008a67;background:#ecf9f4;line-height:1.5}
 .aihl-ai-export-status{display:flex;min-height:150px;flex-direction:column;justify-content:center;padding:22px;border:1px solid #b7e4d5;background:#ecf9f4}.aihl-ai-export-status i{margin-bottom:14px;color:#008a67;font-size:28px}.aihl-ai-export-status strong{font-size:17px}.aihl-ai-export-status span{margin-top:5px;color:#50645d;line-height:1.45}.aihl-ai-export-status.needs-attention{border-color:#f2cf82;background:#fff8e7}.aihl-ai-export-status.needs-attention i{color:#b26a00}
 .aihl-ai-export-section-head{margin-bottom:18px}.aihl-ai-export-section-head h2{margin:5px 0 0;font-size:22px}.aihl-ai-export-steps{display:grid;grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr) 36px minmax(0,1fr);align-items:center;border-block:1px solid #dcdcde}.aihl-ai-export-steps article{position:relative;min-height:190px;padding:26px 22px}.aihl-ai-export-steps article>b{position:absolute;top:18px;right:18px;color:#a7aaad;font-size:24px}.aihl-ai-step-icon{display:flex;width:48px;height:48px;align-items:center;justify-content:center;margin-bottom:18px;border-radius:6px;color:#fff;font-size:20px}.step-export{background:#008a67}.step-chat{background:#3157d5}.step-build{background:#c23678}.aihl-ai-export-steps h3{margin:0 0 7px;font-size:18px}.aihl-ai-export-steps p{margin:0;color:#646970;font-size:14px;line-height:1.5}.aihl-ai-step-arrow{color:#a7aaad;text-align:center}
 .aihl-ai-export-section-head>p{max-width:780px;margin:8px 0 0;color:#646970;font-size:15px;line-height:1.5}.aihl-ai-prompt-library{padding:26px;border:1px solid #dcdcde;background:#fff}.aihl-ai-prompt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.aihl-ai-prompt-grid>div{display:flex}.aihl-ai-prompt-choice{display:flex;width:100%;min-height:92px;align-items:flex-start;gap:12px;padding:16px;border:1px solid #c3c4c7;background:#fff;color:#1d2327;text-align:left;cursor:pointer}.aihl-ai-prompt-choice>i{width:22px;margin-top:3px;color:#3157d5;font-size:18px;text-align:center}.aihl-ai-prompt-choice span{display:flex;min-width:0;flex-direction:column;gap:5px}.aihl-ai-prompt-choice strong{font-size:14px}.aihl-ai-prompt-choice small{color:#646970;font-size:13px;line-height:1.4}.aihl-ai-prompt-choice:hover,.aihl-ai-prompt-choice:focus,.aihl-ai-prompt-choice.is-selected{border-color:#3157d5;background:#f2f6ff;box-shadow:inset 3px 0 #3157d5}.aihl-ai-prompt-editor{margin-top:18px;padding:20px;background:#f6f7f7}.aihl-ai-prompt-editor label{display:block;margin-bottom:8px;font-weight:700}.aihl-ai-prompt-editor textarea{box-sizing:border-box;width:100%;min-height:170px;padding:14px;border-color:#8c8f94;background:#fff;color:#1d2327;font-family:inherit;font-size:14px;line-height:1.55;resize:vertical}.aihl-ai-prompt-editor>div{display:flex;align-items:center;gap:16px;margin-top:12px}.aihl-ai-prompt-editor .button{display:inline-flex;align-items:center;gap:8px}
 .aihl-ai-export-details{display:grid;grid-template-columns:1fr 1fr;border:1px solid #dcdcde}.aihl-ai-export-details>div{padding:24px}.aihl-ai-export-details>div+div{border-left:1px solid #dcdcde}.aihl-ai-detail-icon{display:flex;width:42px;height:42px;align-items:center;justify-content:center;float:left;margin:0 14px 24px 0;border-radius:6px;background:#e8eefc;color:#3157d5;font-size:18px}.aihl-ai-detail-icon.is-safe{background:#e3f5ed;color:#008a67}.aihl-ai-export-details h2{margin:0 0 7px;font-size:17px}.aihl-ai-export-details p{margin:0;color:#646970;line-height:1.55}
 .aihl-ai-export-studio{display:flex;align-items:center;justify-content:space-between;gap:28px;padding:24px 26px;border:1px solid #ead6e2;background:#fff6fb}.aihl-ai-export-studio span{color:#9b2c68;font-size:12px;font-weight:700;text-transform:uppercase}.aihl-ai-export-studio h2{margin:4px 0 6px;font-size:20px}.aihl-ai-export-studio p{margin:0;color:#646970}.aihl-ai-export-studio .button{display:inline-flex;flex-shrink:0;align-items:center;gap:8px}.aihl-ai-copy-feedback{min-height:20px;margin:0;color:#008a67;font-weight:600}
-@media(max-width:900px){.aihl-ai-export-hero{grid-template-columns:1fr}.aihl-ai-export-status{min-height:0}.aihl-ai-export-steps{grid-template-columns:1fr}.aihl-ai-step-arrow{display:none}.aihl-ai-export-steps article+article{border-top:1px solid #dcdcde}.aihl-ai-prompt-grid{grid-template-columns:1fr 1fr}.aihl-ai-export-details{grid-template-columns:1fr}.aihl-ai-export-details>div+div{border-top:1px solid #dcdcde;border-left:0}.aihl-ai-export-studio{align-items:flex-start;flex-direction:column}.aihl-ai-export-hero h2{font-size:25px}}@media(max-width:600px){.aihl-ai-prompt-grid{grid-template-columns:1fr}.aihl-ai-prompt-editor>div{align-items:flex-start;flex-direction:column}}
+@media(max-width:900px){.aihl-ai-export-hero{grid-template-columns:1fr}.aihl-ai-export-status{min-height:0}.aihl-ai-prompt-info-grid{grid-template-columns:1fr 1fr}.aihl-ai-prompt-info-grid>div{border-bottom:1px solid #dcdcde}.aihl-ai-export-steps{grid-template-columns:1fr}.aihl-ai-step-arrow{display:none}.aihl-ai-export-steps article+article{border-top:1px solid #dcdcde}.aihl-ai-prompt-grid{grid-template-columns:1fr 1fr}.aihl-ai-export-details{grid-template-columns:1fr}.aihl-ai-export-details>div+div{border-top:1px solid #dcdcde;border-left:0}.aihl-ai-export-studio{align-items:flex-start;flex-direction:column}.aihl-ai-export-hero h2{font-size:25px}}@media(max-width:600px){.aihl-ai-prompt-info-grid,.aihl-ai-prompt-grid{grid-template-columns:1fr}.aihl-ai-prompt-editor>div{align-items:flex-start;flex-direction:column}}
 CSS;
 	wp_add_inline_style('smart-admin-fa', $css);
 });

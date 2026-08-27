@@ -55,9 +55,15 @@ ai_export_assert(isset($payload['knowledge_entry_points']['chat_classic']), 'Ing
 ai_export_assert(isset($payload['knowledge_entry_points']['smart_ai_studio']), 'Ingresso KB Studio assente.');
 ai_export_assert(isset($payload['knowledge_entry_points']['standalone']), 'Ingresso KB standalone assente.');
 ai_export_assert(isset($payload['knowledge_entry_points']['prompt_library']), 'Ingresso KB prompt assente.');
+ai_export_assert('1.6.0' === $payload['knowledge_pack']['version'], 'Versione Knowledge Pack assente.');
+ai_export_assert(4 === count($payload['required_knowledge']), 'Documenti KB obbligatori incompleti.');
+ai_export_assert(!empty($payload['knowledge_snapshot']), 'Snapshot KB incorporato assente.');
 ai_export_assert(13 === count($payload['prompt_templates']), 'Catalogo prompt incompleto.');
 ai_export_assert('start_session' === $payload['prompt_templates'][0]['id'], 'Primo prompt di contesto assente.');
 ai_export_assert(false !== strpos($payload['prompt_templates'][0]['prompt'], 'non generare codice'), 'Il primo prompt non separa comprensione ed esecuzione.');
 ai_export_assert(false !== strpos($payload['prompt_templates'][2]['prompt'], 'header_full'), 'Prompt header non dichiara lo slot atteso.');
+foreach ($payload['prompt_templates'] as $template) {
+	ai_export_assert(false !== strpos($template['prompt'], 'required_knowledge'), 'Un prompt non richiede la consultazione KB: ' . $template['id']);
+}
 
 echo "AI export runtime contract OK\n";
