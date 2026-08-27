@@ -25,7 +25,7 @@ ai_export_admin_assert(false !== strpos($export, 'Esporta'), 'Passaggio export a
 ai_export_admin_assert(false !== strpos($export, 'Allega e descrivi'), 'Passaggio chat assente.');
 ai_export_admin_assert(false !== strpos($export, 'Copia gli artefatti'), 'Passaggio applicazione assente.');
 ai_export_admin_assert(false !== strpos($export, 'aihl_ai_export_prompt_templates'), 'Catalogo prompt AI assente.');
-ai_export_admin_assert(false !== strpos($export, 'Inizia sempre dal punto 1'), 'Sequenza iniziale dei prompt assente.');
+ai_export_admin_assert(false !== strpos($export, 'Inizia sempre dal prompt iniziale'), 'Sequenza iniziale dei prompt assente.');
 ai_export_admin_assert(false !== strpos($export, 'aihl-ai-prompt-text'), 'Anteprima prompt assente.');
 ai_export_admin_assert(false !== strpos($export, 'Vedi tutti i casi nella KB'), 'Collegamento libreria prompt KB assente.');
 ai_export_admin_assert(false !== strpos($export, 'Come ottenere un prompt e un risultato migliori'), 'Sezione informazioni prompt assente.');

@@ -215,7 +215,7 @@ if (!function_exists('aihl_ai_export_payload')) {
 			),
 			'knowledge_pack' => array(
 				'id' => 'ai-html-contracts',
-				'version' => '1.6.0',
+				'version' => '1.6.1',
 				'index_url' => 'https://kb.smartecommerce.it/v1/packs.json',
 			),
 			'required_knowledge' => array(
@@ -319,7 +319,7 @@ if (!function_exists('aihl_render_ai_export_page')) {
 			</section>
 
 			<section id="aihl-prompt-library" class="aihl-ai-prompt-library" aria-labelledby="aihl-prompt-library-title">
-				<div class="aihl-ai-export-section-head"><span><?php esc_html_e('Prompt guidati', AIHL_TEXT_DOMAIN); ?></span><h2 id="aihl-prompt-library-title"><?php esc_html_e('Inizia sempre dal punto 1', AIHL_TEXT_DOMAIN); ?></h2><p><?php esc_html_e('Prima fai comprendere il sito alla AI. Dopo la sua conferma torna qui e scegli il lavoro specifico.', AIHL_TEXT_DOMAIN); ?></p></div>
+				<div class="aihl-ai-export-section-head"><span><?php esc_html_e('Prompt guidati', AIHL_TEXT_DOMAIN); ?></span><h2 id="aihl-prompt-library-title"><?php esc_html_e('Inizia sempre dal prompt iniziale', AIHL_TEXT_DOMAIN); ?></h2><p><?php esc_html_e('Prima fai comprendere il sito alla AI. Dopo la sua conferma torna qui e scegli il lavoro specifico.', AIHL_TEXT_DOMAIN); ?></p></div>
 				<div class="aihl-ai-prompt-grid" role="list">
 					<?php foreach ($prompt_templates as $index => $template) : ?>
 						<div role="listitem"><button type="button" class="aihl-ai-prompt-choice<?php echo 0 === $index ? ' is-selected' : ''; ?>" data-prompt="<?php echo esc_attr($template['prompt']); ?>" aria-pressed="<?php echo 0 === $index ? 'true' : 'false'; ?>">

@@ -5,6 +5,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.15.7] - 2026-08-27
+
+### Changed
+- Uniformata la denominazione del flusso in "Prompt iniziale", eliminando i riferimenti numerici residui.
+
 ## [1.15.6] - 2026-08-27
 
 ### Added
@@ -28,7 +33,7 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 ## [1.15.3] - 2026-08-26
 
 ### Added
-- Aggiunto il Prompt 1 per leggere, riepilogare e vincolare il contesto prima di generare codice.
+- Aggiunto il prompt iniziale per leggere, riepilogare e vincolare il contesto prima di generare codice.
 - Estesa la libreria a tredici casi per siti, pagine, eCommerce, magazine, contenuti e diagnostica.
 
 ## [1.15.2] - 2026-08-26
