@@ -5,6 +5,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.15.9] - 2026-08-28
+
+### Fixed
+- Il controllo forzato di WordPress invalida anche la cache privata dell updater AI-HTML e rileva immediatamente la nuova release.
+
 ## [1.15.8] - 2026-08-27
 
 ### Added

@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.15.8
+Stable tag: 1.15.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,6 +36,9 @@ Enterprise, Impact, Signature e Nascosto. Ogni utente puo ereditare il
 valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
+
+= 1.15.9 =
+* Invalida la cache privata dell'updater quando WordPress esegue un controllo forzato degli aggiornamenti.
 
 = 1.15.7 =
 * Uniforma la denominazione del flusso in Prompt iniziale eliminando i riferimenti numerici residui.

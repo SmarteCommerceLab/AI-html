@@ -36,8 +36,22 @@ class AIHL_Public_Theme_Updater {
 		add_filter('upgrader_pre_download', array($this, 'verify_package_download'), 10, 4);
 		add_filter('upgrader_source_selection', array($this, 'fix_install_directory'), 10, 4);
 		add_filter('theme_action_links_' . $this->theme_slug, array($this, 'add_action_links'));
+		add_action('admin_init', array($this, 'maybe_clear_cache_for_forced_check'), 1);
 		add_action('admin_post_aihl_check_updates', array($this, 'handle_manual_update_check'));
 		add_action('admin_notices', array($this, 'render_manual_update_notice'));
+	}
+
+	public function maybe_clear_cache_for_forced_check() {
+		if (!current_user_can('update_themes')) {
+			return;
+		}
+
+		$force_check = isset($_GET['force-check']) ? sanitize_text_field(wp_unslash($_GET['force-check'])) : '';
+		if ('1' !== $force_check) {
+			return;
+		}
+
+		delete_site_transient($this->cache_key());
 	}
 
 	public function add_action_links($links) {
