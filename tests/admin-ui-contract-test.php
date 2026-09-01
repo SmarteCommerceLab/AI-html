@@ -7,6 +7,12 @@ foreach ($required as $class) {
 		exit(1);
 	}
 }
+foreach (array('colors[0]', "'modern' === \$scheme ? 1 : 2", "icon_colors['current']", '--smart-admin-accent:', 'var(--smart-admin-accent') as $token) {
+	if (false === strpos($source, $token)) {
+		fwrite(STDERR, "Missing WordPress admin color token: {$token}\n");
+		exit(1);
+	}
+}
 if (false !== strpos($source, 'smart-admin-tabs') || false === strpos($source, 'current_user_can')) {
 	fwrite(STDERR, "Legacy navigation or capability guard mismatch\n");
 	exit(1);

@@ -265,14 +265,22 @@ if (!function_exists('aihl_admin_page_template')) {
 		)), $subpages);
 
 		$header_bg = '#1d2327';
+		$admin_accent = '#2271b1';
+		$admin_accent_text = '#fff';
 		global $_wp_admin_css_colors;
 		$scheme = get_user_option( 'admin_color' ) ?: 'fresh';
 		if ( ! empty( $_wp_admin_css_colors[ $scheme ]->colors[0] ) ) {
 			$header_bg = sanitize_hex_color( $_wp_admin_css_colors[ $scheme ]->colors[0] );
 		}
+		if ( ! empty( $_wp_admin_css_colors[ $scheme ] ) ) {
+			$admin_scheme = $_wp_admin_css_colors[ $scheme ];
+			$accent_index = 'modern' === $scheme ? 1 : 2;
+			if ( ! empty( $admin_scheme->colors[ $accent_index ] ) ) $admin_accent = sanitize_hex_color( $admin_scheme->colors[ $accent_index ] ) ?: $admin_accent;
+			if ( ! empty( $admin_scheme->icon_colors['current'] ) ) $admin_accent_text = sanitize_hex_color( $admin_scheme->icon_colors['current'] ) ?: $admin_accent_text;
+		}
 		?>
-		<div class="smart-admin-wrap">
-			<div class="smart-admin-header" style="background:<?php echo esc_attr( $header_bg ); ?>">
+		<div class="smart-admin-wrap" style="--smart-admin-header:<?php echo esc_attr( $header_bg ); ?>;--smart-admin-accent:<?php echo esc_attr( $admin_accent ); ?>;--smart-admin-accent-text:<?php echo esc_attr( $admin_accent_text ); ?>">
+			<div class="smart-admin-header" style="background:var(--smart-admin-header)">
 				<div class="smart-admin-header-brand">
 					<div class="smart-admin-logo">
 						<svg class="smart-admin-logo-img" width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -793,6 +801,15 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .aihl-json-editor{width:100%;min-height:520px;font-family:Consolas,Monaco,monospace;font-size:12px;line-height:1.55;color:#101517;background:#f8fafc;border:1px solid #c3c4c7;border-radius:6px;padding:14px;tab-size:2}
 .aihl-openapi-editor{min-height:680px}
 
+.smart-admin-wrap .smart-admin-nav-item:hover{color:var(--smart-admin-accent,#2271b1)}
+.smart-admin-wrap .smart-admin-nav-item-active{border-left-color:var(--smart-admin-accent,#2271b1);background:color-mix(in srgb,var(--smart-admin-accent,#2271b1) 10%,#fff);color:var(--smart-admin-accent,#2271b1)}
+.smart-admin-wrap .smart-admin-nav-item-active .smart-admin-nav-icon,.smart-admin-wrap .smart-dash-stat-icon{background:var(--smart-admin-accent,#2271b1);color:var(--smart-admin-accent-text,#fff)}
+.smart-admin-wrap .smart-admin-pathbar a,.smart-admin-wrap .smart-admin-footer a{color:var(--smart-admin-accent,#2271b1)}
+.smart-admin-wrap .smart-dash-card:hover{border-color:var(--smart-admin-accent,#2271b1)}
+.smart-admin-wrap .smart-dash-card-icon{background:color-mix(in srgb,var(--smart-admin-accent,#2271b1) 10%,#fff);color:var(--smart-admin-accent,#2271b1)}
+.smart-admin-wrap .button-primary{border-color:var(--smart-admin-accent,#2271b1);background:var(--smart-admin-accent,#2271b1);color:var(--smart-admin-accent-text,#fff)}
+.smart-admin-wrap .button-primary:hover,.smart-admin-wrap .button-primary:focus{border-color:var(--smart-admin-header,#1d2327);background:var(--smart-admin-header,#1d2327);color:#fff}
+.smart-admin-wrap .smart-context-tab[aria-selected="true"],.smart-admin-wrap .smart-context-tab.is-active{border-color:var(--smart-admin-accent,#2271b1);color:var(--smart-admin-accent,#2271b1)}
 @media(max-width:782px){
 .smart-admin-header-brand{align-items:flex-start;flex-direction:column}
 .smart-admin-header-actions{justify-content:flex-start}
