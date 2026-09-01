@@ -5,6 +5,12 @@ Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 
 ---
 
+## [1.15.10] - 2026-09-01
+
+### Changed
+- Uniformate le tab contestuali dell'editor AI Canvas al Design System Smart.
+- Aggiunte semantica ARIA, gestione nativa dei pannelli nascosti e navigazione con frecce, Home ed End.
+
 ## [1.15.9] - 2026-08-28
 
 ### Fixed

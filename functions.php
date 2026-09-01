@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-define('AIHL_VERSION', '1.15.9');
+define('AIHL_VERSION', '1.15.10');
 
 /**
  * Move the visually oversized legacy author banner to the enterprise preset.

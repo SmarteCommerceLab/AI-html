@@ -1817,18 +1817,18 @@ if (!function_exists('aihl_render_code_slots_page')) {
 						</div>
 					</div>
 					<div class="aihl-code-editor-tabs" role="tablist" aria-label="<?php esc_attr_e('Sezioni codice slot', AIHL_TEXT_DOMAIN); ?>">
-						<button type="button" class="button button-small" data-aihl-editor-tab="html">HTML</button>
-						<button type="button" class="button button-small" data-aihl-editor-tab="css">CSS</button>
-						<button type="button" class="button button-small" data-aihl-editor-tab="js">JS</button>
+						<button type="button" id="aihl-editor-tab-html" class="button button-small" data-aihl-editor-tab="html" role="tab" aria-selected="true" aria-controls="aihl-editor-pane-html">HTML</button>
+						<button type="button" id="aihl-editor-tab-css" class="button button-small" data-aihl-editor-tab="css" role="tab" aria-selected="false" aria-controls="aihl-editor-pane-css" tabindex="-1">CSS</button>
+						<button type="button" id="aihl-editor-tab-js" class="button button-small" data-aihl-editor-tab="js" role="tab" aria-selected="false" aria-controls="aihl-editor-pane-js" tabindex="-1">JS</button>
 					</div>
 					<p class="aihl-code-editor-warning" data-aihl-code-warning hidden><?php esc_html_e('Sono presenti tag style o script nella scheda HTML. Usa "Incolla codice completo" per separarli.', AIHL_TEXT_DOMAIN); ?></p>
-					<div class="aihl-code-editor-pane" data-aihl-editor-pane="html">
+					<div id="aihl-editor-pane-html" class="aihl-code-editor-pane" data-aihl-editor-pane="html" role="tabpanel" aria-labelledby="aihl-editor-tab-html">
 						<textarea id="aihl-slot-code" name="slot_code" rows="18" class="large-text code aihl-code-textarea" spellcheck="false"><?php echo esc_textarea($s['code']); ?></textarea>
 					</div>
-					<div class="aihl-code-editor-pane" data-aihl-editor-pane="css">
+					<div id="aihl-editor-pane-css" class="aihl-code-editor-pane" data-aihl-editor-pane="css" role="tabpanel" aria-labelledby="aihl-editor-tab-css" hidden>
 						<textarea id="aihl-slot-css" name="slot_css" rows="18" class="large-text code aihl-code-textarea" spellcheck="false"><?php echo esc_textarea($s['css'] ?? ''); ?></textarea>
 					</div>
-					<div class="aihl-code-editor-pane" data-aihl-editor-pane="js">
+					<div id="aihl-editor-pane-js" class="aihl-code-editor-pane" data-aihl-editor-pane="js" role="tabpanel" aria-labelledby="aihl-editor-tab-js" hidden>
 						<textarea id="aihl-slot-js" name="slot_js" rows="18" class="large-text code aihl-code-textarea" spellcheck="false"><?php echo esc_textarea($s['js'] ?? ''); ?></textarea>
 					</div>
 				</div>
@@ -1873,15 +1873,16 @@ if (!function_exists('aihl_render_code_slots_page')) {
 						if(first){activateTab(first.getAttribute('data-aihl-editor-tab'));}
 					}
 				}
-				function activateTab(name){
-					document.querySelectorAll('[data-aihl-editor-tab]').forEach(function(tab){tab.classList.toggle('is-active',tab.getAttribute('data-aihl-editor-tab')===name);});
-					document.querySelectorAll('[data-aihl-editor-pane]').forEach(function(pane){pane.classList.toggle('is-active',pane.getAttribute('data-aihl-editor-pane')===name);});
+				function activateTab(name,focus){
+					document.querySelectorAll('[data-aihl-editor-tab]').forEach(function(tab){var active=tab.getAttribute('data-aihl-editor-tab')===name;tab.classList.toggle('is-active',active);tab.setAttribute('aria-selected',active?'true':'false');tab.tabIndex=active?0:-1;if(active&&focus){tab.focus();}});
+					document.querySelectorAll('[data-aihl-editor-pane]').forEach(function(pane){var active=pane.getAttribute('data-aihl-editor-pane')===name;pane.classList.toggle('is-active',active);pane.hidden=!active;});
 					var input=document.querySelector('[data-aihl-editor-tab-input]');
 					if(input){input.value=name;}
 					if(window.aihlSlotEditors&&window.aihlSlotEditors[name]){setTimeout(function(){window.aihlSlotEditors[name].refresh();window.aihlSlotEditors[name].focus();},30);}
 				}
 				document.querySelectorAll('[data-aihl-editor-tab]').forEach(function(tab){
 					tab.addEventListener('click',function(){activateTab(tab.getAttribute('data-aihl-editor-tab'));});
+					tab.addEventListener('keydown',function(event){var visible=Array.prototype.filter.call(document.querySelectorAll('[data-aihl-editor-tab]'),function(item){return item.style.display!=='none';});var index=visible.indexOf(tab),next=index;if(event.key==='ArrowRight'||event.key==='ArrowDown'){next=(index+1)%visible.length;}else if(event.key==='ArrowLeft'||event.key==='ArrowUp'){next=(index-1+visible.length)%visible.length;}else if(event.key==='Home'){next=0;}else if(event.key==='End'){next=visible.length-1;}else{return;}event.preventDefault();activateTab(visible[next].getAttribute('data-aihl-editor-tab'),true);});
 				});
 				function activeSection(){
 					var pane=document.querySelector('[data-aihl-editor-pane].is-active');
@@ -2101,9 +2102,10 @@ add_action('admin_enqueue_scripts', function ($hook) {
 .aihl-code-editor-head strong{font-size:13px;color:#1d2327}
 .aihl-code-editor-head span{font-size:11px;color:#646970}
 .aihl-code-editor-actions{display:flex;align-items:center;gap:5px}
-.aihl-code-editor-tabs{display:flex;align-items:center;gap:4px;padding:8px 10px;border-bottom:1px solid #f0f0f1;background:#fff}
-.aihl-code-editor-tabs .button{min-height:28px;padding:0 10px}
-.aihl-code-editor-tabs .button.is-active{border-color:#2271b1;color:#0a4b78;box-shadow:inset 0 2px 0 #2271b1}
+.aihl-code-editor-tabs{display:flex;flex-wrap:nowrap;align-items:center;gap:2px;padding:8px 10px 0;border-bottom:1px solid #dcdcde;background:#fff;overflow-x:auto;scrollbar-width:thin}
+.aihl-code-editor-tabs .button{flex:0 0 auto;min-height:32px;margin-bottom:-1px;padding:0 12px;border-bottom-color:transparent;border-radius:4px 4px 0 0;background:#f6f7f7;font-weight:600}
+.aihl-code-editor-tabs .button.is-active{border-color:#2271b1;border-bottom-color:#fff;background:#fff;color:#0a4b78;box-shadow:inset 0 2px 0 #2271b1}
+.aihl-code-editor-tabs .button:focus-visible{outline:2px solid #2271b1;outline-offset:-2px}
 .aihl-code-editor-pane{display:none}
 .aihl-code-editor-pane.is-active{display:block}
 .aihl-code-textarea{width:100%;min-height:420px;border:0;box-shadow:none;font-family:Consolas,Monaco,monospace;font-size:13px;line-height:1.5}
