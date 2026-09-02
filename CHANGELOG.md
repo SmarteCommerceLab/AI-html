@@ -1,5 +1,11 @@
 # AI-HTML Theme - Changelog
 
+## 1.15.14 - 2026-09-02
+
+- Uniforma Smart Reset al contratto UI condiviso con elenco verticale, conteggio e ambiti esclusivi.
+- Estrae CSS e JavaScript dalla pagina e li carica soltanto nello schermo Smart Reset.
+- Rafforza la validazione server-side di selezione e factory reset.
+
 Tutte le modifiche significative al tema sono documentate in questo file.
 Formato: [Keep a Changelog](https://keepachangelog.com/). Versioning: Semantic.
 

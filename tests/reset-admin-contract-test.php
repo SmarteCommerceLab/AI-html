@@ -10,7 +10,7 @@ if (str_contains($activation, 'unireset') || str_contains($activation, 'SMART_SI
 	fwrite(STDERR, "FAIL: reset legacy ancora eseguibile\n");
 	exit(1);
 }
-if (!str_contains($reset, 'aihl_smart_reset_snapshot') || !str_contains($reset, "RESET")) {
+if (!str_contains($reset, 'aihl_smart_reset_snapshot') || !str_contains($reset, "RESET") || !str_contains($reset, 'smart-reset-list') || !str_contains($reset, "array('aihl:factory')")) {
 	fwrite(STDERR, "FAIL: Smart Reset senza snapshot o conferma\n");
 	exit(1);
 }

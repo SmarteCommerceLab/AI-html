@@ -316,6 +316,12 @@ function aihl_handle_smart_reset_execute(): void {
 	$components = isset($_POST['components']) && is_array($_POST['components'])
 		? array_map('sanitize_text_field', wp_unslash($_POST['components']))
 		: array();
+	$components = array_values(array_intersect($components, array_keys(aihl_get_smart_reset_registry())));
+	if (in_array('aihl:factory', $components, true)) $components = array('aihl:factory');
+	if (!$components) {
+		wp_safe_redirect(add_query_arg(array('page' => 'aihl-smart-reset', 'reset_message' => 'selection'), admin_url('admin.php')));
+		exit;
+	}
 
 	$snapshot = aihl_smart_reset_snapshot();
 	if (!empty($snapshot['error'])) {
@@ -386,6 +392,7 @@ function aihl_render_smart_reset_page(): void {
 	if (isset($_GET['reset_message']) && $_GET['reset_message'] === 'confirm') {
 		echo '<div class="notice notice-error"><p>' . esc_html__('Per eseguire il reset devi scrivere RESET nel campo conferma.', AIHL_TEXT_DOMAIN) . '</p></div>';
 	}
+	if (isset($_GET['reset_message']) && $_GET['reset_message'] === 'selection') echo '<div class="notice notice-error"><p>' . esc_html__('Seleziona almeno un ambito da ripristinare.', AIHL_TEXT_DOMAIN) . '</p></div>';
 	if (is_array($last)) {
 		delete_transient('aihl_smart_reset_last_result');
 		if (!empty($last['snapshot_error'])) {
@@ -400,45 +407,26 @@ function aihl_render_smart_reset_page(): void {
 		}
 	}
 	?>
-	<div class="aihl-reset-console">
-		<div class="aihl-reset-intro"><span class="aihl-reset-intro-icon"><i class="fa-solid fa-shield-halved"></i></span><div><h2><?php esc_html_e('Ripristino selettivo protetto', AIHL_TEXT_DOMAIN); ?></h2><p><?php esc_html_e('Seleziona solo le aree da ripristinare. Prima di ogni operazione viene creato automaticamente uno snapshot JSON.', AIHL_TEXT_DOMAIN); ?></p></div></div>
-		<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+	<form class="smart-reset-console" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
 			<input type="hidden" name="action" value="aihl_smart_reset_execute">
 			<?php wp_nonce_field('aihl_smart_reset_execute', 'aihl_smart_reset_nonce'); ?>
-			<div class="aihl-reset-grid">
+			<section class="smart-reset-intro"><span class="smart-reset-intro-icon"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i></span><span><strong><?php esc_html_e('Ripristino controllato', AIHL_TEXT_DOMAIN); ?></strong><small><?php esc_html_e('Prima dell operazione viene creato uno snapshot protetto. Contenuti, plugin e configurazioni esterne al tema non vengono modificati.', AIHL_TEXT_DOMAIN); ?></small></span></section>
+			<div class="smart-reset-heading"><span><strong><?php esc_html_e('Scegli cosa ripristinare', AIHL_TEXT_DOMAIN); ?></strong><small><?php esc_html_e('Ogni ambito modifica soltanto impostazioni e risorse governate da AI-HTML.', AIHL_TEXT_DOMAIN); ?></small></span><span id="smart-reset-count"><?php esc_html_e('0 selezionati', AIHL_TEXT_DOMAIN); ?></span></div>
+			<div class="smart-reset-list">
 				<?php foreach ($registry as $component) : ?>
-					<label class="aihl-reset-card<?php echo !empty($component['danger']) ? ' is-danger' : ''; ?>">
-						<input type="checkbox" name="components[]" value="<?php echo esc_attr($component['id']); ?>">
-						<span class="aihl-reset-icon"><i class="<?php echo esc_attr($component['icon']); ?>"></i></span>
-						<span class="aihl-reset-copy">
+					<?php $factory = 'aihl:factory' === $component['id']; ?>
+					<label class="smart-reset-row<?php echo $factory ? ' smart-reset-row-factory' : ''; ?>">
+						<input type="checkbox" name="components[]" value="<?php echo esc_attr($component['id']); ?>"<?php echo $factory ? ' data-reset-factory="1"' : ''; ?>>
+						<span class="smart-reset-row-icon"><i class="<?php echo esc_attr($component['icon']); ?>" aria-hidden="true"></i></span>
+						<span class="smart-reset-row-copy">
 							<strong><?php echo esc_html($component['label']); ?></strong>
-							<em><?php echo esc_html($component['product']); ?></em>
 							<small><?php echo esc_html($component['description']); ?></small>
 						</span>
+						<span class="smart-reset-row-risk"><?php echo esc_html($factory ? __('Completo', AIHL_TEXT_DOMAIN) : __('Selettivo', AIHL_TEXT_DOMAIN)); ?></span>
 					</label>
 				<?php endforeach; ?>
 			</div>
-			<div class="aihl-reset-confirm">
-				<div><strong><?php esc_html_e('Conferma operazione', AIHL_TEXT_DOMAIN); ?></strong><small><?php esc_html_e('Scrivi RESET per abilitare il pulsante.', AIHL_TEXT_DOMAIN); ?></small></div>
-				<input id="aihl-reset-confirm" type="text" name="aihl_reset_confirm" placeholder="RESET" autocomplete="off">
-				<button type="submit" id="aihl-reset-submit" class="button button-primary button-large" disabled><?php esc_html_e('Esegui reset selettivo', AIHL_TEXT_DOMAIN); ?></button>
-			</div>
+			<section class="smart-reset-confirm"><div><strong><?php esc_html_e('Conferma operazione', AIHL_TEXT_DOMAIN); ?></strong><small id="smart-reset-summary"><?php esc_html_e('Seleziona almeno un ambito per continuare.', AIHL_TEXT_DOMAIN); ?></small></div><label><span><?php esc_html_e('Scrivi RESET', AIHL_TEXT_DOMAIN); ?></span><input type="text" name="aihl_reset_confirm" placeholder="RESET" autocomplete="off" spellcheck="false"></label><span class="smart-reset-actions"><a class="button button-large" href="<?php echo esc_url(admin_url('admin.php?page=aihl-dashboard')); ?>"><i class="fa-solid fa-xmark" aria-hidden="true"></i> <?php esc_html_e('Annulla', AIHL_TEXT_DOMAIN); ?></a><button type="submit" class="button button-large smart-reset-submit" disabled><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> <?php esc_html_e('Esegui ripristino', AIHL_TEXT_DOMAIN); ?></button></span></section>
 		</form>
-	</div>
-	<style>
-		.aihl-reset-console{width:100%}.aihl-reset-intro{display:flex;align-items:center;gap:14px;padding:18px 20px;border:1px solid #b8dfc4;border-left:4px solid #00a32a;background:#f3fbf5}.aihl-reset-intro-icon{display:grid;place-items:center;width:38px;height:38px;background:#dff3e5;color:#008a20;border-radius:4px}.aihl-reset-intro h2{margin:0 0 4px;font-size:18px}.aihl-reset-intro p{margin:0;color:#50575e}.aihl-reset-grid{display:flex;flex-direction:column;gap:0;margin:20px 0;border:1px solid #dcdcde}
-		.aihl-reset-card{display:grid;grid-template-columns:auto 40px minmax(0,1fr);gap:14px;align-items:center;border:0;border-bottom:1px solid #dcdcde;background:#fff;padding:16px;cursor:pointer}.aihl-reset-card:last-child{border-bottom:0}
-		.aihl-reset-card:hover{border-color:#2271b1}
-		.aihl-reset-card.is-danger{border-color:#f0b8bd}
-		.aihl-reset-card input{margin:0}
-		.aihl-reset-icon{display:inline-flex;width:38px;height:38px;align-items:center;justify-content:center;border-radius:12px;background:#f0f6fc;color:#2271b1;flex:0 0 auto}
-		.aihl-reset-copy{display:flex;flex-direction:column;gap:4px}
-		.aihl-reset-copy strong{font-size:14px;color:#1d2327}
-		.aihl-reset-copy em{font-style:normal;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#646970;font-weight:700}
-		.aihl-reset-copy small{font-size:12px;color:#50575e;line-height:1.45}
-		.aihl-reset-confirm{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:flex-end;margin-top:22px;padding:18px;border:1px solid #dcdcde;background:#f6f7f7}.aihl-reset-confirm>div{display:flex;flex-direction:column;margin-right:auto}.aihl-reset-confirm small{color:#646970;margin-top:3px}
-		.aihl-reset-confirm input{min-width:220px;min-height:38px}
-	</style>
-	<script>(function(){var input=document.getElementById('aihl-reset-confirm'),button=document.getElementById('aihl-reset-submit');if(!input||!button)return;input.addEventListener('input',function(){button.disabled=input.value.trim()!=='RESET';});})();</script>
 	<?php
 }

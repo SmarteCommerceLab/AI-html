@@ -827,6 +827,16 @@ add_action('admin_enqueue_scripts', function ($hook) {
 CSS;
 
 	wp_add_inline_style('wp-admin', $css);
+	if (isset($_GET['page']) && 'aihl-smart-reset' === sanitize_key((string) wp_unslash($_GET['page']))) {
+		wp_enqueue_style('aihl-smart-reset', AIHL_DIR_URL . '/resource/css/admin-smart-reset.css', array(), AIHL_UNICODE);
+		wp_enqueue_script('aihl-smart-reset', AIHL_DIR_URL . '/resource/js/admin-smart-reset.js', array(), AIHL_UNICODE, true);
+		wp_localize_script('aihl-smart-reset', 'aihlSmartReset', array(
+			'selectedSingular' => __('%d selezionato', AIHL_TEXT_DOMAIN),
+			'selectedPlural' => __('%d selezionati', AIHL_TEXT_DOMAIN),
+			'emptySummary' => __('Seleziona almeno un ambito per continuare.', AIHL_TEXT_DOMAIN),
+			'confirmMessage' => __('Confermi il ripristino delle aree selezionate?', AIHL_TEXT_DOMAIN),
+		));
+	}
 
 	// Font Awesome per le icone della navigazione e delle pagine.
 	if (!wp_style_is('font-awesome-6.4.2', 'enqueued') && !wp_style_is('font-awesome-6', 'enqueued')) {
