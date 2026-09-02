@@ -1,5 +1,9 @@
 # AI-HTML Theme - Changelog
 
+## 1.15.15 - 2026-09-02
+
+- Riallineato lo stable tag del tema alla versione Smart Reset pubblicata.
+
 ## 1.15.14 - 2026-09-02
 
 - Uniforma Smart Reset al contratto UI condiviso con elenco verticale, conteggio e ambiti esclusivi.
