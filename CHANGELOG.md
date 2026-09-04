@@ -1,5 +1,11 @@
 # AI-HTML Theme - Changelog
 
+## 1.15.16 - 2026-09-04
+
+- Aggiunto il progetto Smart eCommerce Shell con header e footer coordinati, responsive e importabili come Code Slots.
+- Collegati logo, menu, contatti e social ai componenti dinamici AI-HTML, senza duplicare contenuti nei sorgenti.
+- Aggiunti preview desktop/mobile e test automatico del contratto di importazione.
+
 ## 1.15.15 - 2026-09-02
 
 - Riallineato lo stable tag del tema alla versione Smart Reset pubblicata.

@@ -101,3 +101,9 @@ Per un esempio verticale destinato a uno studio legale usare:
 `demo-projects/legal-enterprise-header/`
 
 Il progetto include un header `header_full` responsive con topbar contatti, navigazione per competenze, pannello approfondito, CTA, gestione accessibile da tastiera e JSON pronto per l'importazione.
+
+Per la shell coordinata del sito Smart eCommerce usare:
+
+`demo-projects/smart-ecommerce-shell/`
+
+Il progetto contiene gli slot `header_full` e `footer_full`, sorgenti separati, preview desktop/mobile e un unico JSON pronto per l'importazione. Logo, menu, contatti e social restano governati dai componenti dinamici AI-HTML.
