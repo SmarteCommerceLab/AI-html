@@ -1,0 +1,44 @@
+name: Deploy Smart eMagazine Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Smart eMagazine version
+        required: true
+        default: '1.0.92'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      FTP_HOST: repository.smartecommerce.it
+      FTP_USER: ${{ secrets.REPOSITORY_FTP_USER }}
+      FTP_PASSWORD: ${{ secrets.REPOSITORY_FTP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          repository: SmarteCommerceLab/smart-emagazine
+          ref: v${{ inputs.version }}
+      - name: Build package and manifest
+        shell: bash
+        run: |
+          VERSION="${{ inputs.version }}"
+          PACKAGE="smart-emagazine-${VERSION}.zip"
+          mkdir -p dist/smart-emagazine
+          rsync -a ./ dist/smart-emagazine/ --exclude '.git/' --exclude '.github/' --exclude 'dist/' --exclude 'tests/' --exclude '*.md'
+          (cd dist && zip -r "../${PACKAGE}" smart-emagazine)
+          sha256sum "$PACKAGE" > "${PACKAGE}.sha256.txt"
+          SHA256="$(sha256sum "$PACKAGE" | awk '{print $1}')"
+          DOWNLOAD_URL="https://repository.smartecommerce.it/downloads/themes/${PACKAGE}"
+          jq -n --arg version "$VERSION" --arg package "$DOWNLOAD_URL" --arg sha256 "$SHA256" --arg updated "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" '{type:"theme",package_type:"theme",name:"Smart eMagazine",slug:"smart-emagazine",version:$version,new_version:$version,download_url:$package,package:$package,homepage:"https://smartecommerce.it/prodotti/smart-emagazine/",requires:"6.5",tested:"7.1",requires_php:"7.4",author:"Smart eCommerce",description:"Tema WordPress editoriale per magazine, blog e giornali online.",changelog:"Distribuzione tramite Smart Repository.",sha256:$sha256,checksum_sha256:$sha256,last_updated:$updated,repository_url:"https://github.com/SmarteCommerceLab/smart-emagazine",sections:{description:"Tema WordPress editoriale per magazine, blog e giornali online.",changelog:"Distribuzione tramite Smart Repository."},banners:[],icons:[]}' > smart-emagazine.json
+      - name: Deploy and verify
+        shell: bash
+        run: |
+          VERSION="${{ inputs.version }}"
+          PACKAGE="smart-emagazine-${VERSION}.zip"
+          curl --fail --ftp-create-dirs --user "${FTP_USER}:${FTP_PASSWORD}" --upload-file "$PACKAGE" "ftp://${FTP_HOST}/httpdocs/downloads/themes/${PACKAGE}"
+          curl --fail --ftp-create-dirs --user "${FTP_USER}:${FTP_PASSWORD}" --upload-file "${PACKAGE}.sha256.txt" "ftp://${FTP_HOST}/httpdocs/downloads/themes/${PACKAGE}.sha256.txt"
+          curl --fail --ftp-create-dirs --user "${FTP_USER}:${FTP_PASSWORD}" --upload-file smart-emagazine.json "ftp://${FTP_HOST}/httpdocs/updates/themes/smart-emagazine.json"
+          test "$(curl --fail --silent "https://repository.smartecommerce.it/updates/themes/smart-emagazine.json?run=${GITHUB_RUN_ID}" | jq -r '.version')" = "$VERSION"
+          curl --fail --silent --head "https://repository.smartecommerce.it/downloads/themes/${PACKAGE}" >/dev/null
