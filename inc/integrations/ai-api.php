@@ -974,8 +974,6 @@ function aihl_ai_rest_list_pages() {
 		'pages' => $pages,
 		'available_templates' => array(
 			'default'                 => 'Pagina standard del tema',
-			'smart-site-home.php'     => 'Home builder (SBS)',
-			'smart-site-builder.php'  => 'Pagina builder (SBS)',
 			'smart-site-blog.php'     => 'Blog builder + compose (SBS)',
 		),
 	));
@@ -989,7 +987,7 @@ function aihl_ai_rest_create_page(WP_REST_Request $request) {
 	}
 
 	$template = isset($body['template']) ? sanitize_text_field((string) $body['template']) : '';
-	$allowed_templates = array('', 'default', 'smart-site-home.php', 'smart-site-builder.php', 'smart-site-blog.php');
+	$allowed_templates = array('', 'default', 'smart-site-blog.php');
 	if (!in_array($template, $allowed_templates, true)) {
 		return new WP_Error('invalid_template', 'Template non valido.', array('status' => 400));
 	}
@@ -1027,7 +1025,7 @@ function aihl_ai_rest_create_page(WP_REST_Request $request) {
 		'template' => $template ?: 'default',
 		'status'   => $status,
 		'url'      => get_permalink($page_id),
-		'edit_builder' => ('smart-site-home.php' === $template || 'smart-site-builder.php' === $template || 'smart-site-blog.php' === $template)
+		'edit_builder' => ('smart-site-blog.php' === $template)
 			? rest_url('sbs/v1/ai/pages/' . $page_id . '/builder')
 			: null,
 	));
@@ -1066,7 +1064,7 @@ function aihl_ai_rest_update_page(WP_REST_Request $request) {
 		return new WP_Error('publish_permission_required', 'La modifica di una pagina pubblicata richiede il permesso publish.', array('status' => 403));
 	}
 
-	$allowed_templates = array('', 'default', 'smart-site-home.php', 'smart-site-builder.php', 'smart-site-blog.php');
+	$allowed_templates = array('', 'default', 'smart-site-blog.php');
 	$template = array_key_exists('template', $body)
 		? sanitize_text_field((string) $body['template'])
 		: (get_page_template_slug($page_id) ?: 'default');
