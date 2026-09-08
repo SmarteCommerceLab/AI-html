@@ -9,7 +9,9 @@ add_action('after_setup_theme',function()							{
 	add_theme_support('custom-logo');
 	add_theme_support('smart-builder-site', array(
 		'templates' => array(
-			'smart-site-blog.php' => array('builder' => true, 'compose' => true),
+			'smart-site-home.php'    => array('builder' => true, 'compose' => false),
+			'smart-site-builder.php' => array('builder' => true, 'compose' => false),
+			'smart-site-blog.php'    => array('builder' => true, 'compose' => false),
 		),
 	));
 });
