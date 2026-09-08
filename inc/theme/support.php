@@ -7,6 +7,11 @@ add_action('after_setup_theme',function()							{
 	add_theme_support('post-thumbnails');
 	add_theme_support('title-tag');
 	add_theme_support('custom-logo');
+	add_theme_support('smart-builder-site', array(
+		'templates' => array(
+			'smart-site-blog.php' => array('builder' => true, 'compose' => true),
+		),
+	));
 });
 /* Widget Areas */
 add_action('widgets_init', function() {

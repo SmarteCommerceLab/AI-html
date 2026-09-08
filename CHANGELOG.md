@@ -1,5 +1,11 @@
 # AI-HTML Theme - Changelog
 
+## 1.15.17 - 2026-09-08
+
+- Dichiara Smart Site Blog come unica integrazione supportata con Smart Builder Site.
+- Abilita Builder e Compose sul template Blog tramite il contratto capability del tema.
+- Rimuove Home e Builder dall'elenco dei template SBS proposti dalle API AI-HTML.
+
 ## 1.15.16 - 2026-09-04
 
 - Aggiunto il progetto Smart eCommerce Shell con header e footer coordinati, responsive e importabili come Code Slots.
