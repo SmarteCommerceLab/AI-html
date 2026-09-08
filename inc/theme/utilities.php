@@ -401,7 +401,7 @@ add_filter('body_class', function($classes){
 
 	if (is_page()) {
 		$template = get_page_template_slug(get_queried_object_id());
-		if ('smart-site-blog.php' === $template) {
+		if (in_array($template, array('smart-site-home.php', 'smart-site-builder.php', 'smart-site-blog.php'), true)) {
 			$classes[] = 'aihl-smart-builder-template';
 		}
 
