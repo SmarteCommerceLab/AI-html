@@ -12,7 +12,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
-      REPOSITORY_FTP_HOST: repository.smartecommerce.it
+      REPOSITORY_FTP_HOST: secservera21.smartecommerce.it
       REPOSITORY_FTP_UPDATES_PATH: /httpdocs/updates/themes
       REPOSITORY_FTP_DOWNLOADS_PATH: /httpdocs/downloads/themes
       REPOSITORY_FTP_USER: ${{ secrets.REPOSITORY_FTP_USER }}
@@ -182,17 +182,17 @@ jobs:
           THEME_DIR="AI-html"
           PACKAGE="${THEME_DIR}-${VERSION}.zip"
 
-          curl --fail --ftp-create-dirs \
+          curl --fail --ssl-reqd --resolve secservera21.smartecommerce.it:21:95.110.224.51 --ftp-create-dirs \
             --user "${REPOSITORY_FTP_USER}:${REPOSITORY_FTP_PASSWORD}" \
             --upload-file "${PACKAGE}" \
             "ftp://${REPOSITORY_FTP_HOST}${REPOSITORY_FTP_DOWNLOADS_PATH}/${PACKAGE}"
 
-          curl --fail --ftp-create-dirs \
+          curl --fail --ssl-reqd --resolve secservera21.smartecommerce.it:21:95.110.224.51 --ftp-create-dirs \
             --user "${REPOSITORY_FTP_USER}:${REPOSITORY_FTP_PASSWORD}" \
             --upload-file "${PACKAGE}.sha256.txt" \
             "ftp://${REPOSITORY_FTP_HOST}${REPOSITORY_FTP_DOWNLOADS_PATH}/${PACKAGE}.sha256.txt"
 
-          curl --fail --ftp-create-dirs \
+          curl --fail --ssl-reqd --resolve secservera21.smartecommerce.it:21:95.110.224.51 --ftp-create-dirs \
             --user "${REPOSITORY_FTP_USER}:${REPOSITORY_FTP_PASSWORD}" \
             --upload-file "${SLUG}.json" \
             "ftp://${REPOSITORY_FTP_HOST}${REPOSITORY_FTP_UPDATES_PATH}/${SLUG}.json"

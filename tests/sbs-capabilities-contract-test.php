@@ -8,7 +8,7 @@ foreach (array(
     "add_theme_support('smart-builder-site'",
     "'smart-site-home.php'    => array('builder' => true, 'compose' => false)",
     "'smart-site-builder.php' => array('builder' => true, 'compose' => false)",
-    "'smart-site-blog.php'    => array('builder' => true, 'compose' => false)",
+    "'smart-site-blog.php'    => array('builder' => true, 'compose' => true)",
 ) as $needle) {
     if (false === strpos($support, $needle)) {
         fwrite(STDERR, "Missing SBS capability: {$needle}\n");
@@ -29,7 +29,7 @@ if (false === strpos($utilities, "array('smart-site-home.php', 'smart-site-build
 foreach (array(
     "'smart-site-home.php'     => 'Home builder (SBS)'",
     "'smart-site-builder.php'  => 'Pagina builder (SBS)'",
-    "'smart-site-blog.php'     => 'Blog builder (SBS)'",
+    "'smart-site-blog.php'     => 'Blog builder + compose (SBS)'",
 ) as $needle) {
     if (false === strpos($api, $needle)) {
         fwrite(STDERR, "AI API missing template: {$needle}\n");

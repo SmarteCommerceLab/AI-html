@@ -11,7 +11,7 @@ add_action('after_setup_theme',function()							{
 		'templates' => array(
 			'smart-site-home.php'    => array('builder' => true, 'compose' => false),
 			'smart-site-builder.php' => array('builder' => true, 'compose' => false),
-			'smart-site-blog.php'    => array('builder' => true, 'compose' => false),
+			'smart-site-blog.php'    => array('builder' => true, 'compose' => true),
 		),
 	));
 });

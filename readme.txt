@@ -3,7 +3,7 @@ Contributors: smart-ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.15.18
+Stable tag: 1.15.19
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,9 +37,9 @@ valore globale oppure selezionare il proprio formato.
 
 == Changelog ==
 
-= 1.15.18 =
+= 1.15.19 =
 * Ripristina Smart Site Home, Smart Site Page e Smart Site Blog per Smart Builder Site.
-* Mantiene Compose disattivato sui template AI-HTML fino alla trasposizione completa della tecnologia in SBS.
+* Mantiene Compose disattivato su Home e Builder, conservandolo su Smart Site Blog.
 
 = 1.15.15 =
 * Standardizza Smart Reset e riallinea i metadati della release.

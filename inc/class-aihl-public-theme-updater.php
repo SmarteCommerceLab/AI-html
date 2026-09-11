@@ -189,7 +189,7 @@ class AIHL_Public_Theme_Updater {
 		}
 
 		if ($wp_filesystem->move($source, $expected, true)) {
-			return $expected;
+			return trailingslashit($expected);
 		}
 
 		return $source;

@@ -29,7 +29,11 @@ jobs:
           fi
       - name: Contract tests
         if: matrix.php-version == '8.3'
-        run: for test in tests/*-test.php; do php "$test"; done
+        env:
+          SBS_TEST_PATH: ${{ runner.temp }}/sbs-runtime
+        run: |
+          git clone --depth 1 --branch v1.23.0 https://github.com/SmarteCommerceLab/smart-builder-site.git "$SBS_TEST_PATH"
+          for test in tests/*-test.php; do php "$test" || exit 1; done
 
   release-package:
     needs: contracts

@@ -976,7 +976,7 @@ function aihl_ai_rest_list_pages() {
 			'default'                 => 'Pagina standard del tema',
 			'smart-site-home.php'     => 'Home builder (SBS)',
 			'smart-site-builder.php'  => 'Pagina builder (SBS)',
-			'smart-site-blog.php'     => 'Blog builder (SBS)',
+			'smart-site-blog.php'     => 'Blog builder + compose (SBS)',
 		),
 	));
 }
